@@ -1,0 +1,157 @@
+.navbar {
+  position: fixed;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  left: var(--sidebar-width);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 58px;
+  padding: 0 24px 0 18px;
+  background: #0759ad;
+  color: #fff;
+  box-shadow: 0 1px 4px rgb(17 39 68 / 16%);
+  transition: left 160ms ease;
+}
+
+.sidebarButton,
+.notification {
+  position: relative;
+  display: grid;
+  flex: 0 0 36px;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 12%);
+  color: inherit;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.sidebarButton:hover,
+.notification:hover {
+  background: #cfeaff;
+  color: #0759ad;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  width: min(580px, 58%);
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d8e0e8;
+  border-radius: 18px;
+  background: #fff;
+  color: #667085;
+}
+
+.search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #293548;
+  font: inherit;
+  font-size: 12px;
+}
+
+.search input::placeholder {
+  color: #8993a2;
+}
+
+.search svg {
+  flex: 0 0 auto;
+  font-size: 14px;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-left: auto;
+}
+
+.notification {
+  background: transparent;
+  font-size: 18px;
+}
+
+.notificationDot {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #0759ad;
+  border-radius: 50%;
+  background: #ffc247;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #d6eaff;
+  color: #0759ad;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.userDetails {
+  display: grid;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.userDetails strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.userDetails small {
+  color: #d5e6f7;
+  font-size: 10px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 560px) {
+  .navbar {
+    gap: 12px;
+    padding-right: 12px;
+  }
+
+  .search {
+    width: auto;
+    flex: 1;
+  }
+
+  .account {
+    gap: 10px;
+  }
+
+  .userDetails {
+    display: none;
+  }
+}
