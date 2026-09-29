@@ -1,26 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@400..800&display=swap");
+
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --primaryColor: #0355ac;
+  --primarySubtleColor: #d8ebff;
+  --secondaryColor: #7b70ef;
+  --secondarySubtleColor: #e7e5fd;
+  --successColor: #02bc9c;
+  --successSubtleColor: #d9f5f0;
+  --infoColor: #5bc3e1;
+  --infoSubtleColor: #e6f6fb;
+  --warningColor: #f9bf59;
+  --warningSubtleColor: #fef5e6;
+  --dangerColor: #f7577e;
+  --dangerSubtleColor: #fee6ec;
+  --purpleColor: #770ecd;
+  --purpleSubtleColor: #f7e7ff;
+  --whiteColor: #ffffff;
+  --subtleBg: #fafafa;
+  --blackColor: #000000;
+  --darkColor: #313a46;
+  --grayColor: #fafafa;
+  --textBody: #444444;
+  --textBodySecondary: #666666;
+  --textLight: #cccccc;
+  --borderColor: #e9e9e9;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --fs10: 0.75rem;
+  --fs11: 0.8rem;
+  --fs12: 0.85rem;
+  --fs14: 1rem;
+  --fs16: 1.143rem;
+  --fs18: 1.286rem;
+  --fs20: 1.5rem;
+  --fs22: 1.65rem;
+  --fs24: 1.75rem;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  font-size: 14px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  width: 100%;
+  height: 100%;
+  font-family: "Baloo Bhai 2", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: normal;
+  font-optical-sizing: auto;
+  color: var(--textBody);
 }
