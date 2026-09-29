@@ -1,0 +1,23 @@
+.layout {
+  --sidebar-width: 68px;
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.expanded {
+  --sidebar-width: 200px;
+}
+
+.content {
+  min-height: 100vh;
+  margin-left: var(--sidebar-width);
+  padding: 86px 32px 32px;
+  color: #273449;
+  transition: margin-left 160ms ease;
+}
+
+@media (max-width: 560px) {
+  .content {
+    padding: 78px 16px 24px;
+  }
+}
