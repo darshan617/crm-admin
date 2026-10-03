@@ -3,39 +3,79 @@
 @import "tailwindcss";
 
 :root {
-  --primaryColor: #0355ac;
-  --primarySubtleColor: #d8ebff;
-  --secondaryColor: #7b70ef;
-  --secondarySubtleColor: #e7e5fd;
-  --successColor: #02bc9c;
-  --successSubtleColor: #d9f5f0;
-  --infoColor: #5bc3e1;
-  --infoSubtleColor: #e6f6fb;
-  --warningColor: #f9bf59;
-  --warningSubtleColor: #fef5e6;
-  --dangerColor: #f7577e;
-  --dangerSubtleColor: #fee6ec;
-  --purpleColor: #770ecd;
-  --purpleSubtleColor: #f7e7ff;
-  --whiteColor: #ffffff;
-  --subtleBg: #fafafa;
-  --blackColor: #000000;
-  --darkColor: #313a46;
-  --grayColor: #fafafa;
-  --textBody: #444444;
-  --textBodySecondary: #666666;
-  --textLight: #cccccc;
-  --borderColor: #e9e9e9;
-
-  --fs10: 0.75rem;
-  --fs11: 0.8rem;
-  --fs12: 0.85rem;
-  --fs14: 1rem;
-  --fs16: 1.143rem;
-  --fs18: 1.286rem;
-  --fs20: 1.5rem;
-  --fs22: 1.65rem;
-  --fs24: 1.75rem;
+  --primary: #0355ac;
+  --primary-light: #edf5ff;
+  --secondary: #bcdaf9;
+  --white: #fff;
+  --black: #222;
+  --text: #333;
+  --text-light: #444;
+  --text-muted: #777;
+  --border: var(--border);
+  --border-light: #f0f0f0;
+  --body-bg: #f4f7fb;
+  --card-bg: #ffffff;
+  --blue: #0066ff;
+  --blue-bg: #e7f1ff;
+  --green: #16b364;
+  --green-bg: #e8fff3;
+  --orange: #ff9800;
+  --orange-bg: #fff3df;
+  --purple: #7c3aed;
+  --purple-bg: #f1ecff;
+  --warning: #ffc107;
+  --warning-bg: #fff3cd;
+  --warning-text: #8a6700;
+  --success-bg: #dcfce7;
+  --success-text: #15803d;
+  --gray-bg: #f3f5f8;
+  --stats-bg: #f7f9fc;
+  --font-menu: "Baloo Bhai 2", cursive;
+  --font-size-10px: 10px;
+  --font-size-12px: 12px;
+  --font-size-13px: 13px;
+  --font-size-14px: 14px;
+  --font-size-15px: 15px;
+  --font-size-16px: 16px;
+  --font-size-17px: 17px;
+  --font-size-18px: 18px;
+  --font-size-20px: 20px;
+  --font-size-22px: 22px;
+  --font-size-24px: 24px;
+  --font-size-26px: 26px;
+  --font-size-28px: 28px;
+  --font-size-30px: 30px;
+  --font-size-32px: 32px;
+  --font-size-34px: 34px;
+  --font-size-36px: 36px;
+  --font-size-40px: 40px;
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --lh-sm: 1.2;
+  --lh-md: 1.5;
+  --lh-lg: 1.8;
+  --header-height: 74px;
+  --sidebar-width: 15%;
+  --content-width: 85%;
+  --radius-xs: 12px;
+  --radius-sm: 15px;
+  --radius-md: 16px;
+  --radius-lg: 25px;
+  --radius-xl: 30px;
+  --radius-pill: 35px;
+  --radius-round: 50%;
+  --shadow-sm: 0 5px 18px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 5px 20px rgba(0, 0, 0, 0.05);
+  --shadow-primary: 0 8px 20px rgba(3, 85, 172, 0.25);
+  --transition: 0.35s ease;
+  --gap-sm: 10px;
+  --gap-md: 15px;
+  --gap-lg: 20px;
+  --gap-xl: 24px;
+  --gap-xxl: 25px;
 }
 html {
   scroll-behavior: smooth;
@@ -51,4 +91,171 @@ body {
   font-style: normal;
   font-optical-sizing: auto;
   color: var(--textBody);
+}
+
+.content {
+  width: 100%;
+  padding: 30px 6%;
+  transition: all 0.2s ease;
+}
+
+.section-heading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 12px;
+}
+
+@media (max-width: 1560px) {
+  :root {
+    --font-size-15px: 13px;
+    --font-size-14px: 13px;
+    --font-size-20px: 18px;
+    --font-size-24px: 20px;
+  }
+}
+
+.page-header {
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.welcome-text {
+  color: #777;
+  font-size: var(--font-size-16px);
+  margin-bottom: 5px;
+}
+.page-header h2 {
+  font-size: var(--font-size-24px);
+  color: var(--text-light);
+  font-weight: var(--fw-bold);
+  margin-top: 5px;
+}
+.breadcrumb p {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+.breadcrumb-para p {
+  color: #9ba6b7;
+  font-size: var(--font-size-16px);
+  font-style: normal;
+  font-weight: 400;
+}
+.breadcrumb-para a {
+  color: var(--Background-Colors-Colors-500, var(--primary));
+  font-size: var(--font-size-16px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 999px;
+  background: #fff;
+  color: #4a4a4a;
+  text-decoration: none;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+  font-family: Arial, sans-serif;
+  transition: all 0.3s ease;
+}
+.back {
+  display: flex;
+  gap: 16px;
+}
+.back-btn:hover {
+  background: #165aad;
+  color: #fff;
+}
+.back-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.back-btn svg path {
+  transition: stroke 0.3s ease;
+}
+.back-btn:hover svg path {
+  stroke: #fff;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  /* height: 38px; */
+  border: 1px solid #e5e7eb;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-family: "Baloo Bhai 2";
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  transition: 0.3s ease;
+  box-sizing: border-box;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #165aad;
+  box-shadow: 0 0 0 3px rgba(22, 90, 173, 0.12);
+}
+.form-group textarea {
+  resize: none;
+  height: 90px;
+}
+
+.form-group input,
+.form-group select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e7e9eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: var(--font-size-14px);
+  color: #111827;
+  outline: none;
+  transition: 0.3s;
+}
+
+.section-title {
+  margin-top: 22px !important;
+}
+.phone-group {
+  display: flex;
+  /* align-items: center; */
+}
+
+.phone-group select,
+.phone-group option {
+  width: 85px;
+  padding: 0 10px;
+  display: flex;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.common-table-card {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  overflow: hidden;
 }

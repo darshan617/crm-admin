@@ -33,7 +33,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
           className={styles.brandLogo}
           src="/logo.png"
           alt="Tizz Group"
-          width={140}
+          width={150}
           height={42}
           priority
         />
