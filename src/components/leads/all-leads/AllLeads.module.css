@@ -1,0 +1,141 @@
+.commonTableSection {
+  margin-bottom: 24px;
+}
+
+.crmLeadTabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+
+.crmLeadTabs a {
+  display: flex;
+  min-width: 140px;
+  height: 50px;
+  /* border: 0; */
+  border-radius: 6px 6px 0 0;
+  border-top: 3px solid #0865b500;
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 0;
+  background: #f8f9fb;
+  color: #666;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+.crmLeadTabs a:hover {
+  background: #ffffff;
+  color: #303846;
+  border-top: 3px solid #0865b5;
+  /* color: #005eb8; */
+  /* background: #f1f5fa; */
+}
+
+.crmLeadTabs a.active {
+  background: #ffffff;
+  color: #303846;
+
+  border-top: 3px solid #0865b5;
+}
+
+.common-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.crmLeadTitle {
+  display: flex;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.tableSearch {
+  position: relative;
+  flex: 0 0 280px;
+  width: 280px;
+  min-width: 220px;
+  max-width: 100%;
+  height: 40px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.crmLeadHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.itemsSelected {
+    display: flex;
+    gap: 5px;
+    cursor: pointer;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tableFilterWrap {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: max-height .45s ease, opacity .3s ease, transform .35s ease, padding .35s ease, margin .35s ease;
+    padding: 0 24px;
+    margin: 0 -24px;
+    border-top: 1px solid transparent;
+}
+
+.tableFilterWrap.active {
+    max-height: 720px;
+    background: transparent;
+    opacity: 1;
+    transform: translateY(0);
+    padding: 20px 24px 30px;
+    margin-top: 6px;
+    border-top: 1px solid #e9e9e9;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .08)
+}
+
+.filterGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap
+}
+
+.filterGroup h6 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 10px
+}
+
+#filterPanel .filterGroup h6 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    line-height: 1.3;
+}
+
+.filterOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px
+}

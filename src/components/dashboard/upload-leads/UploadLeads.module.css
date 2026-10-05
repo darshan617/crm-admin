@@ -1,0 +1,160 @@
+.uploadLeadCard {
+    width: 35%;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(80, 145, 197, 0.20);
+    box-sizing: border-box;
+}
+
+.uploadLeadPage {
+    width: 100%;
+    min-height: calc(100vh - 100px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    /* padding: 22px 20px 30px; */
+    box-sizing: border-box;
+}
+
+.uploadLeadCard h3 {
+    margin: 0 0 14px;
+    text-align: center;
+    color: #313A46;
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-size: var(--font-size-16px);
+    font-weight: 700;
+    /* line-height: 1.4; */
+}
+
+.uploadLeadBox {
+    position: relative;
+    width: 100%;
+    padding: 25px;
+    /* height: 82px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #F5F8FC;
+    border: 1px solid #1673E6;
+    border-radius: 6px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.uploadLeadIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0068C9;
+    margin-bottom: 3px;
+}
+
+.uploadFileSection {
+    width: 100%;
+    margin-top: 13px;
+}
+.uploadLeadText {
+    color: #414957;
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-size: var(--font-size-16px);
+    font-weight: 600;
+    /* line-height: 14px; */
+}
+.uploadLeadFormat {
+    color: #7D8490;
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-size: var(--font-size-14px);
+    /* line-height: 11px; */
+}
+
+.uploadFileTitle {
+    margin-bottom: 5px;
+    color: #252B34;
+    /* font-family: Arial, Helvetica, sans-serif; */
+    font-size: var(--font-size-16px);
+    font-weight: 400;
+    /* line-height: 16px; */
+}
+
+.uploadFileRow {
+    width: 100%;
+    /* height: 29px; */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid #E1E4E9;
+    border-radius: 5px;
+    box-sizing: border-box;
+    color: #555B65;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: var(--font-size-14px);
+}
+
+.uploadDeleteBtn {
+    width: 17px;
+    height: 17px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: #FF6B81;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.uploadRemoveBtn {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: #E5E8EB;
+    color: #ffffff;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.uploadSubmitWrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+.submitBtn {
+    background: var(--primary);
+    font-family: "Baloo Bhai 2";
+    color: #FFF;
+    border: none;
+    padding: 10px 50px;
+    border-radius: 999px;
+    font-size: var(--font-size-14px);
+    /* font-style: normal; */
+    font-weight: 500;
+    line-height: normal;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.uploadProgress {
+    width: 100%;
+    height: 2px;
+    margin-top: -2px;
+    background: #E3E7EC;
+    overflow: hidden;
+}
+
+.uploadProgress span {
+    display: block;
+    width: 58%;
+    height: 100%;
+    background: #0068C9;
+}
