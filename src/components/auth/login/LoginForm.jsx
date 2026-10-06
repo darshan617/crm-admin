@@ -3,6 +3,7 @@ import styles from "./LoginForm.module.css";
 import logo from "@/../public/images/signup/signupLogo.webp";
 import Image from "next/image";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useLoginMutation } from "@/redux/apis/authApi";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,9 +11,20 @@ const LoginForm = () => {
     email: "",
     password: "",
   });
-  console.log(formState);
+  const [login, { isLoading }] = useLoginMutation();
 
-  const handleSubmit = (e) => {};
+  const handleLogin = async (e) => {
+    try {
+      const res = await login({
+        body: {
+          email: formState?.email,
+          password: formState?.password,
+        },
+      });
+    } catch (error) {
+      console.log(error, "Error in handleLogin");
+    }
+  };
 
   const handleChange = (e) => {
     const { value, name } = e?.target;
@@ -36,13 +48,13 @@ const LoginForm = () => {
             <p className={styles.subtitle}>Sign in to continue.</p>
           </div>
 
-          <form className={styles.form} onSubmit={handleSubmit}>
+          <form className={styles.form} onSubmit={handleLogin}>
             <div className={styles.field}>
-              <label htmlFor="identifier" className={styles.label}>
+              <label htmlFor="email" className={styles.label}>
                 Email <span className={styles.required}>*</span>
               </label>
               <input
-                id="identifier"
+                id="email"
                 name="email"
                 type="text"
                 className={styles.input}
@@ -50,13 +62,12 @@ const LoginForm = () => {
                 value={formState.email}
                 onChange={handleChange}
                 autoComplete="username"
-                required
               />
             </div>
 
             <div className={styles.field}>
               <label htmlFor="password" className={styles.label}>
-                Password<span className={styles.required}>*</span>
+                Password <span className={styles.required}>*</span>
               </label>
               <div className={styles.passwordWrap}>
                 <input
