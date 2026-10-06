@@ -20,7 +20,10 @@ const LoginForm = () => {
           email: formState?.email,
           password: formState?.password,
         },
-      });
+      }).unwrap();
+      if (res?.success) {
+        console.log(res);
+      }
     } catch (error) {
       console.log(error, "Error in handleLogin");
     }
@@ -48,7 +51,7 @@ const LoginForm = () => {
             <p className={styles.subtitle}>Sign in to continue.</p>
           </div>
 
-          <form className={styles.form} onSubmit={handleLogin}>
+          <div className={styles.form}>
             <div className={styles.field}>
               <label htmlFor="email" className={styles.label}>
                 Email <span className={styles.required}>*</span>
@@ -96,10 +99,10 @@ const LoginForm = () => {
               </div>
             </div>
 
-            <button type="submit" className={styles.button}>
+            <button onClick={handleLogin} className={styles.button}>
               Login
             </button>
-          </form>
+          </div>
 
           <p className={styles.copyright}>
             © {new Date().getFullYear()} Tizzy Group. All rights reserved.
