@@ -44,7 +44,7 @@ const DATE_RANGE_PLACEHOLDERS = ["From", "To"];
 const TABLE_HEADINGS = [
   { label: "Customer Name", className: "" },
   { label: "Contact Information", className: "" },
-  { label: "Status", className: "status-col" },
+  { label: "Status", className: "statusCol" },
   { label: "Plan", className: "" },
 ];
 
@@ -278,7 +278,7 @@ export default function AllLeads() {
         </div>
 
         {/* Table */}
-        <table className="crm-lead-table">
+        <table className={`${styles.crmLeadTable} crm-lead-table`}>
           <thead>
             <tr className="table-head">
               <td className="select-col">
@@ -299,7 +299,7 @@ export default function AllLeads() {
 
           <tbody className="table-body">
             {LEADS.map((lead) => (
-              <tr className="crm-lead-row table-row" key={lead.id}>
+              <tr className={`${styles.crmLeadRow} crm-lead-r ow table-row`}key={lead.id}>
                 <td className="select-col">
                   <input
                     type="checkbox"
@@ -308,7 +308,7 @@ export default function AllLeads() {
                   />
                 </td>
 
-                <td className="customer">
+                <td className={styles.customer}>
                   <div className={`avatar ${lead.avatarColor}`}>{lead.company.charAt(0)}</div>
                   <div>
                     <h5>{lead.company}</h5>
@@ -316,21 +316,21 @@ export default function AllLeads() {
                   </div>
                 </td>
 
-                <td className="contact-info">
+                <td className={styles.contactInfo}>
                   <div>
                     <h5>{lead.email}</h5>
                     <p>{lead.phone}</p>
                   </div>
                 </td>
 
-                <td className="status-col">
+                <td className={styles.statusCol}>
                   <span className={`badge ${lead.badge}`}>{lead.status}</span>
                 </td>
 
                 <td className="plan-action">
-                  <div className="assigned-user">
+                  <div className={styles.assignedUser}>
                     <div className="user-info">
-                      <div className="avatar-flex">
+                      <div className={styles.avatarFlex}>
                         <div className="mini-avatar primary">{lead.assignedTo.charAt(0)}</div>
                         <h5>{lead.assignedTo}</h5>
                       </div>

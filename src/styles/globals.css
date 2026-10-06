@@ -259,3 +259,167 @@ textarea {
   box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
   overflow: hidden;
 }
+table {
+  width: 100%;
+}
+.table-head {
+  display: grid;
+  grid-template-columns: 120px 2fr 2.3fr 125px 80px 135px;
+  padding: 12px 24px;
+  align-items: center;
+  gap: 16px;
+  background: #e6f1fd;
+  color: #444444;
+  font-size: var(--font-size-16px);
+  font-style: normal;
+  font-weight: 600;
+  border-radius: 10px;
+  line-height: normal;
+}
+.table-row {
+  display: grid;
+  padding: 12px 24px;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #edf0f4;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+.table-row:hover {
+  border-color: #dbe4f0;
+  box-shadow: 0 0 10px 0 rgba(3, 85, 172, 0.2);
+}
+
+.customer h5 {
+  /* margin: 0 0 5px; */
+  color: #0355ac;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+}
+
+.table-row:nth-child(1) .avatar {
+  color: #fff;
+  background: #6750a4;
+}
+.table-row:nth-child(2) .avatar {
+  color: #fff;
+  background: #37768b;
+}
+.table-row:nth-child(3) .avatar {
+  color: #fff;
+  background: #a88828;
+}
+.table-row:nth-child(4) .avatar {
+  color: #fff;
+  background: #2871a8;
+}
+.table-row:nth-child(5) .avatar {
+  color: #fff;
+  background: #9c2f63;
+}
+.table-row:nth-child(6) .avatar {
+  color: #fff;
+  background: #28468b;
+}
+.table-row:nth-child(7) .avatar {
+  color: #fff;
+  background: #c00f0c;
+}
+.table-row:nth-child(8) .avatar {
+  color: #fff;
+  background: #6750a4;
+}
+.table-row:nth-child(9) .avatar {
+  color: #fff;
+  background: #37768b;
+}
+.table-row:nth-child(10) .avatar {
+  color: #fff;
+  background: #a88828;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #bcdaf9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  line-height: normal;
+}
+
+.badge {
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding: 0 6px;
+  border-radius: 3px;
+}
+
+.badge.new {
+  background: #075db5;
+  color: #fff;
+}
+
+.badge.contacted {
+  background: #52c5df;
+  color: #fff;
+}
+
+.badge.qualified {
+  background: #00b89c;
+  color: #fff;
+}
+
+.badge.quotation-sent {
+  background: #7764e8;
+  color: #fff;
+}
+
+.badge.negotiation {
+  background: #f45176;
+  color: #fff;
+}
+
+.badge.won {
+  background: #00b89c;
+  color: #fff;
+}
+
+.badge.lost {
+  background: #929da3;
+  color: #fff;
+}
+
+.badge.nurturing {
+  background: #f8b84e;
+  color: #fff;
+}
+
+.mini-avatar.primary {
+  background: var(--primary);
+}
+
+.mini-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.crm-lead-table .table-head, .crm-lead-table .crm-lead-row {
+  grid-template-columns: 35px 1.5fr 1.5fr 0.65fr 1.2fr;
+}
