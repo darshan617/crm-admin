@@ -1,21 +1,32 @@
 import {
   FiBarChart2,
   FiFileText,
-  FiGrid,
   FiPhone,
   FiRefreshCw,
   FiSettings,
-  FiUsers,
 } from "react-icons/fi";
+import { HiOutlineDocumentReport } from "react-icons/hi";
+import { HiOutlinePhoneArrowUpRight } from "react-icons/hi2";
+import { LuLayoutDashboard, LuUserSearch } from "react-icons/lu";
 
 export const SIDEBAR_SECTIONS = [
   {
     key: "menu",
     name: "MENU",
     items: [
-      { key: "dashboard", name: "Dashboard", url: "/dashboard", icon: FiGrid },
-      { key: "leads", name: "Leads", url: "/leads", icon: FiUsers },
-      { key: "follow-up", name: "Follow Up", url: "/follow-up", icon: FiPhone },
+      {
+        key: "dashboard",
+        name: "Dashboard",
+        url: "/dashboard",
+        icon: LuLayoutDashboard,
+      },
+      { key: "leads", name: "Leads", url: "/leads", icon: LuUserSearch },
+      {
+        key: "follow-up",
+        name: "Follow Up",
+        url: "/follow-up",
+        icon: HiOutlinePhoneArrowUpRight,
+      },
       {
         key: "quotations",
         name: "Quotations",
@@ -56,7 +67,7 @@ export const SIDEBAR_SECTIONS = [
           },
         ],
       },
-      { key: "reports", name: "Reports", url: "/reports", icon: FiBarChart2 },
+      { key: "reports", name: "Reports", url: "/reports", icon: HiOutlineDocumentReport  },
     ],
   },
 ];

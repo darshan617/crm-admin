@@ -1,0 +1,236 @@
+.commonForm {
+  display: flex;
+  padding: 30px;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  width: 100%;
+  margin-bottom: 30px;
+}
+.commonForm h3 {
+  color: #313a46;
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-style: normal;
+  line-height: normal;
+  font-weight: bold;
+}
+
+.mainFormLayout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 313px;
+  gap: 30px;
+  align-items: start;
+}
+
+.formLeft,
+.formRight {
+  min-width: 0;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+  width: 100%;
+}
+
+.formGrid.formGrid3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.sideCard {
+  width: 100%;
+  padding: 18px 16px 16px;
+  background: #f5f8fc;
+  border: 1px solid #bcdaf9;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.leadSpecification {
+  width: 100%;
+  margin-top: 34px;
+}
+.leadSpecification .formGroup {
+  margin-bottom: 18px;
+}
+
+.leadSpecification .selectWrap select {
+  width: 100%;
+  height: 100%;
+  padding: 10px 35px 10px 10px;
+  border: 1px solid #e7e9eb;
+  border-radius: 8px;
+  color: #9ba6b7;
+}
+
+.assignedUserForm {
+  width: 100%;
+  /* height: 40px; */
+  padding: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e0e4e9;
+  border-radius: 5px;
+  background: #fff;
+  box-sizing: border-box;
+  font-size: var(--font-size-15px);
+}
+
+.userAvatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f5b84b;
+  color: #fff;
+  font-size: var(--font-size-16px);
+  font-weight: 600;
+}
+
+.planBox {
+  width: 100%;
+  padding: 12px;
+  background: #f6f9fd;
+  border: 1px solid #b9d8ff;
+  border-radius: 8px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.addPlanBtn {
+  padding: 0;
+  border: none;
+  background: transparent;
+  /* text-decoration: none; */
+  color: var(--primary);
+  font-family: inherit;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.addPlanBtn:hover {
+  text-decoration: underline;
+}
+
+.submitWrap {
+  margin-top: 20px;
+}
+
+.submitWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.submitBtn {
+  background: var(--primary);
+  font-family: "Baloo Bhai 2";
+  color: #fff;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 999px;
+  font-size: var(--font-size-14px);
+  /* font-style: normal; */
+  font-weight: 500;
+  line-height: normal;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.uploadBox {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f5f8fc;
+  border: 1px solid #b9d8ff;
+  border-radius: 6px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.uploadIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+.uploadTitle {
+  margin-bottom: 3px;
+  font-size: var(--font-size-16px);
+  color: #444;
+}
+.fileItem {
+  width: 100%;
+  /* min-height: 25px; */
+  padding: 8px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid #e1e4e9;
+  border-radius: 4px;
+  color: #555;
+  font-size: var(--font-size-14px);
+}
+
+.uploadedStatus .file-item button {
+  color: #f0446f;
+}
+
+.uploaded {
+  cursor: pointer;
+  color: #f0446f;
+}
+.uploadedStatus {
+    margin-top: 16px;
+}
+
+.progressBar {
+    width: 100%;
+    height: 2px;
+    margin-top: -2px;
+    background: #E4E8ED;
+    overflow: hidden;
+}
+
+.progressBar span {
+    display: block;
+    width: 82%;
+    height: 100%;
+    background: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .commonForm {
+    padding: 20px;
+  }
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .formLeft {
+    grid-template-columns: 1fr;
+  }
+}

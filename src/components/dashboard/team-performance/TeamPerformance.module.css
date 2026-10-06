@@ -1,0 +1,292 @@
+.newQuickActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 24px;
+  padding: 8px 0;
+  margin-bottom: 20px;
+}
+
+.quickBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid #cfd5dc;
+  border-radius: 5px;
+  color: #333;
+  font-size: 12px;
+  padding: 8px 25px;
+  font-weight: 500;
+  cursor: pointer;
+  overflow: hidden;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease;
+}
+.quickBtn svg {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.25s ease;
+}
+.quickBtn:hover {
+  transform: translateY(-3px);
+  border-color: #0b63b6;
+  background: #0b63b6;
+  color: #fff;
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.12);
+}
+.quickBtn:hover svg {
+  transform: translateY(-2px) scale(1.08);
+}
+.quickBtn:active {
+  transform: translateY(-1px) scale(0.97);
+}
+
+/* ---------- Card ---------- */
+.commonTableSection {
+  margin-bottom: 24px;
+}
+.commonTableCard {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  overflow: hidden;
+}
+.commonTableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  margin-bottom: 15px;
+}
+.commonTableHeader h3 {
+  font-size: var(--font-size-18px, 18px);
+  margin: 0;
+  font-weight: 600;
+  color: #1e1e1e;
+}
+
+/* ---------- Filter ---------- */
+.salesFilter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: #eef5ff;
+  border-radius: 30px;
+}
+.salesFilter button {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  background: transparent;
+  color: #555;
+  padding: 8px 18px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: var(--font-size-14px, 14px);
+  font-weight: 500;
+  transition: 0.3s;
+}
+.salesFilter button:hover {
+  color: var(--primary, #0355ac);
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(3, 85, 172, 0.12);
+}
+.salesFilter button.active {
+  background: #fff;
+  color: var(--primary, #0355ac);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.salesFilter button:active {
+  transform: scale(0.96);
+}
+.salesFilter button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: left 0.7s ease;
+}
+.salesFilter button:hover::before {
+  left: 150%;
+}
+
+/* ---------- Table (grid rows) ---------- */
+.teamTable,
+.tableBody {
+  display: block;
+  width: 100%;
+}
+.tableBody {
+  margin-top: 12px;
+}
+
+.tableRow {
+  display: grid;
+  padding: 12px 24px;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #edf0f4;
+  background: #fff;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+.tableRow:hover {
+  border-color: #dbe4f0;
+  box-shadow: 0 0 10px 0 rgba(3, 85, 172, 0.2);
+}
+
+.teamPrRow {
+  grid-template-columns: 6fr 2fr 2fr 2fr 2fr;
+  position: relative;
+  overflow: hidden;
+}
+
+/* big rank number in background */
+.teamPrRow::before {
+  position: absolute;
+  left: 0;
+  top: -10%;
+  font-size: 100px;
+  font-weight: 700;
+  line-height: 1;
+  color: #eef2f7ba;
+  z-index: 0;
+  pointer-events: none;
+}
+.teamPrRow:nth-child(1)::before {
+  content: "1";
+}
+.teamPrRow:nth-child(2)::before {
+  content: "2";
+}
+.teamPrRow:nth-child(3)::before {
+  content: "3";
+}
+.teamPrRow:nth-child(4)::before {
+  content: "4";
+}
+.teamPrRow:nth-child(5)::before {
+  content: "5";
+}
+
+/* all cells above the rank number */
+.teamPrRow td {
+  position: relative;
+  z-index: 1;
+}
+
+/* grey column behind LEADS */
+.teamPrRow td:nth-child(2) {
+  background: #f1f4f8;
+  padding: 0 10px;
+}
+.teamPrRow td:nth-child(2)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  top: -30%;
+  height: 180%;
+  background: #f1f4f8;
+  z-index: -1;
+}
+
+.customer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.customer h5 {
+  margin: 0;
+  font-size: var(--font-size-14px, 14px);
+  font-weight: 600;
+}
+.customer p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ---------- Avatar ---------- */
+.avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #bcdaf9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: var(--font-size-14px, 14px);
+}
+.tableRow:nth-child(1) .avatar {
+  background: #6750a4;
+}
+.tableRow:nth-child(2) .avatar {
+  background: #37768b;
+}
+.tableRow:nth-child(3) .avatar {
+  background: #a88828;
+}
+.tableRow:nth-child(4) .avatar {
+  background: #2871a8;
+}
+.tableRow:nth-child(5) .avatar {
+  background: #9c2f63;
+}
+.tableRow:nth-child(6) .avatar {
+  background: #28468b;
+}
+.tableRow:nth-child(7) .avatar {
+  background: #c00f0c;
+}
+.tableRow:nth-child(8) .avatar {
+  background: #6750a4;
+}
+.tableRow:nth-child(9) .avatar {
+  background: #37768b;
+}
+.tableRow:nth-child(10) .avatar {
+  background: #a88828;
+}
+
+/* ---------- Numbers ---------- */
+.teamNum {
+  display: flex;
+  flex-direction: column;
+  color: #444;
+}
+.teamNum small {
+  font-weight: 400;
+  font-size: var(--font-size-14px, 14px);
+}
+.teamNum strong {
+  font-size: var(--font-size-18px, 18px);
+  font-weight: 500;
+}
