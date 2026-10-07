@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import Cookies from "js-cookie";
 
 export function proxy(request) {
   const token = request.cookies.get("CRM_USER")?.value;
