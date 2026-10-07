@@ -227,7 +227,8 @@
 .profileMenu {
   padding: 6px;
 }
-.profileMenu a {
+.profileMenu a,
+.profileMenu button {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -237,6 +238,8 @@
   text-decoration: none;
   font-size: var(--font-size-16px);
   transition: all 0.2s ease;
+  width: 100%;
+  cursor: pointer;
 }
 .profileMenu a svg {
   width: 20px;
@@ -252,10 +255,10 @@
   margin: 5px 4px;
   background: #edf0f3;
 }
-.profileMenu a.logout {
+.profileMenu .logout {
   color: #e54868;
 }
-.profileMenu a.logout:hover {
+.profileMenu .logout:hover {
   background: #fff1f4;
   color: #d83254;
 }
@@ -287,7 +290,7 @@
 }
 
 .adminBadge {
-  background: #187BE4;
+  background: #187be4;
   color: #fff;
   padding: 0px 10px;
   border-radius: 4px;

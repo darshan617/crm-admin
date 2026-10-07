@@ -4,8 +4,13 @@ import logo from "@/../public/images/signup/signupLogo.webp";
 import Image from "next/image";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useLoginMutation } from "@/redux/apis/authApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 
 const LoginForm = () => {
+  const router = useRouter();
+  const { showToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formState, setFormState] = useState({
     email: "",
@@ -22,7 +27,10 @@ const LoginForm = () => {
         },
       }).unwrap();
       if (res?.success) {
-        console.log(res);
+        Cookies.set("CRM_USER", JSON.stringify(res?.data?.user));
+        Cookies.set("token", JSON.stringify(res?.data?.token));
+        showToast(res?.message, "success");
+        router?.push("/dashboard");
       }
     } catch (error) {
       console.log(error, "Error in handleLogin");
@@ -99,8 +107,12 @@ const LoginForm = () => {
               </div>
             </div>
 
-            <button onClick={handleLogin} className={styles.button}>
-              Login
+            <button
+              onClick={handleLogin}
+              disabled={isLoading}
+              className={styles.button}
+            >
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </div>
 

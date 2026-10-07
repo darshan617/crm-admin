@@ -8,12 +8,27 @@ import {
 import { FaUser } from "react-icons/fa";
 import { CiSettings } from "react-icons/ci";
 import { MdLogout } from "react-icons/md";
+import Cookies from "js-cookie";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useRouter } from "next/router";
 
 const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
+  const { showToast } = useToast();
+  const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
 
-  // Close on outside click
+  const handleLogout = () => {
+    try {
+      (Cookies?.remove("CRM_USER"),
+        Cookies?.remove("token"),
+        showToast("User Logout Successfully", "success"));
+      router?.push("/auth/login");
+    } catch (error) {
+      console.log(error, "Error in handleLogout");
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -115,10 +130,10 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
                 <span>Settings</span>
               </a>
               <div className={styles.profileDivider}></div>
-              <a href="/" className={styles.logout}>
+              <button onClick={handleLogout} className={styles.logout}>
                 <MdLogout />
                 <span>Logout</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
