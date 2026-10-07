@@ -219,6 +219,8 @@
     background: var(--primary);
 }
 
+
+
 @media (max-width: 768px) {
   .commonForm {
     padding: 20px;
