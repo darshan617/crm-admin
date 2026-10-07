@@ -2,6 +2,8 @@
   margin-bottom: 24px;
 }
 
+/* ---------------- Tabs ---------------- */
+
 .crmLeadTabs {
   display: flex;
   align-items: flex-end;
@@ -14,7 +16,6 @@
   display: flex;
   min-width: 140px;
   height: 50px;
-  /* border: 0; */
   border-radius: 6px 6px 0 0;
   border-top: 3px solid #0865b500;
   border-right: 0;
@@ -34,22 +35,30 @@
   background: #ffffff;
   color: #303846;
   border-top: 3px solid #0865b5;
-  /* color: #005eb8; */
-  /* background: #f1f5fa; */
 }
 
 .crmLeadTabs a.active {
   background: #ffffff;
   color: #303846;
-
   border-top: 3px solid #0865b5;
 }
 
-.common-table-header {
+/* ---------------- Header ---------------- */
+
+.commonTableHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 15px;
+}
+
+.crmLeadHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
 }
 
 .crmLeadTitle {
@@ -62,22 +71,11 @@
   gap: 4px;
 }
 
-.tableSearch {
-  position: relative;
-  flex: 0 0 280px;
-  width: 280px;
-  min-width: 220px;
-  max-width: 100%;
-  height: 40px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-.crmLeadHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: nowrap;
+.crmLeadTitle p {
+  margin: 0;
+  padding-right: 10px;
+  border-right: 1px solid #cccccc;
+  white-space: nowrap;
 }
 
 .itemsSelected {
@@ -88,6 +86,43 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+.tableSearch {
+  position: relative;
+  flex: 0 0 280px;
+  width: 300px;
+  min-width: 220px;
+  max-width: 100%;
+  height: 40px;
+  border: 1px solid #E5E7EB;
+  border-radius: 999px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  padding: 0 16px;
+  gap: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.tableSearch input {
+  width: 100%;
+  height: 100%;
+  padding: 0 36px 0 12px;
+  box-sizing: border-box;
+}
+
+.tableSearch svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ---------------- Filter panel ---------------- */
 
 .tableFilterWrap {
   overflow: hidden;
@@ -121,17 +156,13 @@
   grid-template-columns: 1fr 1fr 1fr;
   align-items: flex-start;
   gap: 20px;
-  flex-wrap: wrap;
+}
+
+.filterGroup {
+  min-width: 0;
 }
 
 .filterGroup h6 {
-  font-size: 13px;
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-#filterPanel .filterGroup h6 {
   margin: 0 0 8px;
   font-size: 13px;
   font-weight: 600;
@@ -140,18 +171,76 @@
 }
 
 .filterOptions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  display: block;
+  width: 100%;
 }
+
+/* shared look for selects and date inputs */
+.tableFilterWrap .filterOptions select,
+.tableFilterWrap .dateRange input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e0e3e8;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #303846;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.tableFilterWrap .filterOptions select:focus,
+.tableFilterWrap .dateRange input:focus {
+  border-color: #0865b5;
+}
+
+.tableFilterWrap .filterOptions select {
+  padding-right: 36px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.tableFilterWrap .dateRange {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.dateInput {
+  position: relative;
+  min-width: 0;
+}
+
+.dateInput input {
+  padding-right: 36px;
+}
+
+.dateInput svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6b7280;
+}
+
+/* ---------------- Table ---------------- */
+
 .crmLeadTable .tableHead,
 .crmLeadTable .crmLeadRow {
   grid-template-columns: 35px 1.5fr 1.5fr 0.65fr 1.2fr;
 }
 
-
-
-.crmLeadRow .customer {
+.crmLeadRow .customer,
+.customer {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -163,10 +252,16 @@
   font-weight: 400;
   color: #444444;
 }
+
 .contactInfo p {
   margin: 0;
   font-size: 16px;
   color: #7b7e8d;
+}
+
+.statusCol {
+  width: 100% !important;
+  text-align: center !important;
 }
 
 .avatarFlex {
@@ -179,18 +274,43 @@
 
 .assignedUser {
   display: flex;
-  /* grid-template-columns: 28px 1fr 32px; */
   align-items: center;
   column-gap: 8px;
   width: 100%;
-  display: flex;
-  align-items: center;
   border-left: 1px solid #e7e9eb;
   padding-left: 15px;
   justify-content: space-between;
 }
 
-.statusCol {
-  width: 100% !important;
-  text-align: center !important;
+.tablePagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
 }
+
+.pageBtn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.pageBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light)
+}
+.pageBtn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white)
+}
+

@@ -10,7 +10,7 @@ import { GoTrophy } from "react-icons/go";
 
 const LeadSummary = () => {
   return (
-    <div className="content">
+    <div className="">
       <div className="page-header">
         <div className="">
           <div className="breadcrumb welcome-text">
@@ -22,13 +22,13 @@ const LeadSummary = () => {
           <h2>Leads </h2>
         </div>
         <div className={styles.crmActions}>
-          <a href="/" className={styles.crmActionBtn}>
+          <a href="/upload-leads" className={styles.crmActionBtn}>
             <FiUpload />
             <span>Upload Leads</span>
           </a>
 
           <a
-            href="add-new-lead.php"
+            href="/add-new-leads"
             className={`${styles.crmActionBtn} ${styles.active}`}
           >
             <FiUserPlus />

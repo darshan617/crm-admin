@@ -6,8 +6,10 @@ import React from "react";
 const index = () => {
   return (
     <Layout>
-      <LeadSummary />
-      <AllLeads />
+      <div className="content">
+        <LeadSummary />
+        <AllLeads />
+      </div>  
     </Layout>
   );
 };

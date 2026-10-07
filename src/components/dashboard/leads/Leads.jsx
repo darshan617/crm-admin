@@ -351,7 +351,7 @@ const Leads = () => {
               <h3>Add Document</h3>
 
               {/* Upload */}
-              <a href="upload-document.php" className={styles.uploadBox}>
+              <a href="/" className={styles.uploadBox}>
                 <div className={styles.uploadIcon}>
                   <LuFileDown size={24} />
                 </div>

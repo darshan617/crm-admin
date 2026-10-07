@@ -1,0 +1,579 @@
+.leadTopMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.leadTopMeta span:nth-child(2) {
+  text-align: center;
+}
+
+.leadTopMeta span:nth-child(3) {
+  display: flex;
+  text-align: right;
+}
+
+.customerContent {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 18px;
+  align-items: start;
+}
+
+.orderDashboardGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 385px;
+  gap: 18px;
+  align-items: start;
+}
+
+.leadCompanyHeader {
+  position: relative;
+  width: 100%;
+  height: 70px;
+  padding: 0 15px 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: linear-gradient(105deg, #1684ef, #075dbb);
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+
+.leadCompanyHeader h3 {
+  font-size: 18px;
+  line-height: 1.3;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
+  max-width: 100%;
+  margin: 0;
+  color: #fff;
+  font-weight: 500;
+}
+
+.editLeadBtn {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  height: 26px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  border-radius: 18px;
+  background: #fff;
+  color: #444;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.leadInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 30px;
+  row-gap: 14px;
+  margin-top: 19px;
+}
+
+.infoItem label {
+  color: var(--color-grey-300-subtext, #9ba6b7);
+  font-family: "Baloo Bhai 2";
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.leadInfoGrid .infoItem p {
+  margin: 0;
+  color: #414756;
+  font-size: var(--font-size-14px);
+  line-height: 1.5;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--Border-Colors-Additive-deactive, #e7e9eb);
+}
+
+.cardHeader h3 {
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.addCreditBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #dedede;
+  color: #444;
+  text-decoration: none;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex-direction: row;
+  height: 31px;
+  /* border: 0; */
+  cursor: pointer;
+}
+
+.leadContactCard {
+  width: 100%;
+  margin-top: 11px;
+  padding: 12px;
+  display: flex;
+  background: #f4f8fd;
+  border: 1px solid #a9d1ff;
+  border-radius: 6px;
+  box-sizing: border-box;
+  flex-direction: column;
+}
+
+.contactInfoGrid label {
+  display: block;
+  margin-bottom: 4px;
+  color: #aeaeae;
+  font-size: 12px;
+}
+
+.contactInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+
+.contactInformationSection {
+  height: 355px;
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #9ba6b7 transparent;
+  scrollbar-color: #efefef !important;
+}
+
+.commonTableCard {
+  position: relative;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  overflow: hidden;
+}
+
+.customerContent > :global(.common-table-section):nth-child(3),
+.customerContent > :global(.common-table-section):nth-child(4) {
+  grid-column: 1 / -1;
+}
+
+.serviceRequiredCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr 0.9fr;
+  column-gap: 18px;
+  row-gap: 13px;
+  /* padding-left: 50px; */
+  padding: 12px;
+  padding-left: 40px;
+  background: #f4f8fd;
+  border: 1px solid #a9d1ff;
+  border-radius: 6px;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+.serviceCheck {
+  padding-top: 1px;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+}
+
+.serviceItem label {
+  display: block;
+  margin-bottom: 5px;
+  color: #aeaeae;
+  font-size: 12px;
+}
+.serviceItem p {
+  margin: 0;
+  color: #313a46;
+  font-size: var(--font-size-14px);
+}
+
+.serviceActions {
+  display: flex;
+  flex-direction: row;
+  gap: 7px;
+}
+
+.actionAbsolute {
+  position: absolute;
+  top: 9px;
+  right: 8px;
+}
+
+.serviceActions button {
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d9dde3;
+  border-radius: 50%;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+}
+
+.serviceActions button:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.assignedUserForm {
+  width: 100%;
+  /* height: 40px; */
+  padding: 10px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #e0e4e9;
+  border-radius: 5px;
+  background: #fff;
+  box-sizing: border-box;
+  font-size: var(--font-size-15px);
+  display: flex;
+  justify-content: space-between;
+}
+
+.submitBtn {
+  background: var(--primary);
+  font-family: "Baloo Bhai 2";
+  color: #fff;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 999px;
+  font-size: var(--font-size-14px);
+  /* font-style: normal; */
+  font-weight: 500;
+  line-height: normal;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submitWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.downloadList {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.downloadHeader {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) 1fr 1fr 130px;
+  font-size: var(--font-size-14px);
+  color: #1f2937;
+  font-weight: 600;
+  padding: 10px;
+  padding-top: 0;
+  /* margin-bottom: 10px; */
+  border-bottom: 1px solid var(--Border-Colors-Additive-deactive, #e7e9eb);
+}
+
+.downloadRow {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) 1fr 1fr 130px;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4c4c5c;
+  font-size: 13px;
+  padding: 10px;
+}
+
+.downloadFile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #898d94;
+  text-decoration: none;
+}
+
+.downloadFile:hover {
+  text-decoration: underline;
+}
+
+.downloadFile svg {
+  width: 15px;
+  height: 15px;
+  color: #0355ac;
+  flex-shrink: 0;
+}
+
+.activityCard {
+  position: relative;
+  /* min-height: 230px; */
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e1e6ed;
+  border-radius: 10px;
+  /* box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15); */
+}
+
+.activityHeader {
+  /* min-height: 48px; */
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e7ebef;
+}
+
+.activityHeader h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* color: #505766; */
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+}
+
+.activityHeader h3 svg {
+  width: 16px;
+  height: 16px;
+}
+
+.viewAll {
+  font-size: var(--font-size-14px);
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.activityBody {
+  padding: 12px 15px;
+}
+
+.activityTitle {
+  display: block;
+  margin-bottom: 11px;
+  color: #69727d;
+  font-size: 10px;
+}
+
+.activityList {
+  position: relative;
+  padding-left: 18px;
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+}
+
+.activityList::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  bottom: 3px;
+  width: 1px;
+  background: #d8e0e9;
+}
+
+.activityItem {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  min-height: 61px;
+}
+
+.activityDot {
+  position: absolute;
+  left: -18px;
+  top: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #0667c4;
+}
+
+.addCreditBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #dedede;
+  color: #444;
+  text-decoration: none;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  flex-direction: row;
+  height: 31px;
+  /* border: 0; */
+  cursor: pointer;
+}
+
+.serviceRequiredCard2 {
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 12px 72px 12px 12px;
+  margin-top: 10px;
+}
+
+.commonTableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  margin-bottom: 15px;
+}
+
+.commonTableHeader h3 {
+  font-size: var(--font-size-18px);
+  margin-bottom: 0px;
+  font-weight: 600;
+  color: #1e1e1e;
+}
+
+.activityIcon {
+  position: relative;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+.activityIcon.teal {
+  color: #16c7b1;
+  background: #e7faf7;
+}
+
+.activityIcon.blue {
+    color: #006bc7;
+    background: #eaf3ff;
+}
+
+.activityIcon.purple {
+    color: #7564ff;
+    background: #f1efff;
+}
+
+.activityIcon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    position: relative;
+    z-index: 2;
+    border-radius: 50%;
+}
+
+.activityContent {
+    padding-left: 12px;
+    padding: 0px 0 16px 12px;
+}
+
+.activityItem:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 17px;
+    top: 34px;
+    bottom: -8px;
+    width: 1px;
+    background: #dfe4ea;
+    z-index: 1;
+}
+
+.customerInfo {
+    position: sticky;
+    top: 20px;
+    align-self: start;
+    height: fit-content;
+}
+
+.credit-modal-box h2 {
+  margin: 0 0 18px;
+  padding-right: 28px;
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.creditModalBox h2 {
+  color: var(--color-grey-500-dark-text, #2C3139);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+  width: 100%;
+}
+.creditModalBox :global(.form-group) {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.creditModalBox :global(.form-group) label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4C4C5C;
+}
+
+.submitBtn {
+  background: var(--primary);
+  font-family: "Baloo Bhai 2";
+  color: #FFF;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 999px;
+  font-size: var(--font-size-14px);
+  /* font-style: normal; */
+  font-weight: 500;
+  line-height: normal;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.creditModalBox .submitWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
