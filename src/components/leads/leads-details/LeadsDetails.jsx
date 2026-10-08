@@ -14,8 +14,15 @@ import styles from "@/components/leads/leads-details/LeadsDetails.module.css";
 import CustomPopup from "@/common-components/custom-popup/CustomPopup";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { selectIsPopupVisble, setIsPopupVisible } from "@/redux/slices/popupSlice";
+import {
+  selectIsPopupVisble,
+  setIsPopupVisible,
+} from "@/redux/slices/popupSlice";
 import EditDetailForm from "../edit-detail-form/EditDetailForm";
+import AddContactForm from "../add-contact-form/AddContactForm";
+import AddCurrentServiceForm from "../add-current-service-form/AddCurrentServiceForm";
+import AddOurService from "../add-our-service/AddOurService";
+import AddDocumentForm from "../add-document-form/AddDocumentForm";
 
 const contacts = [1, 2, 3].map((n) => ({
   title: `Contact Person ${n}`,
@@ -53,12 +60,10 @@ const activities = [
   { date: "05 May 2026", text: "New Lead created by online marketing." },
 ];
 
-
-
 export default function LeadDetail() {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const router = useRouter();
-  const isPopupVisible =  useSelector(selectIsPopupVisble)
+  const isPopupVisible = useSelector(selectIsPopupVisble);
 
   const removeService = (formId) => {
     if (confirm("Remove this info?")) {
@@ -123,7 +128,9 @@ export default function LeadDetail() {
                   <button
                     type="button"
                     className={styles.editLeadBtn}
-                    onClick={() => dispatch(setIsPopupVisible('add-details-popup'))}
+                    onClick={() =>
+                      dispatch(setIsPopupVisible("add-details-popup"))
+                    }
                   >
                     <FaPencil />
                     Add / Edit Details
@@ -186,7 +193,10 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>CONTACT INFORMATION</h3>
 
-                  <a href="#" className={styles.addCreditBtn}>
+                  <a
+                    onClick={() => dispatch(setIsPopupVisible("add-contact"))}
+                    className={styles.addCreditBtn}
+                  >
                     <GoPlus />
                     Add Contact
                   </a>
@@ -231,7 +241,9 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>CURRENT SERVICE (INFO)</h3>
                   <a
-                    href="#"
+                    onClick={() =>
+                      dispatch(setIsPopupVisible("add-current-service"))
+                    }
                     className={styles.addCreditBtn}
                     id="openAddInfoService"
                   >
@@ -393,7 +405,12 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>OUR SERVICE</h3>
 
-                  <a href="#" className={styles.addCreditBtn}>
+                  <a
+                    onClick={() =>
+                      dispatch(setIsPopupVisible("add-our-service"))
+                    }
+                    className={styles.addCreditBtn}
+                  >
                     <GoPlus />
                     Add Service
                   </a>
@@ -464,7 +481,9 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>DOCUMENTS</h3>
 
-                  <a href="#" className={styles.addCreditBtn}>
+                  <a onClick={() =>
+                      dispatch(setIsPopupVisible("add-document"))
+                    } className={styles.addCreditBtn}>
                     <GoPlus />
                     Add Document
                   </a>
@@ -844,14 +863,31 @@ export default function LeadDetail() {
         </div>
       </div>
 
-      {
-        isPopupVisible === 'add-details-popup' && (
-          <CustomPopup  onClose={()=> dispatch(setIsPopupVisible(''))}  >
-            <EditDetailForm/>
-          </CustomPopup>
-        )
-      }
-      
+      {isPopupVisible === "add-details-popup" && (
+        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
+          <EditDetailForm />
+        </CustomPopup>
+      )}
+      {isPopupVisible === "add-contact" && (
+        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
+          <AddContactForm />
+        </CustomPopup>
+      )}
+      {isPopupVisible === "add-current-service" && (
+        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
+          <AddCurrentServiceForm />
+        </CustomPopup>
+      )}
+      {isPopupVisible === "add-our-service" && (
+        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
+          <AddOurService />
+        </CustomPopup>
+      )}
+      {isPopupVisible === "add-document" && (
+        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
+          <AddDocumentForm />
+        </CustomPopup>
+      )}
     </>
   );
 }
