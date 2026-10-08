@@ -39,7 +39,7 @@
   width: 100%;
 }
 
-.formGrid.formGrid3 {
+.formGrid3 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -219,7 +219,66 @@
     background: var(--primary);
 }
 
+.contactModalTitle {
+  color: var(--color-grey-500-dark-text, #2c3139);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
 
+
+.leadDocCard {
+  padding: 18px;
+  border: 1px solid #D7E6F8;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #F8FBFF 0%, #FFFFFF 70%);
+}
+
+.leadDocCard .docHelp {
+  margin: 0;
+  color: #5B6472;
+  line-height: 1.45;
+}
+
+.uploadBox {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #F5F8FC;
+  border: 1px solid #B9D8FF;
+  border-radius: 6px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.uploadIcon {
+  width: 59px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.uploadBox p {
+  margin: 3px 0 0;
+  font-size: var(--font-size-16px);
+  color: #444;
+}
+
+.uploadFormats {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6B7280;
+}
 
 @media (max-width: 768px) {
   .commonForm {

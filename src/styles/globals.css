@@ -520,21 +520,12 @@ table {
   margin-bottom: 24px;
 }
 
-
 .common-form {
-  display: flex;
   padding: 30px;
-  flex-direction: column;
-  align-items: flex-start;
-  align-self: stretch;
-  border-radius: 10px;
-  background: #FFF;
-  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
-  width: 100%;
-  margin-bottom: 30px;
 }
 
-.common-form .phone-group, .credit-modal .phone-group {
+.common-form .phone-group,
+.credit-modal .phone-group {
   display: flex;
   align-items: stretch;
   width: 100%;
@@ -542,7 +533,8 @@ table {
   gap: 0;
 }
 
-.common-form .phone-group, .credit-modal .phone-group {
+.common-form .phone-group,
+.credit-modal .phone-group {
   display: flex;
   align-items: stretch;
   width: 100%;
@@ -550,9 +542,20 @@ table {
   gap: 0;
 }
 
-.common-form .phone-group select, .credit-modal .phone-group select {
+.common-form .phone-group select,
+.credit-modal .phone-group select {
   width: 148px;
   flex: 0 0 148px;
   min-height: 42px;
   height: 42px;
+}
+
+.credit-modal-box h2 {
+  color: var(--color-grey-500-dark-text, #2C3139);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 }
