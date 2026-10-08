@@ -1,5 +1,5 @@
 import { ToastProvider } from "@/custom-hooks/toast/ToastProvider";
-import { storeWrapper } from "@/redux/slices/store";
+import { storeWrapper } from "@/redux/store";
 import "@/styles/globals.css";
 import { Provider } from "react-redux";
 
