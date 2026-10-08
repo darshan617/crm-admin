@@ -420,6 +420,139 @@ table {
   color: #fff;
 }
 
-.crm-lead-table .table-head, .crm-lead-table .crm-lead-row {
+.crm-lead-table .table-head,
+.crm-lead-table .crm-lead-row {
   grid-template-columns: 35px 1.5fr 1.5fr 0.65fr 1.2fr;
+}
+
+.table-filter {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+.border-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #e7e9eb;
+}
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #0b5db8;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 7px 24px;
+  font-size: var(--font-size-14px);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: -15px;
+  z-index: 9;
+  transition: all 0.3s ease;
+}
+#filterPanel .filter-options select,
+#filterPanel .date-input input,
+#filterPanel .date-input input[type="date"],
+#filterPanel .date-input input[type="text"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #374151;
+  font-size: 14px;
+  line-height: 38px;
+  font-family: inherit;
+}
+
+.crm-quo-header .table-search,
+.es-quo-header .table-search,
+.crm-lead-header .table-search {
+  flex: 0 0 280px;
+  width: 280px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.status-interested {
+  background: #00b894;
+}
+
+.status-interested,
+.status-hot {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  margin-left: 4px;
+  border-radius: 3px;
+  color: #fff !important;
+  font-size: 13px;
+}
+
+.status-hot {
+  background: #f04f75;
+}
+
+.followup-form .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #3f4652;
+  /* font-size: 10px; */
+}
+
+.followup-form .form-group label span {
+  color: #ef4968;
+}
+
+.common-table-section {
+  margin-bottom: 24px;
+}
+
+
+.common-form {
+  display: flex;
+  padding: 30px;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  border-radius: 10px;
+  background: #FFF;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.common-form .phone-group, .credit-modal .phone-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 0;
+}
+
+.common-form .phone-group, .credit-modal .phone-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 0;
+}
+
+.common-form .phone-group select, .credit-modal .phone-group select {
+  width: 148px;
+  flex: 0 0 148px;
+  min-height: 42px;
+  height: 42px;
 }
