@@ -3,15 +3,20 @@ import PendingApproval from "@/components/dashboard/pending-approval/PendingAppr
 import TeamPerformance from "@/components/dashboard/team-performance/TeamPerformance";
 import Layout from "@/components/layout/Layout";
 import React from "react";
+import { useDashboardQuery } from "@/redux/apis/dashboardApi";
 
 const dashboard = () => {
-  return <Layout>
-    <div className="content">
-    <AccountSummary />
-    <TeamPerformance />
-    <PendingApproval />
-    </div>
-  </Layout>;
+  const { data: dashboardData } = useDashboardQuery();
+
+  return (
+    <Layout>
+      <div className="content">
+        <AccountSummary />    
+        <TeamPerformance />
+        <PendingApproval />
+      </div>
+    </Layout>
+  );
 };
 
 export default dashboard;
