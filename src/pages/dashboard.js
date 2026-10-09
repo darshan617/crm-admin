@@ -5,18 +5,26 @@ import Layout from "@/components/layout/Layout";
 import React from "react";
 import { useDashboardQuery } from "@/redux/apis/dashboardApi";
 
-const dashboard = () => {
-  const { data: dashboardData } = useDashboardQuery();
+const Dashboard = () => {
+  const { data: dashboardResponse } = useDashboardQuery();
+
+  const dashboardData = dashboardResponse?.data;
 
   return (
     <Layout>
       <div className="content">
-        <AccountSummary />    
-        <TeamPerformance />
-        <PendingApproval />
+        <AccountSummary
+          summary={dashboardData?.summary}
+          user={dashboardData?.user}
+        />
+        <TeamPerformance team={dashboardData?.team} />
+        <PendingApproval
+          summary={dashboardData?.summary}
+          recentActivities={dashboardData?.recent_activities}
+        />
       </div>
     </Layout>
   );
 };
 
-export default dashboard;
+export default Dashboard;
