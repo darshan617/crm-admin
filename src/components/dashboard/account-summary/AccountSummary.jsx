@@ -1,21 +1,51 @@
 import React from "react";
 import styles from "@/components/dashboard/account-summary/AccountSummary.module.css";
+
 import { FiPhoneCall } from "react-icons/fi";
-import {
-  LuCalendarClock,
-  LuCalendarDays,
-  LuClipboardCheck,
-} from "react-icons/lu";
+import { LuCalendarClock, LuClipboardCheck } from "react-icons/lu";
 import { CiClock2 } from "react-icons/ci";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 
-const AccountSummary = () => {
+const AccountSummary = ({ summary, user }) => {
+  const summaryCards = [
+    {
+      title: "Total Leads",
+      value: summary?.total_leads ?? 0,
+      icon: <FiPhoneCall />,
+      color: styles.blue,
+    },
+    {
+      title: "Pending Follow-ups",
+      value: summary?.pending_follow_ups ?? 0,
+      icon: <LuClipboardCheck />,
+      color: styles.green,
+    },
+    {
+      title: "Pending Quotations",
+      value: summary?.pending_quotations ?? 0,
+      icon: <CiClock2 />,
+      color: styles.yellow,
+    },
+    {
+      title: "Meetings Scheduled",
+      value: summary?.meetings_scheduled ?? 0,
+      icon: <LuCalendarClock />,
+      color: styles.purple,
+    },
+    {
+      title: "Overdue Tasks",
+      value: summary?.overdue_tasks ?? 0,
+      icon: <AiOutlineExclamationCircle />,
+      color: styles.red,
+    },
+  ];
+
   return (
     <section>
       <div className={styles.pageHeader}>
         <div>
           <p className={styles.welcomeText}>Welcome,</p>
-          <h2>Janak Singh</h2>
+          <h2>{user?.name || "User"}</h2>
         </div>
 
         <div className={styles.summarySection}>
@@ -36,50 +66,17 @@ const AccountSummary = () => {
           </div>
 
           <div className={`${styles.summaryGrid} stats-grid`}>
-            {/* <!-- Card 1 --> */}
-            <div className={`${styles.summaryCard} ${styles.blue} `}>
-              <div className={styles.cardIcon}>
-                <FiPhoneCall />
-              </div>
-              <p>Total Leads</p>
-              <h3>4,250</h3>
-            </div>
+            {summaryCards.map((card, index) => (
+              <div
+                key={index}
+                className={`${styles.summaryCard} ${card.color}`}
+              >
+                <div className={styles.cardIcon}>{card.icon}</div>
 
-            {/* <!-- Card 2 --> */}
-            <div className={`${styles.summaryCard} ${styles.green}  `}>
-              <div className={styles.cardIcon}>
-                <LuClipboardCheck />
+                <p>{card.title}</p>
+                <h3>{card.value}</h3>
               </div>
-              <p>Pending Follow-ups</p>
-              <h3>145</h3>
-            </div>
-
-            {/* <!-- Card 3 --> */}
-            <div className={`${styles.summaryCard} ${styles.yellow} `}>
-              <div className={styles.cardIcon}>
-                <CiClock2 />
-              </div>
-              <p>Pending Quotations</p>
-              <h3>35</h3>
-            </div>
-
-            {/* <!-- Card 4 --> */}
-            <div className={`${styles.summaryCard} ${styles.purple} `}>
-              <div className={styles.cardIcon}>
-                <LuCalendarClock />
-              </div>
-              <p>Meetings Scheduled</p>
-              <h3>0</h3>
-            </div>
-
-            {/* <!-- Card 5 --> */}
-            <div className={`${styles.summaryCard} ${styles.red} `}>
-              <div className={styles.cardIcon}>
-                <AiOutlineExclamationCircle />
-              </div>
-              <p>Overdue Tasks</p>
-              <h3>5</h3>
-            </div>
+            ))}
           </div>
         </div>
       </div>
