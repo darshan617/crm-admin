@@ -5,6 +5,7 @@ import { CiSearch } from "react-icons/ci";
 import { LuCalendarDays } from "react-icons/lu";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import styles from "@/components/leads/all-leads/AllLeads.module.css";
+import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
 
 /* ---------------- DATA ---------------- */
 
@@ -61,7 +62,7 @@ const TABLE_HEADINGS = [
   { label: "Customer Name", className: "" },
   { label: "Contact Information", className: "" },
   { label: "Status", className: styles.statusCol },
-  { label: "Plan", className: "" },
+  { label: "Follow Up", className: "" },
 ];
 
 const LEADS = [
@@ -178,6 +179,8 @@ const TOTAL_CUSTOMERS = 124;
 export default function AllLeads() {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  const { data: allLeadsListData } = useGetAllLeadsQuery();
 
   const toggleOne = (id) => {
     setSelectedIds((prev) =>
@@ -369,7 +372,7 @@ export default function AllLeads() {
           </thead>
 
           <tbody className="table-body">
-            {LEADS.map((lead) => (
+            {allLeadsListData?.data?.leads?.map((lead) => (
               <tr
                 className={`${styles.crmLeadRow} crm-lead-row table-row`}
                 key={lead.id}
@@ -378,34 +381,36 @@ export default function AllLeads() {
                 <td className="select-col">
                   <input
                     type="checkbox"
-                    checked={selectedIds.includes(lead.id)}
-                    onChange={() => toggleOne(lead.id)}
+                    checked={selectedIds.includes(lead?.id)}
+                    onChange={() => toggleOne(lead?.id)}
                   />
                 </td>
 
                 {/* Customer */}
                 <td className={styles.customer}>
-                  <div className={`avatar ${lead.avatarColor}`}>
-                    {lead.company.charAt(0)}
+                  <div className={`avatar ${lead?.avatarColor}`}>
+                    {lead?.company_name?.charAt(0) || "-"}
                   </div>
 
                   <div>
-                    <h5>{lead.company}</h5>
-                    <p>{lead.person}</p>
+                    <h5>{lead?.company_name || "-"}</h5>
+                    <p>{lead?.name || "-"}</p>
                   </div>
                 </td>
 
                 {/* Contact */}
                 <td className={styles.contactInfo}>
                   <div>
-                    <h5>{lead.email}</h5>
-                    <p>{lead.phone}</p>
+                    <h5>{lead?.email || "-"}</h5>
+                    <p>{lead?.mobile || "-"}</p>
                   </div>
                 </td>
 
                 {/* Status */}
                 <td className={styles.statusCol}>
-                  <span className={`badge ${lead.badge}`}>{lead.status}</span>
+                  <span className={`badge ${lead?.badge}`}>
+                    {lead?.lead_status || "-"}
+                  </span>
                 </td>
 
                 {/* Plan / Assigned User */}
@@ -414,20 +419,20 @@ export default function AllLeads() {
                     <div className="user-info">
                       <div className={styles.avatarFlex}>
                         <div className="mini-avatar primary">
-                          {lead.assignedTo.charAt(0)}
+                          {lead?.assigned_to?.charAt(0) || "-"}
                         </div>
 
-                        <h5>{lead.assignedTo}</h5>
+                        <h5>{lead?.assigned_to || "-"}</h5>
                       </div>
 
                       <small>
                         Follow up on&nbsp;
-                        <strong>{lead.followUp}</strong>
+                        <strong>{lead?.follow_up_date || "-"}</strong>
                       </small>
                     </div>
 
                     <div className="actions">
-                      <Link href={lead.href} className="action-btn">
+                      <Link href={lead?.href || "#"} className="action-btn">
                         <HiChevronRight size={16} />
                       </Link>
                     </div>
@@ -439,7 +444,7 @@ export default function AllLeads() {
         </table>
 
         {/* Pagination */}
-        <div className={styles.tablePagination}>
+        {/* <div className={styles.tablePagination}>
           <a href="#" className={styles.pageBtn}>
             <HiChevronLeft size={16} />
           </a>
@@ -457,7 +462,7 @@ export default function AllLeads() {
           <a href="#" className={styles.pageBtn}>
             <HiChevronRight size={16} />
           </a>
-        </div>
+        </div> */}
       </div>
     </section>
   );
