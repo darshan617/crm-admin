@@ -3,8 +3,10 @@ import styles from "@/components/dashboard/leads/Leads.module.css";
 import { LuFileDown } from "react-icons/lu";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
+import { useGetDdDataQuery } from "@/redux/apis/leadsApi";
 
 const Leads = () => {
+  const { data: apiDropdownData } = useGetDdDataQuery();
   const [formData, setFormData] = useState({
     customer_detail: {
       salutation: "",
@@ -227,9 +229,11 @@ const Leads = () => {
                     <option value="" disabled>
                       Title
                     </option>
-                    <option value="Mr">Mr</option>
-                    <option value="Mrs">Mrs</option>
-                    <option value="Ms">Ms</option>
+                    {apiDropdownData?.data?.options?.salutation?.map(
+                      (item, idx) => {
+                        return <option value={item}>{item}</option>;
+                      },
+                    )}
                   </select>
                   <input
                     type="text"
@@ -242,13 +246,29 @@ const Leads = () => {
 
               {/* Designation */}
               <div className="form-group">
-                <label>Designation</label>
+                {/* <label>Designation</label>
                 <input
                   type="text"
                   value={formData?.customer_detail?.designation}
                   name="designation"
                   onChange={(e) => handleFormChange(e, "customer_detail")}
-                />
+                /> */}
+                <select
+                  aria-label="Designation"
+                  type="text"
+                  value={formData?.customer_detail?.designation}
+                  name="designation"
+                  onChange={(e) => handleFormChange(e, "customer_detail")}
+                >
+                  <option value="" disabled>
+                    Designation
+                  </option>
+                  {apiDropdownData?.data?.options?.designation?.map(
+                    (item, idx) => {
+                      return <option value={item}>{item}</option>;
+                    },
+                  )}
+                </select>
               </div>
 
               {/* Email */}
@@ -637,7 +657,6 @@ const Leads = () => {
                     {/* <button type="button" className={styles.availabilityButton}>
                       Check Availability
                     </button> */}
-                    <span>ss</span>
                   </div>
 
                   <div className={styles.domainField}>
@@ -649,9 +668,11 @@ const Leads = () => {
                         onChange={(e) => handleFormChange(e, "domain")}
                       >
                         <option value="">Select Period</option>
-                        <option value="Yearly">Yearly</option>
-                        <option value="2 Yearly">2 Yearly</option>
-                        <option value="3 Yearly">3 Yearly</option>
+                        {apiDropdownData?.data?.options?.domain_period?.map(
+                          (item, idx) => {
+                            return <option value={item}>{item}</option>;
+                          },
+                        )}
                       </select>
                     </div>
                   </div>
@@ -758,9 +779,13 @@ const Leads = () => {
                         }
                       >
                         <option value="">Select Provider</option>
-                        <option value="2">Google workspace</option>
-                        <option value="3">Microsoft 365</option>
-                        <option value="4">Tizzy Mail</option>
+                        {apiDropdownData?.data?.options?.providers?.map(
+                          (item, idx) => {
+                            return (
+                              <option value={item?.id}>{item?.name}</option>
+                            );
+                          },
+                        )}
                       </select>
                     </div>
 
@@ -777,12 +802,15 @@ const Leads = () => {
                         }
                       >
                         <option value="">Select Service</option>
-                        <option value="2">Tizzy Cloud Email</option>
-                        <option value="3">Tizzy Cloud Hosting</option>
-                        <option value="4">Google workspace</option>
-                        <option value="5">Migration</option>
-                        <option value="6">Backup &amp; Restore</option>
-                        <option value="7">Microsoft 365</option>
+                        {Object.values(
+                          apiDropdownData?.data?.options?.plans || {},
+                        )
+                          .flat()
+                          .map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
                       </select>
                     </div>
 
@@ -973,10 +1001,32 @@ const Leads = () => {
                     onChange={(e) => handleFormChange(e, "lead_specification")}
                   >
                     <option value="">Select Priority</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Hot">Hot</option>
-                    <option value="Warm">Warm</option>
-                    <option value="Cold">Cold</option>
+                    {apiDropdownData?.data?.options?.lead_priority?.map(
+                      (item, idx) => {
+                        return <option value={item}>{item}</option>;
+                      },
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* lead bifurcation */}
+              <div className={`${styles.formGroup} form-group`}>
+                <label>Lead Bifurcation</label>
+                <div className={styles.selectWrap}>
+                  <select
+                    name="lead_bifurcation"
+                    value={
+                      formData?.lead_specification?.asslead_bifurcationigned_to
+                    }
+                    onChange={(e) => handleFormChange(e, "lead_specification")}
+                  >
+                    <option value="">Select Bifurcation</option>
+                    {apiDropdownData?.data?.options?.lead_bifurcation?.map(
+                      (item, idx) => {
+                        return <option value={item}>{item}</option>;
+                      },
+                    )}
                   </select>
                 </div>
               </div>
@@ -991,11 +1041,11 @@ const Leads = () => {
                     onChange={(e) => handleFormChange(e, "lead_specification")}
                   >
                     <option value="">Select Status</option>
-                    <option value="New">New</option>
-                    <option value="Contacted">Contacted</option>
-                    <option value="Qualified">Qualified</option>
-                    <option value="Converted">Converted</option>
-                    <option value="Closed">Closed</option>
+                    {apiDropdownData?.data?.options?.lead_status?.map(
+                      (item, idx) => {
+                        return <option value={item}>{item}</option>;
+                      },
+                    )}
                   </select>
                 </div>
               </div>
@@ -1010,11 +1060,11 @@ const Leads = () => {
                     onChange={(e) => handleFormChange(e, "lead_specification")}
                   >
                     <option value="">Select Source</option>
-                    <option value="Tele Caller">Tele Caller</option>
-                    <option value="Website">Website</option>
-                    <option value="Reference">Reference</option>
-                    <option value="Social Media">Social Media</option>
-                    <option value="Advertisement">Advertisement</option>
+                    {apiDropdownData?.data?.options?.lead_source?.map(
+                      (item, idx) => {
+                        return <option value={item}>{item}</option>;
+                      },
+                    )}
                   </select>
                 </div>
               </div>
@@ -1029,7 +1079,11 @@ const Leads = () => {
                     onChange={(e) => handleFormChange(e, "lead_specification")}
                   >
                     <option value="">Select Employee</option>
-                    <option value="Supriya Ss">Supriya Ss</option>
+                    {apiDropdownData?.data?.options?.assignees?.map(
+                      (item, idx) => {
+                        return <option value={item}>{item}</option>;
+                      },
+                    )}
                   </select>
                 </div>
               </div>

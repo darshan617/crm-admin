@@ -9,7 +9,14 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["leads"],
     }),
+    getDdData: builder.query({
+      query: () => ({
+        url: "leads/create",
+        method: "GET",
+      }),
+      providesTags: ["leads"],
+    }),
   }),
 });
 
-export const { useGetAllLeadsQuery } = leadsApi;
+export const { useGetAllLeadsQuery, useGetDdDataQuery } = leadsApi;
