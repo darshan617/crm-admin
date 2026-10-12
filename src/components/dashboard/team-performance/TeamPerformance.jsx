@@ -10,7 +10,7 @@ import styles from "@/components/dashboard/team-performance/TeamPerformance.modu
 
 const TeamPerformance = ({ team }) => {
   const quickActions = [
-    { href: "/add-new-leads", icon: IoIosAdd, label: "Add Leads" },
+    { href: "/leads/add-new-leads", icon: IoIosAdd, label: "Add Leads" },
     {
       href: "/upload-leads",
       icon: BsFileEarmarkArrowUp,

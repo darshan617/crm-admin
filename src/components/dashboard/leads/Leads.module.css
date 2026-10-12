@@ -43,6 +43,349 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.nameInputGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.nameInputGroup select {
+  flex: 0 0 88px;
+  min-width: 0;
+}
+
+.nameInputGroup input {
+  flex: 1;
+  min-width: 0;
+}
+
+.businessTypeCard {
+  width: 100%;
+  margin: 24px 0;
+  border: 1px solid #dfe3e8;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.businessTypeTitle {
+  padding: 18px 20px 14px;
+  font-size: var(--font-size-18px);
+  font-weight: 600;
+  color: #2f3a45;
+  line-height: 1.2;
+}
+
+.businessTypeOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0 20px 18px;
+}
+
+.businessTypeOption {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+  cursor: pointer;
+  color: #1b2430;
+  font-size: var(--font-size-14px);
+  line-height: 1.2;
+  user-select: none;
+}
+
+.businessTypeOption input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radioCircle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #b9c1ca;
+  border-radius: 50%;
+  background: #fff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.businessTypeOption input:checked + .radioCircle {
+  border-color: #0d74d6;
+  box-shadow: inset 0 0 0 4px #fff;
+  background: #0d74d6;
+}
+
+.optionLabel {
+  display: inline-block;
+}
+
+.existingServiceWrapper {
+  width: 100%;
+  margin-bottom: 26px;
+}
+
+.serviceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.serviceHeader h3 {
+  margin: 0;
+}
+
+.addServiceBtn {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-size: var(--font-size-14px);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.serviceHelp {
+  margin: 0 0 14px;
+  color: #5f6976;
+  font-size: var(--font-size-14px);
+  line-height: 1.45;
+}
+
+.servicePanel {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #b9d8ff;
+  border-radius: 8px;
+  padding: 18px 18px 10px;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.servicePanelTitle {
+  margin: 0 0 18px;
+  color: #1e2a36;
+  font-size: var(--font-size-18px);
+  font-weight: 700;
+}
+
+.serviceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 30px;
+}
+
+.serviceField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.serviceField label {
+  color: #404b58;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+}
+
+.serviceField input,
+.serviceField select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 6px;
+  background: #fff;
+  color: #313a46;
+  font-size: var(--font-size-14px);
+  box-sizing: border-box;
+}
+
+.serviceField input::placeholder,
+.serviceField select {
+  color: #8a909a;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.selectWrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 38px;
+  background: linear-gradient(90deg, #fff 0%, #fff 80%, transparent 100%);
+}
+
+.selectWrap::after {
+  content: "▾";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #4b5563;
+  font-size: var(--font-size-14px);
+  pointer-events: none;
+}
+
+.dateWrap {
+  position: relative;
+}
+
+.dateWrap input {
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.dateWrap input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 1;
+}
+
+.domainSection {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.domainTitle {
+  margin: 0 0 12px;
+  color: #1f2a36;
+  font-size: var(--font-size-18px);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.domainSelectionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 28px;
+  align-items: start;
+}
+
+.domainField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.domainField label {
+  color: #404b58;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+}
+
+.domainField input,
+.domainSelectWrap select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 6px;
+  background: #fff;
+  color: #1b2430;
+  font-size: var(--font-size-14px);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.domainSelectWrap {
+  position: relative;
+  width: 100%;
+}
+
+.domainSelectWrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 38px;
+  border-radius: 8px;
+}
+
+.domainField:first-child .domainSelectWrap select {
+  border-color: #0d74d6;
+}
+
+.domainSelectWrap::after {
+  content: "▾";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0d74d6;
+  font-size: var(--font-size-14px);
+  pointer-events: none;
+}
+
+.periodSelectWrap {
+  width: 100%;
+}
+
+.periodSelectWrap select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b2430;
+  font-size: var(--font-size-14px);
+  box-sizing: border-box;
+}
+
+.availabilityButton {
+  justify-self: start;
+  align-self: center;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: var(--font-size-14px);
+  cursor: pointer;
+}
+
+.availabilityButton:hover {
+  text-decoration: underline;
+}
+
+.domainField .dateWrap {
+  position: relative;
+}
+
+.domainField .dateWrap input {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 40px 10px 12px;
+  border: 1px solid #dfe3e8;
+  border-radius: 6px;
+  background: #fff;
+  color: #1b2430;
+  font-size: var(--font-size-14px);
+  box-sizing: border-box;
+}
+
+.addContactWrapper {
+  box-shadow: 0px 0px 5px #0d75d64f;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
 .sideCard {
   width: 100%;
   padding: 18px 16px 16px;
@@ -155,6 +498,7 @@
   width: 100%;
   height: 100px;
   margin-bottom: 20px;
+  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -162,8 +506,19 @@
   background: #f5f8fc;
   border: 1px solid #b9d8ff;
   border-radius: 6px;
+  color: inherit;
+  font: inherit;
   box-sizing: border-box;
   cursor: pointer;
+}
+
+.uploadBox:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.hiddenFileInput {
+  display: none;
 }
 
 .uploadIcon {
@@ -192,8 +547,21 @@
   font-size: var(--font-size-14px);
 }
 
-.uploadedStatus .file-item button {
-  color: #f0446f;
+.uploadedStatus .fileItem button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fileName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .uploaded {
@@ -201,22 +569,22 @@
   color: #f0446f;
 }
 .uploadedStatus {
-    margin-top: 16px;
+  margin-top: 16px;
 }
 
 .progressBar {
-    width: 100%;
-    height: 2px;
-    margin-top: -2px;
-    background: #E4E8ED;
-    overflow: hidden;
+  width: 100%;
+  height: 2px;
+  margin-top: -2px;
+  background: #e4e8ed;
+  overflow: hidden;
 }
 
 .progressBar span {
-    display: block;
-    width: 82%;
-    height: 100%;
-    background: var(--primary);
+  display: block;
+  width: 82%;
+  height: 100%;
+  background: var(--primary);
 }
 
 .contactModalTitle {
@@ -229,17 +597,16 @@
   line-height: normal;
 }
 
-
 .leadDocCard {
   padding: 18px;
-  border: 1px solid #D7E6F8;
+  border: 1px solid #d7e6f8;
   border-radius: 12px;
-  background: linear-gradient(180deg, #F8FBFF 0%, #FFFFFF 70%);
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 70%);
 }
 
 .leadDocCard .docHelp {
   margin: 0;
-  color: #5B6472;
+  color: #5b6472;
   line-height: 1.45;
 }
 
@@ -251,8 +618,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #F5F8FC;
-  border: 1px solid #B9D8FF;
+  background: #f5f8fc;
+  border: 1px solid #b9d8ff;
   border-radius: 6px;
   box-sizing: border-box;
   cursor: pointer;
@@ -277,10 +644,14 @@
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: #6B7280;
+  color: #6b7280;
 }
 
 @media (max-width: 768px) {
+  .domainSelectionGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .commonForm {
     padding: 20px;
   }

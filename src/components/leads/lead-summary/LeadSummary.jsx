@@ -28,7 +28,7 @@ const LeadSummary = () => {
           </a>
 
           <a
-            href="/add-new-leads"
+            href="/leads/add-new-leads"
             className={`${styles.crmActionBtn} ${styles.active}`}
           >
             <FiUserPlus />
@@ -41,7 +41,7 @@ const LeadSummary = () => {
           {/* <!-- Card 1 --> */}
           <div className={styles.summaryCard}>
             <div className={`${styles.cardIcon} ${styles.blue}`}>
-              <FiUsers size={24}/>
+              <FiUsers size={24} />
             </div>
 
             <div className={styles.statContent}>
@@ -53,7 +53,7 @@ const LeadSummary = () => {
           {/* <!-- Card 2 --> */}
           <div className={styles.summaryCard}>
             <div className={`${styles.cardIcon} ${styles.green}`}>
-              <LuUserRoundPlus  size={24}/>
+              <LuUserRoundPlus size={24} />
             </div>
 
             <div className={styles.statContent}>
