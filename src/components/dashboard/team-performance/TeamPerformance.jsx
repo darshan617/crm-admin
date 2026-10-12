@@ -50,7 +50,11 @@ const TeamPerformance = ({ team }) => {
     <>
       <div className={styles.newQuickActions}>
         {quickActions.map(({ href, icon: Icon, label }) => (
-          <Link key={label} href={href} className={styles.quickBtn}>
+          <Link
+            key={label}
+            href={href}
+            className={styles.quickBtn}
+          >
             <Icon />
             <span>{label}</span>
           </Link>
@@ -104,10 +108,11 @@ const TeamPerformance = ({ team }) => {
                   </tr>
                 ))}
               </tbody>
-              <a href="/reports" className={styles.viewAll}>
-                View All
-              </a>
             </table>
+
+            <Link href="/reports" className={styles.viewAll}>
+              View All
+            </Link>
           </div>
         </div>
       </section>
