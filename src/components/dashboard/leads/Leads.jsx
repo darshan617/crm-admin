@@ -1,8 +1,8 @@
 import React, { useRef, useState } from "react";
 import styles from "@/components/dashboard/leads/Leads.module.css";
 import { LuFileDown } from "react-icons/lu";
-import { FaRegTrashAlt } from "react-icons/fa";
 import { IoMdArrowBack } from "react-icons/io";
+import { FaRegTrashAlt } from "react-icons/fa";
 import { useGetDdDataQuery } from "@/redux/apis/leadsApi";
 
 const Leads = () => {
