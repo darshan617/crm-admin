@@ -1,0 +1,128 @@
+.crmActions {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+}
+
+.crmActionBtn {
+    width: 154px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: #fff;
+    border: 1px solid #cfd5dc;
+    border-radius: 6px;
+    color: #333;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    transition: all 0.25s ease;
+}
+
+.crmActionBtn.active {
+    background: #0865b5;
+    border-color: #0865b5;
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(8, 101, 181, 0.22);
+}
+
+.assignedUser {
+    display: flex;
+    /* grid-template-columns: 28px 1fr 32px; */
+    align-items: center;
+    column-gap: 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid #e7e9eb;
+    padding-left: 15px;
+    justify-content: space-between;
+}
+
+.avatarFlex {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+}
+
+.orderId span {
+    display: inline-block;
+    background: #E7E9EB;
+    color: #374151;
+    padding: 2px 12px;
+    border-radius: 5px;
+    font-size: var(--font-size-14px);
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.crmLeadTabs {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    padding-left: 20px;
+    margin-bottom: 0;
+}
+
+.crmLeadTabs a {
+    display: flex;
+    min-width: 140px;
+    height: 50px;
+    /* border: 0; */
+    border-radius: 6px 6px 0 0;
+    border-top: 3px solid #0865b500;
+    border-right: 0;
+    border-left: 0;
+    border-bottom: 0;
+    background: #f8f9fb;
+    color: #666;
+    font-size: var(--font-size-14px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    align-items: center;
+    justify-content: center;
+}
+
+.crmLeadTabs a.active {
+    background: #ffffff;
+    color: #303846;
+    border-top: 3px solid #0865b5;
+}
+
+.partnerTabsWrap {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 18px;
+}
+.partnerTabs {
+    display: inline-flex;
+    align-items: center;
+    background: #E6F1FD;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.partnerTab {
+    border: none;
+    background: transparent;
+    color: #5B6472;
+    font-size: var(--font-size-14px);
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+.partnerTab.active {
+    background: #FFFFFF;
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+}

@@ -551,11 +551,220 @@ table {
 }
 
 .credit-modal-box h2 {
-  color: var(--color-grey-500-dark-text, #2C3139);
+  color: var(--color-grey-500-dark-text, #2c3139);
   text-align: center;
   font-family: "Baloo Bhai 2";
   font-size: 24px;
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+}
+
+.crm-quo-table .table-head,
+.crm-quo-table .crm-quo-row {
+  grid-template-columns:
+    minmax(120px, 0.8fr) minmax(200px, 1.3fr) minmax(240px, 1.7fr)
+    minmax(100px, 0.6fr) minmax(200px, 1.2fr);
+  align-items: center;
+}
+
+.crm-quo-table .customer,
+.es-quo-table .customer,
+.crm-quo-table .plan-info,
+.es-quo-table .plan-info {
+  align-items: flex-start;
+}
+.customer,
+.plan-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.crm-quo-table .plan-icon,
+.es-quo-table .plan-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  flex: 0 0 40px;
+  padding: 8px;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.plan-icon {
+  width: 40px;
+  padding: 8px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.badge {
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding: 0 6px;
+  border-radius: 3px;
+}
+
+.pending,
+.medium {
+  background: #f9bf59;
+  color: #fff;
+}
+
+.badge.active,
+.approved,
+.paid,
+.low,
+.resolved {
+  background: #02bc9c;
+  color: #fff;
+}
+
+.common-table-header.crm-quo-header,
+.common-table-header.es-quo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.common-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  margin-bottom: 15px;
+}
+.common-table-header p {
+  margin: 6px 0 0;
+  font-size: var(--font-size-14px);
+  color: #6b7280;
+}
+
+.crm-quo-header .table-search,
+.es-quo-header .table-search,
+.crm-lead-header .table-search {
+  flex: 0 0 280px;
+  width: 280px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.table-search {
+  width: 300px;
+  min-width: 220px;
+  max-width: 100%;
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  padding: 0 16px;
+  gap: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.page-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+
+#filterPanel .filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 20px;
+  align-items: start;
+}
+#filterPanel .date-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.es-quo-table .table-head,
+.es-quo-table .es-quo-row {
+  grid-template-columns:
+    minmax(120px, 0.8fr) minmax(190px, 1.2fr) minmax(240px, 1.6fr)
+    96px 96px minmax(190px, 1.1fr);
+  align-items: center;
+}
+.action-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4444447d;
+  transition: 0.3s ease;
+}
+
+.action-btn svg {
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  stroke-width: 1.5;
+  color: inherit;
+  transition: 0.3s ease;
+}
+
+.action-btn:hover {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.action-btn:hover svg {
+  color: #fff;
 }
