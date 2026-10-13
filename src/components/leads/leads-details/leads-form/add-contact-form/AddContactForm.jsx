@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "@/components/leads/add-contact-form/AddContactForm.module.css";
+import styles from "@/components/leads/leads-details/leads-form/add-contact-form/AddContactForm.module.css";
 
 const AddContactForm = () => {
   return (

@@ -94,7 +94,7 @@
   min-width: 220px;
   max-width: 100%;
   height: 40px;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #e5e7eb;
   border-radius: 999px;
   background: #fff;
   display: flex;
@@ -306,11 +306,23 @@
 .pageBtn:hover {
   border-color: var(--primary);
   color: var(--primary);
-  background: var(--primary-light)
+  background: var(--primary-light);
 }
 .pageBtn.active {
   background: var(--primary);
   border-color: var(--primary);
-  color: var(--white)
+  color: var(--white);
 }
 
+.viewLeadBtn {
+  cursor: pointer;
+  border: 1px solid #919191;
+  border-radius: 50%;
+  padding: 3px;
+}
+.viewLeadBtn:hover {
+  border: 1px solid var(--primary);
+}
+.viewLeadBtn:hover svg {
+  color: var(--primary);
+}

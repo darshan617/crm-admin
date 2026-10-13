@@ -18,11 +18,11 @@ import {
   selectIsPopupVisble,
   setIsPopupVisible,
 } from "@/redux/slices/popupSlice";
-import EditDetailForm from "../edit-detail-form/EditDetailForm";
-import AddContactForm from "../add-contact-form/AddContactForm";
-import AddCurrentServiceForm from "../add-current-service-form/AddCurrentServiceForm";
-import AddOurService from "../add-our-service/AddOurService";
-import AddDocumentForm from "../add-document-form/AddDocumentForm";
+import AddCurrentServiceForm from "./leads-form/add-current-service-form/AddCurrentServiceForm";
+import AddContactForm from "./leads-form/add-contact-form/AddContactForm";
+import AddOurService from "./leads-form/add-our-service/AddOurService";
+import AddDocumentForm from "./leads-form/add-document-form/AddDocumentForm";
+import EditDetailForm from "./leads-form/edit-detail-form/EditDetailForm";
 
 const contacts = [1, 2, 3].map((n) => ({
   title: `Contact Person ${n}`,
@@ -481,9 +481,10 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>DOCUMENTS</h3>
 
-                  <a onClick={() =>
-                      dispatch(setIsPopupVisible("add-document"))
-                    } className={styles.addCreditBtn}>
+                  <a
+                    onClick={() => dispatch(setIsPopupVisible("add-document"))}
+                    className={styles.addCreditBtn}
+                  >
                     <GoPlus />
                     Add Document
                   </a>
