@@ -435,7 +435,9 @@ export default function AllLeads() {
 
                     <div className="actions">
                       <button
-                        onClick={() => router?.push(`/leads/leads-details`)}
+                        onClick={() =>
+                          router?.push(`/leads/leads-details/${lead?.id}`)
+                        }
                         className={styles.viewLeadBtn}
                       >
                         <HiChevronRight size={16} />
