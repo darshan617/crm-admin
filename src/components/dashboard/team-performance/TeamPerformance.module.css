@@ -300,3 +300,154 @@
   text-decoration: none;
   font-weight: 600;
 }
+
+/* ---------- Large laptops (≤1560px) ---------- */
+@media (max-width: 1560px) {
+  .commonTableCard {
+    padding: 16px;
+  }
+  .newQuickActions {
+    gap: 16px;
+  }
+  .quickBtn {
+    padding: 8px 18px;
+  }
+  .tableRow {
+    padding: 12px 18px;
+    gap: 12px;
+  }
+}
+
+/* ---------- Small laptops (≤1199px) ---------- */
+@media (max-width: 1199px) {
+  .teamPrRow {
+    grid-template-columns: 5fr 2fr 2fr 2fr 2fr;
+  }
+  .teamPrRow::before {
+    font-size: 80px;
+  }
+  .salesFilter button {
+    padding: 7px 14px;
+  }
+}
+
+/* ---------- Tablets (≤991px) ---------- */
+@media (max-width: 991px) {
+  .newQuickActions {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .commonTableHeader {
+    flex-wrap: wrap;
+  }
+  .tableRow {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .teamPrRow {
+    grid-template-columns: 4fr 2fr 2fr 2fr 2fr;
+  }
+  .teamPrRow::before {
+    font-size: 70px;
+  }
+  .teamPrRow td:nth-child(2) {
+    padding: 0 6px;
+  }
+}
+
+/* ---------- Large phones (≤767px) ---------- */
+@media (max-width: 767px) {
+  .newQuickActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .quickBtn {
+    padding: 10px 12px;
+  }
+
+  .commonTableCard {
+    padding: 14px;
+  }
+  .commonTableHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .salesFilter {
+    width: 100%;
+    overflow-x: auto;
+    justify-content: space-between;
+    scrollbar-width: none;
+  }
+  .salesFilter::-webkit-scrollbar {
+    display: none;
+  }
+  .salesFilter button {
+    flex: 1;
+    white-space: nowrap;
+    padding: 7px 10px;
+    font-size: var(--font-size-12px, 12px);
+  }
+
+  /* name on its own line, 4 stats underneath */
+  .teamPrRow {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    row-gap: 12px;
+    column-gap: 8px;
+    padding: 14px;
+  }
+  .teamPrRow .customer {
+    grid-column: 1 / -1;
+  }
+  .teamPrRow::before {
+    font-size: 60px;
+    top: -5%;
+  }
+
+  /* grey column doesn't work in the stacked layout */
+  .teamPrRow td:nth-child(2) {
+    background: transparent;
+    padding: 0;
+  }
+  .teamPrRow td:nth-child(2)::before {
+    display: none;
+  }
+
+  .teamNum small {
+    font-size: 11px;
+  }
+  .teamNum strong {
+    font-size: var(--font-size-16px, 16px);
+  }
+}
+
+/* ---------- Small phones (≤575px) ---------- */
+@media (max-width: 575px) {
+  .commonTableCard {
+    padding: 12px;
+  }
+  .commonTableHeader h3 {
+    font-size: var(--font-size-16px, 16px);
+  }
+  .teamPrRow {
+    padding: 12px;
+  }
+  .teamPrRow::before {
+    font-size: 48px;
+  }
+  .avatar {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* ---------- Extra small phones (≤400px) ---------- */
+@media (max-width: 400px) {
+  .newQuickActions {
+    grid-template-columns: 1fr;
+  }
+  .teamPrRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
