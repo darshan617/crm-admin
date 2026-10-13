@@ -3,9 +3,16 @@ import styles from "@/components/dashboard/leads/Leads.module.css";
 import { LuFileDown } from "react-icons/lu";
 import { IoMdArrowBack } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { useGetDdDataQuery } from "@/redux/apis/leadsApi";
+import {
+  useCreateLeadMutation,
+  useGetDdDataQuery,
+} from "@/redux/apis/leadsApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useRouter } from "next/router";
 
 const Leads = () => {
+  const { showToast } = useToast();
+  const router = useRouter();
   const { data: apiDropdownData } = useGetDdDataQuery();
   const [formData, setFormData] = useState({
     customer_detail: {
@@ -80,6 +87,8 @@ const Leads = () => {
     documents: [],
   });
   console.log(formData);
+
+  const [createLead, { isLoading: isCreatingLead }] = useCreateLeadMutation();
 
   const documentInputRef = useRef(null);
 
@@ -186,6 +195,135 @@ const Leads = () => {
           },
         ],
       }));
+    }
+  };
+
+  const handleCreateLead = async () => {
+    try {
+      const formBody = new FormData();
+      formBody.append(
+        "customer_detail",
+        JSON.stringify(formData.customer_detail),
+      );
+
+      formBody.append(
+        "address_information",
+        JSON.stringify(formData.address_information),
+      );
+
+      formBody.append("domain", JSON.stringify(formData.domain));
+
+      formBody.append(
+        "current_service_info",
+        JSON.stringify(formData.current_service_info),
+      );
+
+      formBody.append(
+        "our_service_plan_detail",
+        JSON.stringify(formData.our_service_plan_detail),
+      );
+
+      formBody.append(
+        "additional_contact",
+        JSON.stringify(formData.additional_contact),
+      );
+
+      formBody.append(
+        "lead_specification",
+        JSON.stringify(formData.lead_specification),
+      );
+
+      formBody.append(
+        "follow_up_detail",
+        JSON.stringify(formData.follow_up_detail),
+      );
+
+      formData.documents.forEach((file) => {
+        formBody.append("attachments[]", file);
+      });
+
+      const res = await createLead({
+        body: formBody,
+      });
+      console.log(res);
+      if (res?.data?.success) {
+        showToast(res?.data?.message, "success");
+        router?.push("/leads");
+        setFormData({
+          customer_detail: {
+            salutation: "",
+            name: "",
+            designation: "",
+            email: "",
+            mobile_code: "91",
+            mobile: "",
+            company_name: "",
+            industry: "",
+            no_of_employees: "",
+            gstin: "",
+            business_type: "new",
+          },
+          address_information: {
+            mailing_address: "",
+            country: "India",
+            state: "Maharashtra",
+            city: "",
+            pincode: "",
+          },
+          domain: {
+            domain_type: "no-domain",
+            domain: "",
+            domain_period: "Yearly",
+            domain_rate: null,
+            sac: "",
+            domain_start: "",
+            domain_end: "",
+            domain_renewal_date: "",
+          },
+          current_service_info: [
+            {
+              domain: "",
+              provider_id: "",
+              plan_id: "",
+              quantity: "",
+              rate: "",
+              renewal_date: "",
+            },
+          ],
+          our_service_plan_detail: [
+            {
+              provider_id: null,
+              plan_id: null,
+              quote_period: "",
+              sku: "",
+              quantity: null,
+              rate: "",
+            },
+          ],
+          additional_contact: [
+            {
+              name: "",
+              designation: "",
+              email: "",
+              mobile: "",
+            },
+          ],
+          lead_specification: {
+            lead_priority: "Normal",
+            lead_status: "New",
+            lead_bifurcation: "",
+            lead_source: "Tele Caller",
+            assigned_to: "Supriya Ss",
+          },
+          follow_up_detail: {
+            follow_up_date: "",
+            follow_up_note: "",
+          },
+          documents: [],
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -588,7 +726,7 @@ const Leads = () => {
             <div className={styles.domainSection}>
               <div className={styles.domainTitle}>Domain</div>
 
-              {formData.domain.domain_type === "already" ? (
+              {formData.domain.domain_type === "existing" ? (
                 <div className={styles.domainSelectionGrid}>
                   <div className={styles.domainField}>
                     <label>Domain option</label>
@@ -599,8 +737,8 @@ const Leads = () => {
                         onChange={(e) => handleFormChange(e, "domain")}
                       >
                         <option value="no-domain">No domain</option>
-                        <option value="already">Already have domain</option>
-                        <option value="need-new">Need new domain</option>
+                        <option value="existing">Already have domain</option>
+                        <option value="new">Need new domain</option>
                       </select>
                     </div>
                   </div>
@@ -628,7 +766,7 @@ const Leads = () => {
                     </div>
                   </div>
                 </div>
-              ) : formData.domain.domain_type === "need-new" ? (
+              ) : formData.domain.domain_type === "new" ? (
                 <div className={styles.domainSelectionGrid}>
                   <div className={styles.domainField}>
                     <label>Domain option</label>
@@ -639,8 +777,8 @@ const Leads = () => {
                         onChange={(e) => handleFormChange(e, "domain")}
                       >
                         <option value="no-domain">No domain</option>
-                        <option value="already">Already have domain</option>
-                        <option value="need-new">Need new domain</option>
+                        <option value="existing">Already have domain</option>
+                        <option value="new">Need new domain</option>
                       </select>
                     </div>
                   </div>
@@ -731,8 +869,8 @@ const Leads = () => {
                       onChange={(e) => handleFormChange(e, "domain")}
                     >
                       <option value="no-domain">No domain</option>
-                      <option value="already">Already have domain</option>
-                      <option value="need-new">Need new domain</option>
+                      <option value="existing">Already have domain</option>
+                      <option value="new">Need new domain</option>
                     </select>
                   </div>
                 </div>
@@ -1142,7 +1280,11 @@ const Leads = () => {
 
         {/* SUBMIT */}
         <div className={styles.submitWrap}>
-          <button type="submit" className={styles.submitBtn}>
+          <button
+            type="submit"
+            onClick={handleCreateLead}
+            className={styles.submitBtn}
+          >
             Save Lead
           </button>
         </div>

@@ -16,7 +16,16 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["leads"],
     }),
+    createLead: builder.mutation({
+      query: ({ body }) => ({
+        url: "/lead-create",
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
   }),
 });
 
-export const { useGetAllLeadsQuery, useGetDdDataQuery } = leadsApi;
+export const { useGetAllLeadsQuery, useGetDdDataQuery, useCreateLeadMutation } =
+  leadsApi;
