@@ -24,8 +24,19 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["leads"],
     }),
+    getSingleLeadDeatils: builder.query({
+      query: ({ lead_id }) => ({
+        url: `/leads/${lead_id}`,
+        method: "GET",
+      }),
+      providesTags: ["leads"],
+    }),
   }),
 });
 
-export const { useGetAllLeadsQuery, useGetDdDataQuery, useCreateLeadMutation } =
-  leadsApi;
+export const {
+  useGetAllLeadsQuery,
+  useGetDdDataQuery,
+  useCreateLeadMutation,
+  useGetSingleLeadDeatilsQuery,
+} = leadsApi;

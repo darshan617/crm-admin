@@ -6,6 +6,7 @@ import { LuCalendarDays } from "react-icons/lu";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import styles from "@/components/leads/all-leads/AllLeads.module.css";
 import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
+import { useRouter } from "next/router";
 
 /* ---------------- DATA ---------------- */
 
@@ -177,6 +178,7 @@ const PAGES = [1, 2, 3, 4, 5];
 const TOTAL_CUSTOMERS = 124;
 
 export default function AllLeads() {
+  const router = useRouter();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -432,9 +434,14 @@ export default function AllLeads() {
                     </div>
 
                     <div className="actions">
-                      <Link href={lead?.href || "#"} className="action-btn">
+                      <button
+                        onClick={() =>
+                          router?.push(`/leads/leads-details/${lead?.id}`)
+                        }
+                        className={styles.viewLeadBtn}
+                      >
                         <HiChevronRight size={16} />
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </td>

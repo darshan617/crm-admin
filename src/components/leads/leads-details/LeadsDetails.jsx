@@ -18,11 +18,12 @@ import {
   selectIsPopupVisble,
   setIsPopupVisible,
 } from "@/redux/slices/popupSlice";
-import EditDetailForm from "../edit-detail-form/EditDetailForm";
-import AddContactForm from "../add-contact-form/AddContactForm";
-import AddCurrentServiceForm from "../add-current-service-form/AddCurrentServiceForm";
-import AddOurService from "../add-our-service/AddOurService";
-import AddDocumentForm from "../add-document-form/AddDocumentForm";
+import AddCurrentServiceForm from "./leads-form/add-current-service-form/AddCurrentServiceForm";
+import AddContactForm from "./leads-form/add-contact-form/AddContactForm";
+import AddOurService from "./leads-form/add-our-service/AddOurService";
+import AddDocumentForm from "./leads-form/add-document-form/AddDocumentForm";
+import EditDetailForm from "./leads-form/edit-detail-form/EditDetailForm";
+import { useGetSingleLeadDeatilsQuery } from "@/redux/apis/leadsApi";
 
 const contacts = [1, 2, 3].map((n) => ({
   title: `Contact Person ${n}`,
@@ -53,17 +54,16 @@ const documents = [
   },
 ];
 
-const activities = [
-  { date: "08 May 2026", text: "Proposal drafted and sent for review." },
-  { date: "07 May 2026", text: "Initial meeting scheduled with the lead." },
-  { date: "06 May 2026", text: "Follow-up email sent to prospective client." },
-  { date: "05 May 2026", text: "New Lead created by online marketing." },
-];
-
 export default function LeadDetail() {
   const dispatch = useDispatch();
   const router = useRouter();
   const isPopupVisible = useSelector(selectIsPopupVisble);
+  const { data: getLeadDeatils } = useGetSingleLeadDeatilsQuery(
+    {
+      lead_id: router?.query?.slug,
+    },
+    { skip: !router?.query?.slug },
+  );
 
   const removeService = (formId) => {
     if (confirm("Remove this info?")) {
@@ -481,9 +481,10 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>DOCUMENTS</h3>
 
-                  <a onClick={() =>
-                      dispatch(setIsPopupVisible("add-document"))
-                    } className={styles.addCreditBtn}>
+                  <a
+                    onClick={() => dispatch(setIsPopupVisible("add-document"))}
+                    className={styles.addCreditBtn}
+                  >
                     <GoPlus />
                     Add Document
                   </a>
