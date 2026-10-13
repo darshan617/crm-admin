@@ -420,6 +420,351 @@ table {
   color: #fff;
 }
 
-.crm-lead-table .table-head, .crm-lead-table .crm-lead-row {
+.crm-lead-table .table-head,
+.crm-lead-table .crm-lead-row {
   grid-template-columns: 35px 1.5fr 1.5fr 0.65fr 1.2fr;
+}
+
+.table-filter {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+.border-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #e7e9eb;
+}
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #0b5db8;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 7px 24px;
+  font-size: var(--font-size-14px);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: -15px;
+  z-index: 9;
+  transition: all 0.3s ease;
+}
+#filterPanel .filter-options select,
+#filterPanel .date-input input,
+#filterPanel .date-input input[type="date"],
+#filterPanel .date-input input[type="text"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 40px;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid #e2e5ea;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #374151;
+  font-size: 14px;
+  line-height: 38px;
+  font-family: inherit;
+}
+
+.crm-quo-header .table-search,
+.es-quo-header .table-search,
+.crm-lead-header .table-search {
+  flex: 0 0 280px;
+  width: 280px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.status-interested {
+  background: #00b894;
+}
+
+.status-interested,
+.status-hot {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  margin-left: 4px;
+  border-radius: 3px;
+  color: #fff !important;
+  font-size: 13px;
+}
+
+.status-hot {
+  background: #f04f75;
+}
+
+.followup-form .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #3f4652;
+  /* font-size: 10px; */
+}
+
+.followup-form .form-group label span {
+  color: #ef4968;
+}
+
+.common-table-section {
+  margin-bottom: 24px;
+}
+
+.common-form {
+  padding: 30px;
+}
+
+.common-form .phone-group,
+.credit-modal .phone-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 0;
+}
+
+.common-form .phone-group,
+.credit-modal .phone-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  gap: 0;
+}
+
+.common-form .phone-group select,
+.credit-modal .phone-group select {
+  width: 148px;
+  flex: 0 0 148px;
+  min-height: 42px;
+  height: 42px;
+}
+
+.credit-modal-box h2 {
+  color: var(--color-grey-500-dark-text, #2c3139);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.crm-quo-table .table-head,
+.crm-quo-table .crm-quo-row {
+  grid-template-columns:
+    minmax(120px, 0.8fr) minmax(200px, 1.3fr) minmax(240px, 1.7fr)
+    minmax(100px, 0.6fr) minmax(200px, 1.2fr);
+  align-items: center;
+}
+
+.crm-quo-table .customer,
+.es-quo-table .customer,
+.crm-quo-table .plan-info,
+.es-quo-table .plan-info {
+  align-items: flex-start;
+}
+.customer,
+.plan-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.crm-quo-table .plan-icon,
+.es-quo-table .plan-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  flex: 0 0 40px;
+  padding: 8px;
+  border-radius: 50%;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.plan-icon {
+  width: 40px;
+  padding: 8px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.badge {
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding: 0 6px;
+  border-radius: 3px;
+}
+
+.pending,
+.medium {
+  background: #f9bf59;
+  color: #fff;
+}
+
+.badge.active,
+.approved,
+.paid,
+.low,
+.resolved {
+  background: #02bc9c;
+  color: #fff;
+}
+
+.common-table-header.crm-quo-header,
+.common-table-header.es-quo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+
+.common-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: nowrap;
+  margin-bottom: 15px;
+}
+.common-table-header p {
+  margin: 6px 0 0;
+  font-size: var(--font-size-14px);
+  color: #6b7280;
+}
+
+.crm-quo-header .table-search,
+.es-quo-header .table-search,
+.crm-lead-header .table-search {
+  flex: 0 0 280px;
+  width: 280px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.table-search {
+  width: 300px;
+  min-width: 220px;
+  max-width: 100%;
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  padding: 0 16px;
+  gap: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.page-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+
+#filterPanel .filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 20px;
+  align-items: start;
+}
+#filterPanel .date-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.es-quo-table .table-head,
+.es-quo-table .es-quo-row {
+  grid-template-columns:
+    minmax(120px, 0.8fr) minmax(190px, 1.2fr) minmax(240px, 1.6fr)
+    96px 96px minmax(190px, 1.1fr);
+  align-items: center;
+}
+.action-btn {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #4444447d;
+  transition: 0.3s ease;
+}
+
+.action-btn svg {
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+  stroke-width: 1.5;
+  color: inherit;
+  transition: 0.3s ease;
+}
+
+.action-btn:hover {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.action-btn:hover svg {
+  color: #fff;
 }

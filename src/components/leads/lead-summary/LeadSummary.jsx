@@ -10,7 +10,7 @@ import { GoTrophy } from "react-icons/go";
 
 const LeadSummary = () => {
   return (
-    <div className="content">
+    <div className="">
       <div className="page-header">
         <div className="">
           <div className="breadcrumb welcome-text">
@@ -22,13 +22,13 @@ const LeadSummary = () => {
           <h2>Leads </h2>
         </div>
         <div className={styles.crmActions}>
-          <a href="/" className={styles.crmActionBtn}>
+          <a href="/upload-leads" className={styles.crmActionBtn}>
             <FiUpload />
             <span>Upload Leads</span>
           </a>
 
           <a
-            href="add-new-lead.php"
+            href="/leads/add-new-leads"
             className={`${styles.crmActionBtn} ${styles.active}`}
           >
             <FiUserPlus />
@@ -41,7 +41,7 @@ const LeadSummary = () => {
           {/* <!-- Card 1 --> */}
           <div className={styles.summaryCard}>
             <div className={`${styles.cardIcon} ${styles.blue}`}>
-              <FiUsers size={24}/>
+              <FiUsers size={24} />
             </div>
 
             <div className={styles.statContent}>
@@ -53,7 +53,7 @@ const LeadSummary = () => {
           {/* <!-- Card 2 --> */}
           <div className={styles.summaryCard}>
             <div className={`${styles.cardIcon} ${styles.green}`}>
-              <LuUserRoundPlus  size={24}/>
+              <LuUserRoundPlus size={24} />
             </div>
 
             <div className={styles.statContent}>

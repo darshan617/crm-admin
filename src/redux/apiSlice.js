@@ -8,14 +8,18 @@ export const apiSlice = createApi({
       headers.set("Content-Type", "application/json");
       headers.set("Accept", "application/json");
 
-      const userData = Cookies.get("userData") ? Cookies.get("userData") : null;
+      const userData = Cookies.get("CRM_USER") ? Cookies.get("CRM_USER") : null;
+      console.log(userData, "💕");
+      const token = Cookies.get('token') ? Cookies.get("token") : null
+      
 
-      if (userData) {
+      if (token) {
         try {
-          const parsedData = JSON.parse(userData);
+          const paredToken = JSON.parse(token);
 
-          if (parsedData?.token) {
-            headers.set("Authorization", `Bearer ${parsedData.token}`);
+
+          if (paredToken) {
+            headers.set("Authorization", `Bearer ${paredToken}`);
           }
         } catch (error) {
           console.error("Invalid userData cookie:", error);

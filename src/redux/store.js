@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { apiSlice } from "../apiSlice";
+import { apiSlice } from "./apiSlice";
 import { createWrapper } from "next-redux-wrapper";
+import popupSlice from './slices/popupSlice'
 
 const makeStore = () => {
   const store = configureStore({
     reducer: {
-      [apiSlice.reducerPath]: apiSlice.reducer,
+      popup: popupSlice,
+      [apiSlice.reducerPath] :apiSlice.reducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(apiSlice.middleware),

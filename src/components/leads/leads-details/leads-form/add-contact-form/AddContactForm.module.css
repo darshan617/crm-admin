@@ -1,0 +1,39 @@
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+  width: 100%;
+}
+.contactModalTitle {
+  color: var(--color-grey-500-dark-text, #2c3139);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+  
+.submitBtn {
+    background: var(--primary);
+    font-family: "Baloo Bhai 2";
+    color: #FFF;
+    border: none;
+    padding: 10px 50px;
+    border-radius: 999px;
+    font-size: var(--font-size-14px);
+    /* font-style: normal; */
+    font-weight: 500;
+    line-height: normal;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .creditModalBox .submitWrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    width: 100%;
+  }
