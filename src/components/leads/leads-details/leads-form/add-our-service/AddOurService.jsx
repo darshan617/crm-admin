@@ -1,13 +1,20 @@
 import React from "react";
 import styles from "@/components/dashboard/leads/Leads.module.css";
 
-const AddOurService = () => {
+const AddOurService = ({ leadId, initialData = null }) => {
+  const isEditing = Boolean(initialData?.id);
+
   return (
     <div className={styles.creditModalBox}>
-      <h2 className={styles.contactModalTitle}>Add Our Service</h2>{" "}
+      <h2 className={styles.contactModalTitle}>
+        {isEditing ? "Edit Service" : "Add Our Service"}
+      </h2>{" "}
       <form
         method="POST"
-        action="https://superadmin.tizzygroup.com/crm/leads/70/services"
+        action={`https://superadmin.tizzygroup.com/crm/leads/${leadId}/services${
+          isEditing ? `/${initialData.id}/update` : ""
+        }`}
+        key={initialData?.id || "new-our-service"}
         id="leadServiceForm"
         className="common-form"
       >
@@ -25,7 +32,8 @@ const AddOurService = () => {
               name="provider_id"
               id="serviceProvider"
               className="provider-select"
-              required=""
+              defaultValue={initialData?.provider_id || ""}
+              required
             >
               <option value="">Select Provider</option>
               <option value="3">Google Workspace</option>
@@ -39,9 +47,15 @@ const AddOurService = () => {
               name="plan_id"
               id="servicePlan"
               className="plan-select"
-              required=""
+              defaultValue={initialData?.plan_id || ""}
+              required
             >
               <option value="">Select Plan</option>
+              {initialData?.plan && (
+                <option value={initialData.plan_id}>
+                  {initialData.plan.name}
+                </option>
+              )}
             </select>
           </div>
           <div className="form-group" id="servicePeriodWrap">
@@ -50,13 +64,12 @@ const AddOurService = () => {
               name="quote_period"
               id="servicePeriod"
               className="quote-period-select"
+              defaultValue={initialData?.quote_period || "Yearly"}
             >
               <option value="Monthly">Monthly</option>
               <option value="Quarterly">Quarterly</option>
               <option value="Half Yearly">Half Yearly</option>
-              <option value="Yearly" selected="">
-                Yearly
-              </option>
+              <option value="Yearly">Yearly</option>
             </select>
           </div>
           <div className="form-group">
@@ -66,6 +79,7 @@ const AddOurService = () => {
               name="sku"
               id="serviceSku"
               className="sku-input"
+              defaultValue={initialData?.sku || ""}
               readonly=""
             />
           </div>
@@ -76,8 +90,8 @@ const AddOurService = () => {
               name="quantity"
               id="serviceQty"
               min="1"
-              value="1"
-              required=""
+              defaultValue={initialData?.quantity ?? 1}
+              required
             />
           </div>
           <div className="form-group">
@@ -89,6 +103,7 @@ const AddOurService = () => {
               className="rate-input"
               min="0"
               step="0.01"
+              defaultValue={initialData?.rate ?? ""}
             />
           </div>
           <div
@@ -102,6 +117,7 @@ const AddOurService = () => {
               name="domain"
               id="serviceDomain"
               placeholder="example.com"
+              defaultValue={initialData?.domain || ""}
             />
           </div>
           <div
@@ -111,7 +127,12 @@ const AddOurService = () => {
           >
             <label>Renewal Date</label>
             <div className="date-input">
-              <input type="date" name="renewal_date" id="serviceRenewal" />
+              <input
+                type="date"
+                name="renewal_date"
+                id="serviceRenewal"
+                defaultValue={initialData?.renewal_date?.slice(0, 10) || ""}
+              />
             </div>
           </div>
         </div>

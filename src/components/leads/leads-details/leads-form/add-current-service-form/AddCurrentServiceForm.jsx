@@ -1,13 +1,20 @@
 import React from "react";
 import styles from "@/components/dashboard/leads/Leads.module.css";
 
-const AddCurrentServiceForm = () => {
+const AddCurrentServiceForm = ({ leadId, initialData = null }) => {
+  const isEditing = Boolean(initialData?.id);
+
   return (
     <div className={styles.creditModalBox}>
-      <h2 className={styles.contactModalTitle}>Add Current Service</h2>{" "}
+      <h2 className={styles.contactModalTitle}>
+        {isEditing ? "Edit Current Service" : "Add Current Service"}
+      </h2>{" "}
       <form
         method="POST"
-        action="https://superadmin.tizzygroup.com/crm/leads/70/services"
+        action={`https://superadmin.tizzygroup.com/crm/leads/${leadId}/services${
+          isEditing ? `/${initialData.id}/update` : ""
+        }`}
+        key={initialData?.id || "new-current-service"}
         id="leadServiceForm"
         className="common-form"
       >
@@ -25,7 +32,8 @@ const AddCurrentServiceForm = () => {
               name="provider_id"
               id="serviceProvider"
               className="provider-select"
-              required=""
+              defaultValue={initialData?.provider_id || ""}
+              required
             >
               <option value="">Select Provider</option>
               <option value="3">Google Workspace</option>
@@ -39,9 +47,15 @@ const AddCurrentServiceForm = () => {
               name="plan_id"
               id="servicePlan"
               className="plan-select"
-              required=""
+              defaultValue={initialData?.plan_id || ""}
+              required
             >
               <option value="">Select Plan</option>
+              {initialData?.plan && (
+                <option value={initialData.plan_id}>
+                  {initialData.plan.name}
+                </option>
+              )}
             </select>
           </div>
           <div
@@ -70,6 +84,7 @@ const AddCurrentServiceForm = () => {
               name="sku"
               id="serviceSku"
               className="sku-input"
+              defaultValue={initialData?.sku || ""}
               readonly=""
             />
           </div>
@@ -80,8 +95,8 @@ const AddCurrentServiceForm = () => {
               name="quantity"
               id="serviceQty"
               min="1"
-              value="1"
-              required=""
+              defaultValue={initialData?.quantity ?? 1}
+              required
             />
           </div>
           <div className="form-group">
@@ -93,6 +108,7 @@ const AddCurrentServiceForm = () => {
               className="rate-input"
               min="0"
               step="0.01"
+              defaultValue={initialData?.rate ?? ""}
             />
           </div>
           <div className="form-group" id="serviceDomainWrap">
@@ -102,12 +118,18 @@ const AddCurrentServiceForm = () => {
               name="domain"
               id="serviceDomain"
               placeholder="example.com"
+              defaultValue={initialData?.domain || ""}
             />
           </div>
           <div className="form-group" id="serviceRenewalWrap">
             <label>Renewal Date</label>
             <div className="date-input">
-              <input type="date" name="renewal_date" id="serviceRenewal" />
+              <input
+                type="date"
+                name="renewal_date"
+                id="serviceRenewal"
+                defaultValue={initialData?.renewal_date?.slice(0, 10) || ""}
+              />
             </div>
           </div>
         </div>

@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { FiBell, FiSearch, FiChevronDown } from "react-icons/fi";
 import styles from "./Navbar.module.css";
 import {
@@ -12,10 +18,29 @@ import Cookies from "js-cookie";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 
+const subscribeToUserCookie = () => () => {};
+const getUserCookieSnapshot = () => Cookies.get("CRM_USER") || null;
+const getServerUserCookieSnapshot = () => null;
+
 const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { showToast } = useToast();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const userCookie = useSyncExternalStore(
+    subscribeToUserCookie,
+    getUserCookieSnapshot,
+    getServerUserCookieSnapshot,
+  );
+  const userData = useMemo(() => {
+    if (!userCookie) return {};
+
+    try {
+      return JSON.parse(userCookie);
+    } catch (error) {
+      console.error("Invalid CRM_USER cookie:", error);
+      return {};
+    }
+  }, [userCookie]);
   const profileRef = useRef(null);
 
   const handleLogout = () => {
@@ -89,10 +114,12 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
             aria-expanded={profileOpen}
             onClick={() => setProfileOpen((o) => !o)}
           >
-            <div className={styles.avatar}>J</div>
+            <div className={styles.avatar}>
+              {userData?.name?.charAt(0) || "-"}
+            </div>
             <div className={styles.profileInfo}>
-              <h5>Janak</h5>
-              <small>Super Admin</small>
+              <h5>{userData?.name || "-"}</h5>
+              <small>{userData?.role || "-"}</small>
             </div>
             <FiChevronDown
               className={`${styles.profileArrow} ${
@@ -110,12 +137,14 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
               <div className={styles.profilePattern}></div>
               <div className={styles.profileContent}>
                 <div className={styles.profileAvatar}>
-                  <span>J</span>
+                  <span>{userData?.name?.charAt(0) || "-"}</span>
                 </div>
-                <h2>Janak Singh</h2>
+                <h2>{userData?.name || "-"}</h2>
                 <div className={styles.profileMeta}>
-                  <span>Partner ID : P123456</span>
-                  <span className={styles.adminBadge}>Admin</span>
+                  <span>Partner ID : {userData?.id || "-"}</span>
+                  <span className={styles.adminBadge}>
+                    {userData?.status || "-"}
+                  </span>
                 </div>
               </div>
             </div>
