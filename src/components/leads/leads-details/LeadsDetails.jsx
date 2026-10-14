@@ -19,7 +19,10 @@ import AddContactForm from "./leads-form/add-contact-form/AddContactForm";
 import AddOurService from "./leads-form/add-our-service/AddOurService";
 import AddDocumentForm from "./leads-form/add-document-form/AddDocumentForm";
 import EditDetailForm from "./leads-form/edit-detail-form/EditDetailForm";
-import { useGetSingleLeadDeatilsQuery } from "@/redux/apis/leadsApi";
+import {
+  useGetDdDataQuery,
+  useGetSingleLeadDeatilsQuery,
+} from "@/redux/apis/leadsApi";
 
 const displayValue = (value) =>
   value === null || value === undefined || value === "" ? "-" : value;
@@ -50,17 +53,271 @@ const formatDateTimeInput = (value) => {
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
+const createLeadFormData = (leadData) => {
+  const leadDomain = leadData.domain || {};
+  const services = Array.isArray(leadData.services) ? leadData.services : [];
+
+  return {
+    customer_detail: {
+      salutation: leadData.salutation || "",
+      name: leadData.name || "",
+      designation: leadData.designation || "",
+      email: leadData.email || "",
+      mobile_code: leadData.mobile_code || "91",
+      mobile: leadData.mobile || "",
+      company_name: leadData.company_name || "",
+      industry: leadData.industry || "",
+      no_of_employees: leadData.no_of_employees ?? "",
+      gstin: leadData.gstin || "",
+      business_type: leadData.business_type || "",
+    },
+    address_information: {
+      mailing_address: leadData.mailing_address || "",
+      country: leadData.country || "",
+      state: leadData.state || "",
+      city: leadData.city || "",
+      pincode: leadData.pincode || "",
+    },
+    domain: {
+      domain_type: leadDomain.domain_type || "",
+      domain: leadDomain.domain || "",
+      domain_period: leadDomain.domain_period || "",
+      domain_rate: leadDomain.domain_rate ?? "",
+      sac: leadData.sac ?? leadDomain.sac ?? "",
+      domain_start: leadDomain.domain_start?.slice(0, 10) || "",
+      domain_end: leadDomain.domain_end?.slice(0, 10) || "",
+      domain_renewal_date: leadDomain.domain_renewal_date?.slice(0, 10) || "",
+    },
+    current_service_info: services
+      .filter(
+        (service) =>
+          service.is_info === true ||
+          service.is_info === 1 ||
+          service.is_info === "1",
+      )
+      .map((service) => ({
+        domain: service.domain || "",
+        provider_id: service.provider_id || "",
+        plan_id: service.plan_id || "",
+        quantity: service.quantity ?? "",
+        rate: service.rate ?? "",
+        renewal_date: service.renewal_date?.slice(0, 10) || "",
+      })),
+    our_service_plan_detail: services
+      .filter(
+        (service) =>
+          service.is_info !== true &&
+          service.is_info !== 1 &&
+          service.is_info !== "1",
+      )
+      .map((service) => ({
+        provider_id: service.provider_id ?? null,
+        plan_id: service.plan_id ?? null,
+        quote_period: service.quote_period || "",
+        sku: service.sku || "",
+        quantity: service.quantity ?? null,
+        rate: service.rate ?? "",
+      })),
+    additional_contact: Array.isArray(leadData.contacts)
+      ? leadData.contacts.map((contact) => ({
+          name: contact.name || "",
+          designation: contact.designation || "",
+          email: contact.email || "",
+          mobile: contact.mobile || "",
+        }))
+      : [],
+    lead_specification: {
+      lead_priority: leadData.lead_priority || "",
+      lead_status: leadData.lead_status || "",
+      lead_bifurcation: leadData.lead_bifurcation || "",
+      lead_source: leadData.lead_source || "",
+      assigned_to: leadData.assigned_to || "",
+    },
+    follow_up_detail: {
+      follow_up_date: formatDateTimeInput(leadData.follow_up_date),
+      follow_up_note: leadData.follow_up_note || "",
+    },
+    document_detail: {
+      document_type: "PAN Card",
+      files: [],
+    },
+    documents: leadData.document ? [leadData.document] : [],
+  };
+};
+
 export default function LeadDetail() {
   const dispatch = useDispatch();
   const router = useRouter();
   const isPopupVisible = useSelector(selectIsPopupVisble);
   const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({
+    customer_detail: {
+      salutation: "",
+      name: "",
+      designation: "",
+      email: "",
+      mobile_code: "91",
+      mobile: "",
+      company_name: "",
+      industry: "",
+      no_of_employees: "",
+      gstin: "",
+      business_type: "new",
+    },
+    address_information: {
+      mailing_address: "",
+      country: "",
+      state: "",
+      city: "",
+      pincode: "",
+    },
+    domain: {
+      domain_type: "no-domain",
+      domain: "",
+      domain_period: "",
+      domain_rate: null,
+      sac: "",
+      domain_start: "",
+      domain_end: "",
+      domain_renewal_date: "",
+    },
+    current_service_info: [
+      {
+        domain: "",
+        provider_id: "",
+        plan_id: "",
+        quantity: "",
+        rate: "",
+        renewal_date: "",
+      },
+    ],
+    our_service_plan_detail: [
+      {
+        provider_id: null,
+        plan_id: null,
+        quote_period: "",
+        sku: "",
+        quantity: null,
+        rate: "",
+      },
+    ],
+    additional_contact: [
+      {
+        name: "",
+        designation: "",
+        email: "",
+        mobile: "",
+      },
+    ],
+    lead_specification: {
+      lead_priority: "",
+      lead_status: "",
+      lead_bifurcation: "",
+      lead_source: "",
+      assigned_to: "",
+    },
+    follow_up_detail: {
+      follow_up_date: "",
+      follow_up_note: "",
+    },
+    document_detail: {
+      document_type: "PAN Card",
+      files: [],
+    },
+    documents: [],
+  });
+
+  console.log(formData);
+
   const { data: getLeadDeatils } = useGetSingleLeadDeatilsQuery(
     {
       lead_id: router?.query?.slug,
     },
     { skip: !router?.query?.slug },
   );
+  const { data: apiDropdownData } = useGetDdDataQuery();
+
+  const leadData = getLeadDeatils?.data?.lead || {};
+  const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
+  const services = Array.isArray(leadData.services) ? leadData.services : [];
+  const currentServices = services.filter(
+    (service) =>
+      service.is_info === true ||
+      service.is_info === 1 ||
+      service.is_info === "1",
+  );
+  const ourServices = services.filter(
+    (service) =>
+      service.is_info !== true &&
+      service.is_info !== 1 &&
+      service.is_info !== "1",
+  );
+  const leadId = leadData.id || router?.query?.slug;
+
+  const handleFormChange = (
+    e,
+    section,
+    index = null,
+    stateField = e.target.name,
+  ) => {
+    const value =
+      e.target.type === "number"
+        ? e.target.value === ""
+          ? null
+          : Number(e.target.value)
+        : e.target.value;
+    const serviceSections = ["current_service_info", "our_service_plan_detail"];
+    const selectedPlan =
+      stateField === "plan_id"
+        ? Object.values(apiDropdownData?.data?.options?.plans || {})
+            .flat()
+            .find((plan) => String(plan.id) === String(value))
+        : null;
+
+    setFormData((prev) => {
+      // Handle array sections
+      if (Array.isArray(prev[section])) {
+        return {
+          ...prev,
+          [section]: prev[section].map((item, i) =>
+            i === index
+              ? {
+                  ...item,
+                  [stateField]: value,
+                  ...(serviceSections.includes(section) &&
+                  stateField === "provider_id"
+                    ? { plan_id: "", sku: "" }
+                    : {}),
+                  ...(serviceSections.includes(section) &&
+                  stateField === "plan_id"
+                    ? { sku: selectedPlan?.sku || selectedPlan?.slug || "" }
+                    : {}),
+                }
+              : item,
+          ),
+        };
+      }
+
+      // Handle object sections
+      return {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [stateField]: value,
+        },
+      };
+    });
+  };
+
+  const handleDocumentFilesChange = (files) => {
+    setFormData((prev) => ({
+      ...prev,
+      document_detail: {
+        ...prev.document_detail,
+        files,
+      },
+    }));
+  };
 
   const statusBg = (status) => {
     const renamedStatus = status?.toLowerCase();
@@ -88,25 +345,76 @@ export default function LeadDetail() {
     }
   };
 
-  const leadData = getLeadDeatils?.data?.lead || {};
-  const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
-  const services = Array.isArray(leadData.services) ? leadData.services : [];
-  const currentServices = services.filter(
-    (service) =>
-      service.is_info === true ||
-      service.is_info === 1 ||
-      service.is_info === "1",
-  );
-  const ourServices = services.filter(
-    (service) =>
-      service.is_info !== true &&
-      service.is_info !== 1 &&
-      service.is_info !== "1",
-  );
-  const leadId = leadData.id || router?.query?.slug;
-
   const openPopup = (popup, item = null) => {
-    setEditingItem(item);
+    let popupItem = item ? { ...item } : null;
+
+    if (leadData.id) {
+      const nextFormData = createLeadFormData(leadData);
+
+      if (popup === "add-contact") {
+        if (popupItem?.type === "contact") {
+          popupItem = {
+            ...popupItem,
+            index: popupItem.index ?? nextFormData.additional_contact.length,
+          };
+        } else {
+          popupItem = {
+            type: "contact",
+            index: nextFormData.additional_contact.length,
+          };
+          nextFormData.additional_contact.push({
+            name: "",
+            designation: "",
+            email: "",
+            mobile: "",
+          });
+        }
+      } else if (popup === "add-current-service") {
+        if (popupItem?.type === "current-service") {
+          popupItem = {
+            ...popupItem,
+            index: popupItem.index ?? nextFormData.current_service_info.length,
+          };
+        } else {
+          popupItem = {
+            type: "current-service",
+            index: nextFormData.current_service_info.length,
+          };
+          nextFormData.current_service_info.push({
+            domain: "",
+            provider_id: "",
+            plan_id: "",
+            quantity: 1,
+            rate: "",
+            renewal_date: "",
+          });
+        }
+      } else if (popup === "add-our-service") {
+        if (popupItem?.type === "our-service") {
+          popupItem = {
+            ...popupItem,
+            index:
+              popupItem.index ?? nextFormData.our_service_plan_detail.length,
+          };
+        } else {
+          popupItem = {
+            type: "our-service",
+            index: nextFormData.our_service_plan_detail.length,
+          };
+          nextFormData.our_service_plan_detail.push({
+            provider_id: null,
+            plan_id: null,
+            quote_period: "Yearly",
+            sku: "",
+            quantity: 1,
+            rate: "",
+          });
+        }
+      }
+
+      setFormData(nextFormData);
+    }
+    setEditingItem(popupItem);
     dispatch(setIsPopupVisible(popup));
   };
 
@@ -188,9 +496,7 @@ export default function LeadDetail() {
                   <button
                     type="button"
                     className={styles.editLeadBtn}
-                    onClick={() =>
-                      dispatch(setIsPopupVisible("add-details-popup"))
-                    }
+                    onClick={() => openPopup("add-details-popup")}
                   >
                     <FaPencil />
                     Add / Edit Details
@@ -308,6 +614,7 @@ export default function LeadDetail() {
                               openPopup("add-contact", {
                                 type: "contact",
                                 data: contact,
+                                index,
                               })
                             }
                           >
@@ -353,9 +660,7 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>CURRENT SERVICE (INFO)</h3>
                   <a
-                    onClick={() =>
-                      openPopup("add-current-service")
-                    }
+                    onClick={() => openPopup("add-current-service")}
                     className={styles.addCreditBtn}
                     id="openAddInfoService"
                   >
@@ -380,7 +685,7 @@ export default function LeadDetail() {
                   </a>
                 </div>
                 {currentServices.length ? (
-                  currentServices.map((service) => (
+                  currentServices.map((service, index) => (
                     <div
                       className={`${styles.serviceRequiredCard} ${styles.serviceRequiredCard2}`}
                       key={service.id}
@@ -403,6 +708,7 @@ export default function LeadDetail() {
                             openPopup("add-current-service", {
                               type: "current-service",
                               data: service,
+                              index,
                             })
                           }
                         >
@@ -455,9 +761,7 @@ export default function LeadDetail() {
                   <h3>OUR SERVICE</h3>
 
                   <a
-                    onClick={() =>
-                      openPopup("add-our-service")
-                    }
+                    onClick={() => openPopup("add-our-service")}
                     className={styles.addCreditBtn}
                   >
                     <GoPlus />
@@ -466,7 +770,7 @@ export default function LeadDetail() {
                 </div>
 
                 {ourServices.length ? (
-                  ourServices.map((service) => (
+                  ourServices.map((service, index) => (
                     <div
                       className={styles.serviceRequiredCard}
                       key={service.id}
@@ -489,6 +793,7 @@ export default function LeadDetail() {
                             openPopup("add-our-service", {
                               type: "our-service",
                               data: service,
+                              index,
                             })
                           }
                         >
@@ -939,7 +1244,13 @@ export default function LeadDetail() {
 
       {isPopupVisible === "add-details-popup" && (
         <CustomPopup onClose={closePopup}>
-          <EditDetailForm leadData={leadData} />
+          <EditDetailForm
+            leadData={leadData}
+            formData={formData}
+            setFormData={setFormData}
+            handleFormChange={handleFormChange}
+            apiDropdownData={apiDropdownData}
+          />
         </CustomPopup>
       )}
       {isPopupVisible === "add-contact" && (
@@ -949,6 +1260,10 @@ export default function LeadDetail() {
             initialData={
               editingItem?.type === "contact" ? editingItem.data : null
             }
+            formData={formData}
+            handleFormChange={handleFormChange}
+            formIndex={editingItem?.index}
+            formSection="additional_contact"
           />
         </CustomPopup>
       )}
@@ -956,9 +1271,14 @@ export default function LeadDetail() {
         <CustomPopup onClose={closePopup}>
           <AddCurrentServiceForm
             leadId={leadId}
+            apiDropdownData={apiDropdownData}
             initialData={
               editingItem?.type === "current-service" ? editingItem.data : null
             }
+            formData={formData}
+            handleFormChange={handleFormChange}
+            formIndex={editingItem?.index}
+            formSection="current_service_info"
           />
         </CustomPopup>
       )}
@@ -966,15 +1286,25 @@ export default function LeadDetail() {
         <CustomPopup onClose={closePopup}>
           <AddOurService
             leadId={leadId}
+            apiDropdownData={apiDropdownData}
             initialData={
               editingItem?.type === "our-service" ? editingItem.data : null
             }
+            formData={formData}
+            handleFormChange={handleFormChange}
+            formIndex={editingItem?.index}
+            formSection="our_service_plan_detail"
           />
         </CustomPopup>
       )}
       {isPopupVisible === "add-document" && (
         <CustomPopup onClose={closePopup}>
-          <AddDocumentForm />
+          <AddDocumentForm
+            leadId={leadId}
+            formData={formData}
+            handleFormChange={handleFormChange}
+            onFilesChange={handleDocumentFilesChange}
+          />
         </CustomPopup>
       )}
     </>

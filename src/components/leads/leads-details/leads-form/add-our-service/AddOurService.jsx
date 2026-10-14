@@ -1,8 +1,33 @@
 import React from "react";
 import styles from "@/components/dashboard/leads/Leads.module.css";
 
-const AddOurService = ({ leadId, initialData = null }) => {
+const AddOurService = ({
+  leadId,
+  initialData = null,
+  apiDropdownData,
+  formData,
+  handleFormChange,
+  formIndex = 0,
+  formSection = "our_service_plan_detail",
+}) => {
   const isEditing = Boolean(initialData?.id);
+  const providers = apiDropdownData?.data?.options?.providers || [];
+  const service = formData?.[formSection]?.[formIndex] || {};
+  const plans = Object.values(apiDropdownData?.data?.options?.plans || {})
+    .flat()
+    .filter(
+      (plan) =>
+        !service.provider_id ||
+        String(plan.provider_id) === String(service.provider_id),
+    );
+  if (
+    initialData?.plan &&
+    !plans.some((plan) => String(plan.id) === String(initialData.plan_id))
+  ) {
+    plans.push(initialData.plan);
+  }
+  const onChange = (event) =>
+    handleFormChange(event, formSection, formIndex);
 
   return (
     <div className={styles.creditModalBox}>
@@ -32,13 +57,16 @@ const AddOurService = ({ leadId, initialData = null }) => {
               name="provider_id"
               id="serviceProvider"
               className="provider-select"
-              defaultValue={initialData?.provider_id || ""}
+              value={service.provider_id ?? ""}
+              onChange={onChange}
               required
             >
               <option value="">Select Provider</option>
-              <option value="3">Google Workspace</option>
-              <option value="2">Microsoft 365</option>
-              <option value="1">Tizzy Mail</option>
+              {providers.map((provider) => (
+                <option key={provider.id} value={provider.id}>
+                  {provider.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-group">
@@ -47,15 +75,16 @@ const AddOurService = ({ leadId, initialData = null }) => {
               name="plan_id"
               id="servicePlan"
               className="plan-select"
-              defaultValue={initialData?.plan_id || ""}
+              value={service.plan_id ?? ""}
+              onChange={onChange}
               required
             >
               <option value="">Select Plan</option>
-              {initialData?.plan && (
-                <option value={initialData.plan_id}>
-                  {initialData.plan.name}
+              {plans.map((plan) => (
+                <option key={plan.id} value={plan.id}>
+                  {plan.name}
                 </option>
-              )}
+              ))}
             </select>
           </div>
           <div className="form-group" id="servicePeriodWrap">
@@ -64,7 +93,8 @@ const AddOurService = ({ leadId, initialData = null }) => {
               name="quote_period"
               id="servicePeriod"
               className="quote-period-select"
-              defaultValue={initialData?.quote_period || "Yearly"}
+              value={service.quote_period || "Yearly"}
+              onChange={onChange}
             >
               <option value="Monthly">Monthly</option>
               <option value="Quarterly">Quarterly</option>
@@ -79,8 +109,8 @@ const AddOurService = ({ leadId, initialData = null }) => {
               name="sku"
               id="serviceSku"
               className="sku-input"
-              defaultValue={initialData?.sku || ""}
-              readonly=""
+              value={service.sku || ""}
+              readOnly
             />
           </div>
           <div className="form-group">
@@ -90,7 +120,8 @@ const AddOurService = ({ leadId, initialData = null }) => {
               name="quantity"
               id="serviceQty"
               min="1"
-              defaultValue={initialData?.quantity ?? 1}
+              value={service.quantity ?? ""}
+              onChange={onChange}
               required
             />
           </div>
@@ -103,7 +134,8 @@ const AddOurService = ({ leadId, initialData = null }) => {
               className="rate-input"
               min="0"
               step="0.01"
-              defaultValue={initialData?.rate ?? ""}
+              value={service.rate ?? ""}
+              onChange={onChange}
             />
           </div>
           <div
@@ -117,7 +149,8 @@ const AddOurService = ({ leadId, initialData = null }) => {
               name="domain"
               id="serviceDomain"
               placeholder="example.com"
-              defaultValue={initialData?.domain || ""}
+              value={service.domain || ""}
+              onChange={onChange}
             />
           </div>
           <div
@@ -131,7 +164,8 @@ const AddOurService = ({ leadId, initialData = null }) => {
                 type="date"
                 name="renewal_date"
                 id="serviceRenewal"
-                defaultValue={initialData?.renewal_date?.slice(0, 10) || ""}
+                value={service.renewal_date || ""}
+                onChange={onChange}
               />
             </div>
           </div>
