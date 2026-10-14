@@ -28,6 +28,8 @@
   --warning-text: #8a6700;
   --success-bg: #dcfce7;
   --success-text: #15803d;
+  --danger-bg: #f04f75;
+  --danger: #ef4968;
   --gray-bg: #f3f5f8;
   --stats-bg: #f7f9fc;
   --font-menu: "Baloo Bhai 2", cursive;
@@ -206,6 +208,8 @@ body {
   line-height: normal;
   transition: 0.3s ease;
   box-sizing: border-box;
+  border: none;
+  outline: none;
 }
 .form-group input:focus,
 .form-group textarea:focus {
@@ -547,7 +551,7 @@ table {
   width: 148px;
   flex: 0 0 148px;
   min-height: 42px;
-  height: 42px;
+  /* height: 42px; */
 }
 
 .credit-modal-box h2 {
@@ -654,6 +658,13 @@ table {
   margin: 6px 0 0;
   font-size: var(--font-size-14px);
   color: #6b7280;
+}
+
+.common-table-header h3 {
+  font-size: var(--font-size-18px);
+  margin-bottom: 0px;
+  font-weight: 600;
+  color: #1e1e1e;
 }
 
 .crm-quo-header .table-search,
@@ -767,4 +778,93 @@ table {
 
 .action-btn:hover svg {
   color: #fff;
+}
+
+.common-form {
+  display: flex;
+  padding: 30px;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.common-form h3 {
+  color: var(--Text-Colors-Colors-Dark, #313a46);
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-style: normal;
+  line-height: normal;
+  font-weight: bold;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px 30px;
+  width: 100%;
+}
+
+.form-grid.form-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-group label span {
+  color: #ef4444;
+}
+.quotation-status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  width: auto;
+  min-width: 132px;
+  height: 34px;
+  margin: 0;
+  border: 0;
+  outline: none;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 34px;
+  padding: 0 26px 0 12px;
+  cursor: pointer;
+  vertical-align: middle;
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #ffffff 50%),
+    linear-gradient(135deg, #ffffff 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 14px,
+    calc(100% - 9px) 14px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+}
+.quotation-status-select option {
+  background-color: #ffffff;
+  color: #333333; 
+}
+.quotation-status-select.is-not_shared,
+.quotation-status-select.is-not_sent {
+  background-color: #64748b;
+}
+
+.quotation-status-select.is-pending,
+.quotation-status-select.is-shared,
+.quotation-status-select.is-sent {
+  background-color: #e8a317;
+}
+
+.quotation-status-select.is-approved {
+  background-color: #0f9f6e;
+}
+
+.quotation-status-select.is-rejected {
+  background-color: #e11d48;
 }

@@ -1,13 +1,45 @@
 import React from "react";
 import styles from "@/components/dashboard/leads/Leads.module.css";
 
-const AddOurService = () => {
+const AddOurService = ({
+  leadId,
+  initialData = null,
+  apiDropdownData,
+  formData,
+  handleFormChange,
+  formIndex = 0,
+  formSection = "our_service_plan_detail",
+}) => {
+  const isEditing = Boolean(initialData?.id);
+  const providers = apiDropdownData?.data?.options?.providers || [];
+  const service = formData?.[formSection]?.[formIndex] || {};
+  const plans = Object.values(apiDropdownData?.data?.options?.plans || {})
+    .flat()
+    .filter(
+      (plan) =>
+        !service.provider_id ||
+        String(plan.provider_id) === String(service.provider_id),
+    );
+  if (
+    initialData?.plan &&
+    !plans.some((plan) => String(plan.id) === String(initialData.plan_id))
+  ) {
+    plans.push(initialData.plan);
+  }
+  const onChange = (event) =>
+    handleFormChange(event, formSection, formIndex);
+
   return (
     <div className={styles.creditModalBox}>
-      <h2 className={styles.contactModalTitle}>Add Our Service</h2>{" "}
+      <h2 className={styles.contactModalTitle}>
+        {isEditing ? "Edit Service" : "Add Our Service"}
+      </h2>{" "}
       <form
         method="POST"
-        action="https://superadmin.tizzygroup.com/crm/leads/70/services"
+        action={`https://superadmin.tizzygroup.com/crm/leads/${leadId}/services${
+          isEditing ? `/${initialData.id}/update` : ""
+        }`}
+        key={initialData?.id || "new-our-service"}
         id="leadServiceForm"
         className="common-form"
       >
@@ -25,12 +57,16 @@ const AddOurService = () => {
               name="provider_id"
               id="serviceProvider"
               className="provider-select"
-              required=""
+              value={service.provider_id ?? ""}
+              onChange={onChange}
+              required
             >
               <option value="">Select Provider</option>
-              <option value="3">Google Workspace</option>
-              <option value="2">Microsoft 365</option>
-              <option value="1">Tizzy Mail</option>
+              {providers.map((provider) => (
+                <option key={provider.id} value={provider.id}>
+                  {provider.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-group">
@@ -39,9 +75,16 @@ const AddOurService = () => {
               name="plan_id"
               id="servicePlan"
               className="plan-select"
-              required=""
+              value={service.plan_id ?? ""}
+              onChange={onChange}
+              required
             >
               <option value="">Select Plan</option>
+              {plans.map((plan) => (
+                <option key={plan.id} value={plan.id}>
+                  {plan.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-group" id="servicePeriodWrap">
@@ -50,13 +93,13 @@ const AddOurService = () => {
               name="quote_period"
               id="servicePeriod"
               className="quote-period-select"
+              value={service.quote_period || "Yearly"}
+              onChange={onChange}
             >
               <option value="Monthly">Monthly</option>
               <option value="Quarterly">Quarterly</option>
               <option value="Half Yearly">Half Yearly</option>
-              <option value="Yearly" selected="">
-                Yearly
-              </option>
+              <option value="Yearly">Yearly</option>
             </select>
           </div>
           <div className="form-group">
@@ -66,7 +109,8 @@ const AddOurService = () => {
               name="sku"
               id="serviceSku"
               className="sku-input"
-              readonly=""
+              value={service.sku || ""}
+              readOnly
             />
           </div>
           <div className="form-group">
@@ -76,8 +120,9 @@ const AddOurService = () => {
               name="quantity"
               id="serviceQty"
               min="1"
-              value="1"
-              required=""
+              value={service.quantity ?? ""}
+              onChange={onChange}
+              required
             />
           </div>
           <div className="form-group">
@@ -89,6 +134,8 @@ const AddOurService = () => {
               className="rate-input"
               min="0"
               step="0.01"
+              value={service.rate ?? ""}
+              onChange={onChange}
             />
           </div>
           <div
@@ -102,6 +149,8 @@ const AddOurService = () => {
               name="domain"
               id="serviceDomain"
               placeholder="example.com"
+              value={service.domain || ""}
+              onChange={onChange}
             />
           </div>
           <div
@@ -111,7 +160,13 @@ const AddOurService = () => {
           >
             <label>Renewal Date</label>
             <div className="date-input">
-              <input type="date" name="renewal_date" id="serviceRenewal" />
+              <input
+                type="date"
+                name="renewal_date"
+                id="serviceRenewal"
+                value={service.renewal_date || ""}
+                onChange={onChange}
+              />
             </div>
           </div>
         </div>

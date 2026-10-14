@@ -1,11 +1,17 @@
 import React from "react";
 import styles from "@/components/leads/leads-details/leads-form/edit-detail-form/EditDetailForm.module.css";
-const EditDetailForm = () => {
+const EditDetailForm = ({
+  leadData = {},
+  formData,
+  handleFormChange,
+  apiDropdownData,
+}) => {
   return (
     <div className={styles.creditModalBox}>
       <h2>Add / Edit Lead Details</h2>
 
       <form
+        key={leadData.id || "loading"}
         method="POST"
         action="https://superadmin.tizzygroup.com/crm/leads/70/update"
         className="common-form"
@@ -27,36 +33,50 @@ const EditDetailForm = () => {
 
             <div className="phone-group name-title-row">
               <select
+                aria-label="Title"
+                value={formData?.customer_detail?.salutation}
+                onChange={(e) => handleFormChange(e, "customer_detail")}
                 name="salutation"
-                className="form-control phone-code-select title-select"
-                required
-                defaultValue="Mr"
               >
                 <option value="">Title</option>
-                <option value="Mr">Mr</option>
-                <option value="Mrs">Mrs</option>
-                <option value="Ms">Ms</option>
+                {apiDropdownData?.data?.options?.salutation?.map(
+                  (item, idx) => {
+                    return (
+                      <option key={item || idx} value={item}>
+                        {item}
+                      </option>
+                    );
+                  },
+                )}
               </select>
-
               <input
                 type="text"
+                value={formData?.customer_detail?.name}
                 name="name"
-                defaultValue="Darshan B"
-                required
+                onChange={(e) => handleFormChange(e, "customer_detail")}
               />
             </div>
           </div>
 
           <div className="form-group">
             <label>Designation</label>
-
-            <select name="designation" defaultValue="Accounts">
-              <option value="">Select Designation</option>
-              <option value="Accounts">Accounts</option>
-              <option value="Director">Director</option>
-              <option value="IT Head">IT Head</option>
-              <option value="Manager">Manager</option>
-              <option value="Owner">Owner</option>
+            <select
+              aria-label="Designation"
+              type="text"
+              value={formData?.customer_detail?.designation}
+              name="designation"
+              onChange={(e) => handleFormChange(e, "customer_detail")}
+            >
+              <option value="" disabled>
+                Designation
+              </option>
+              {apiDropdownData?.data?.options?.designation?.map((item, idx) => {
+                return (
+                  <option key={item || idx} value={item}>
+                    {item}
+                  </option>
+                );
+              })}
             </select>
           </div>
 
@@ -68,7 +88,8 @@ const EditDetailForm = () => {
             <input
               type="email"
               name="email"
-              defaultValue="darshan1@goyalinfotech.com"
+              value={formData?.customer_detail?.email || ""}
+              onChange={(e) => handleFormChange(e, "customer_detail")}
               required
             />
           </div>
@@ -82,7 +103,8 @@ const EditDetailForm = () => {
               <select
                 name="mobile_code"
                 className="form-control phone-code-select"
-                defaultValue="91"
+                value={formData?.customer_detail?.mobile_code || "91"}
+                onChange={(e) => handleFormChange(e, "customer_detail")}
               >
                 <option value="91">+91 India</option>
                 <option value="93">+93 Afghanistan</option>
@@ -259,7 +281,8 @@ const EditDetailForm = () => {
               <input
                 type="tel"
                 name="mobile"
-                defaultValue="9658745858"
+                value={formData?.customer_detail?.mobile || ""}
+                onChange={(e) => handleFormChange(e, "customer_detail")}
                 required
                 inputMode="numeric"
                 maxLength="15"
@@ -274,13 +297,18 @@ const EditDetailForm = () => {
             <input
               type="text"
               name="company_name"
-              defaultValue="CENTRAL WARE HOUSING CORP.LTD."
+              value={formData?.customer_detail?.company_name || ""}
+              onChange={(e) => handleFormChange(e, "customer_detail")}
             />
           </div>
 
           <div className="form-group">
             <label>Business</label>
-            <select name="business_type" defaultValue="existing">
+            <select
+              name="business_type"
+              value={formData?.customer_detail?.business_type || ""}
+              onChange={(e) => handleFormChange(e, "customer_detail")}
+            >
               <option value="new">New Business</option>
               <option value="existing">Existing Business</option>
             </select>
@@ -291,7 +319,8 @@ const EditDetailForm = () => {
             <input
               type="text"
               name="industry"
-              defaultValue="CORPORATION"
+              value={formData?.customer_detail?.industry || ""}
+              onChange={(e) => handleFormChange(e, "customer_detail")}
               placeholder="Filled from GSTIN"
             />
           </div>
@@ -302,7 +331,8 @@ const EditDetailForm = () => {
               type="number"
               name="no_of_employees"
               min="0"
-              defaultValue="22"
+              value={formData?.customer_detail?.no_of_employees ?? ""}
+              onChange={(e) => handleFormChange(e, "customer_detail")}
             />
           </div>
 
@@ -313,7 +343,8 @@ const EditDetailForm = () => {
               type="text"
               name="gstin"
               id="editGstin"
-              defaultValue="24AAACC1206D1ZM"
+              value={formData?.customer_detail?.gstin || ""}
+              onChange={(e) => handleFormChange(e, "customer_detail")}
               maxLength="15"
             />
 
@@ -330,8 +361,22 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Assigned To</label>
 
-            <select name="assigned_to" defaultValue="Darshan Bane">
+            <select
+              name="assigned_to"
+              value={formData?.lead_specification?.assigned_to || ""}
+              onChange={(e) => handleFormChange(e, "lead_specification")}
+            >
               <option value="">Select Employee</option>
+              {![
+                "Darshan Bane",
+                "Janvi Singh",
+                "Pratik V",
+              ].includes(formData?.lead_specification?.assigned_to) &&
+                formData?.lead_specification?.assigned_to && (
+                  <option value={formData.lead_specification.assigned_to}>
+                    {formData.lead_specification.assigned_to}
+                  </option>
+                )}
               <option value="Darshan Bane">Darshan Bane</option>
               <option value="Janvi Singh">Janvi Singh</option>
               <option value="Pratik V">Pratik V</option>
@@ -341,7 +386,18 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Lead Priority</label>
 
-            <select name="lead_category" defaultValue="Hot">
+            <select
+              name="lead_category"
+              value={formData?.lead_specification?.lead_priority || ""}
+              onChange={(e) =>
+                handleFormChange(
+                  e,
+                  "lead_specification",
+                  null,
+                  "lead_priority",
+                )
+              }
+            >
               <option value="">Select Priority</option>
               <option value="Cold">Cold</option>
               <option value="Hot">Hot</option>
@@ -355,7 +411,12 @@ const EditDetailForm = () => {
               Lead Status <span>*</span>
             </label>
 
-            <select name="lead_status" required defaultValue="Contacted">
+            <select
+              name="lead_status"
+              required
+              value={formData?.lead_specification?.lead_status || ""}
+              onChange={(e) => handleFormChange(e, "lead_specification")}
+            >
               <option value="">Select Status</option>
               <option value="Contacted">Contacted</option>
               <option value="Lost">Lost</option>
@@ -371,7 +432,11 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Lead Bifurcation</label>
 
-            <select name="lead_bifurcation" defaultValue="B2B">
+            <select
+              name="lead_bifurcation"
+              value={formData?.lead_specification?.lead_bifurcation || ""}
+              onChange={(e) => handleFormChange(e, "lead_specification")}
+            >
               <option value="">Select Bifurcation</option>
               <option value="B2B">B2B</option>
               <option value="B2C">B2C</option>
@@ -381,7 +446,11 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Lead Source</label>
 
-            <select name="lead_source" defaultValue="Website">
+            <select
+              name="lead_source"
+              value={formData?.lead_specification?.lead_source || ""}
+              onChange={(e) => handleFormChange(e, "lead_specification")}
+            >
               <option value="">Select Source</option>
               <option value="Email">Email</option>
               <option value="Exhibition">Exhibition</option>
@@ -401,14 +470,19 @@ const EditDetailForm = () => {
             <input
               type="text"
               name="mailing_address"
-              defaultValue="CENTRAL WAREHOUSING CORPORATION, MAHALAXMI CHAR RASTA, PALDI, Ahmedabad, Gujarat, 380007"
+              value={formData?.address_information?.mailing_address || ""}
+              onChange={(e) => handleFormChange(e, "address_information")}
             />
           </div>
 
           <div className="form-group">
             <label>Country</label>
 
-            <select name="country" defaultValue="India">
+            <select
+              name="country"
+              value={formData?.address_information?.country || ""}
+              onChange={(e) => handleFormChange(e, "address_information")}
+            >
               <option value="">Select Country</option>
               <option value="India">India</option>
               <option value="United States">United States</option>
@@ -420,19 +494,34 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>State</label>
 
-            <input type="text" name="state" defaultValue="Delhi" />
+            <input
+              type="text"
+              name="state"
+              value={formData?.address_information?.state || ""}
+              onChange={(e) => handleFormChange(e, "address_information")}
+            />
           </div>
 
           <div className="form-group">
             <label>City</label>
 
-            <input type="text" name="city" defaultValue="" />
+            <input
+              type="text"
+              name="city"
+              value={formData?.address_information?.city || ""}
+              onChange={(e) => handleFormChange(e, "address_information")}
+            />
           </div>
 
           <div className="form-group">
             <label>Pincode</label>
 
-            <input type="text" name="pincode" defaultValue="380007" />
+            <input
+              type="text"
+              name="pincode"
+              value={formData?.address_information?.pincode || ""}
+              onChange={(e) => handleFormChange(e, "address_information")}
+            />
           </div>
 
           <div className="form-group">
@@ -441,7 +530,8 @@ const EditDetailForm = () => {
             <select
               name="domain_type"
               id="editDomainType"
-              defaultValue="existing"
+              value={formData?.domain?.domain_type || ""}
+              onChange={(e) => handleFormChange(e, "domain")}
             >
               <option value="">No domain</option>
               <option value="existing">Already have domain</option>
@@ -460,7 +550,8 @@ const EditDetailForm = () => {
                 type="text"
                 name="domain"
                 id="editDomainName"
-                defaultValue="dar.com"
+                value={formData?.domain?.domain || ""}
+                onChange={(e) => handleFormChange(e, "domain")}
                 placeholder="example.com"
               />
 
@@ -493,7 +584,8 @@ const EditDetailForm = () => {
                 type="date"
                 name="domain_renewal_date"
                 id="editDomainRenewal"
-                defaultValue="2026-10-06"
+                value={formData?.domain?.domain_renewal_date || ""}
+                onChange={(e) => handleFormChange(e, "domain")}
               />
             </div>
           </div>
@@ -504,7 +596,11 @@ const EditDetailForm = () => {
           >
             <label>Period</label>
 
-            <select name="domain_period" defaultValue="">
+            <select
+              name="domain_period"
+              value={formData?.domain?.domain_period || ""}
+              onChange={(e) => handleFormChange(e, "domain")}
+            >
               <option value="">Select Period</option>
               <option value="Monthly">Monthly</option>
               <option value="Quarterly">Quarterly</option>
@@ -524,7 +620,8 @@ const EditDetailForm = () => {
               name="domain_rate"
               min="0"
               step="0.01"
-              defaultValue=""
+              value={formData?.domain?.domain_rate ?? ""}
+              onChange={(e) => handleFormChange(e, "domain")}
             />
           </div>
 
@@ -534,7 +631,12 @@ const EditDetailForm = () => {
           >
             <label>SAC</label>
 
-            <input type="text" name="sac" defaultValue="" />
+            <input
+              type="text"
+              name="sac"
+              value={formData?.domain?.sac || ""}
+              onChange={(e) => handleFormChange(e, "domain")}
+            />
           </div>
 
           <div
@@ -543,7 +645,12 @@ const EditDetailForm = () => {
           >
             <label>Domain Start</label>
 
-            <input type="date" name="domain_start" defaultValue="" />
+            <input
+              type="date"
+              name="domain_start"
+              value={formData?.domain?.domain_start || ""}
+              onChange={(e) => handleFormChange(e, "domain")}
+            />
           </div>
 
           <div
@@ -552,7 +659,12 @@ const EditDetailForm = () => {
           >
             <label>Domain End</label>
 
-            <input type="date" name="domain_end" defaultValue="" />
+            <input
+              type="date"
+              name="domain_end"
+              value={formData?.domain?.domain_end || ""}
+              onChange={(e) => handleFormChange(e, "domain")}
+            />
           </div>
         </div>
 

@@ -3,10 +3,20 @@ import styles from "@/components/dashboard/leads/Leads.module.css";
 
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 
-const AddDocumentForm = ({ leadId = 70, csrfToken }) => {
-  const [files, setFiles] = useState([]);
+const AddDocumentForm = ({
+  leadId = 70,
+  csrfToken,
+  formData,
+  handleFormChange,
+  onFilesChange,
+}) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const documentForm = formData?.document_detail || {
+    document_type: "PAN Card",
+    files: [],
+  };
+  const files = documentForm.files || [];
 
   const handleFiles = (fileList) => {
     const picked = Array.from(fileList);
@@ -16,7 +26,7 @@ const AddDocumentForm = ({ leadId = 70, csrfToken }) => {
       return;
     }
     setError("");
-    setFiles(picked);
+    onFilesChange(picked);
   };
 
   const handleSubmit = async (e) => {
@@ -26,22 +36,24 @@ const AddDocumentForm = ({ leadId = 70, csrfToken }) => {
       return;
     }
     setLoading(true);
+    const formElement = e.currentTarget;
     try {
-      const formData = new FormData(e.currentTarget);
-      // the file input already adds files under "documents[]"
+      const body = new FormData(formElement);
+      body.delete("documents[]");
+      files.forEach((file) => body.append("documents[]", file));
       const res = await fetch(
         `https://superadmin.tizzygroup.com/crm/leads/${leadId}/documents`,
         {
           method: "POST",
-          body: formData,
+          body,
           credentials: "include",
           headers: { "X-CSRF-TOKEN": csrfToken, Accept: "application/json" },
           // do NOT set Content-Type; the browser adds the multipart boundary
         }
       );
       if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-      setFiles([]);
-      e.currentTarget.reset();
+      onFilesChange([]);
+      formElement.reset();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -62,7 +74,14 @@ const AddDocumentForm = ({ leadId = 70, csrfToken }) => {
 
           <div className="form-group" style={{ marginBottom: "16px" }}>
             <label htmlFor="document_type">Document Type</label>
-            <select id="document_type" name="document_type">
+            <select
+              id="document_type"
+              name="document_type"
+              value={documentForm.document_type}
+              onChange={(event) =>
+                handleFormChange(event, "document_detail")
+              }
+            >
               <option value="PAN Card">PAN Card</option>
               <option value="GST Certificate">GST Certificate</option>
               <option value="Address Proof">Address Proof</option>
