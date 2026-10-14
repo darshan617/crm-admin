@@ -1,0 +1,118 @@
+.quoActivityPage {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.quoActivityPage .statsGrid {
+    display: grid;
+    margin: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.summaryCard {
+    position: relative;
+    padding: 16px;
+    border: 1px solid #E7E9EB;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 5px 5px 10px rgba(80, 145, 197, .15);
+    transition: all .35s ease;
+    overflow: hidden;
+}
+
+.summaryCard p {
+    margin: 0 0 8px;
+    font-size: var(--font-size-14px);
+    color: #313A46;
+    font-weight: 400;
+}
+
+.summaryCard h3 {
+    margin: 0;
+    font-size: var(--font-size-24px);
+    font-weight: 600;
+    color: var(--text-light);
+    line-height: 1.2;
+}
+.quoActivityPage .summaryCard small {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+    word-break: break-word;
+}
+
+.quoActivityTimeline {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0 0;
+}
+
+.quoActivityTimeline li {
+    position: relative;
+    padding: 0 0 22px 22px;
+    border-left: 2px solid #e6edf5;
+}
+
+.quoActivityTimeline li::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 99px;
+    background: #0355ac;
+}
+
+.quoActivityTimeline h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.quoActivityTimeline p {
+    margin: 0;
+    font-size: 13px;
+    color: #475569;
+}
+.quoActivityTimeline small {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #94a3b8;
+}
+.quotationTopMeta {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 50px;
+    width: 100%;
+    margin: 0 0 18px;
+    padding: 4px 2px 16px;
+    border-bottom: 1px solid #e6ebf2;
+}
+
+.qmetaField {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    /* flex: 1 1 140px; */
+    gap: 6px;
+    min-width: 140px;
+}
+.qmetaField>span {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8b97a8;
+    line-height: 1;
+}
+

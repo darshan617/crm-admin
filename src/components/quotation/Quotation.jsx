@@ -10,6 +10,12 @@ import {
   LuRotateCcw,
   LuChevronRight,
   LuChevronLeft,
+  LuEye,
+  LuHistory,
+  LuPencil,
+  LuDownload,
+  LuMail,
+  LuCornerUpRight,
 } from "react-icons/lu";
 
 const quotations = [
@@ -205,24 +211,17 @@ const quotations = [
   },
 ];
 
-const BASE = "https://superadmin.tizzygroup.com/crm/quotations";
-
 const TABS = [
   { key: "all", label: "All" },
   { key: "discount", label: "Discount Status" },
   { key: "customer", label: "Customer Status" },
 ];
 
-// --- Derived statuses -------------------------------------------------------
-// Replace these with real fields from your API when available.
 const getDiscountStatus = (q) => {
-  // Discount-request status. Replace `discountStatus` with your API field
-  // ("pending" | "approved" | "rejected" ...). Defaults to pending.
   const key = q.discountStatus ?? "pending";
   return { key, type: key, label: key.charAt(0).toUpperCase() + key.slice(1) };
 };
 
-// Customer Status tab lists only quotations that have been shared with the customer.
 const isShared = (q) => q.status.label !== "Not shared";
 
 const Quotation = () => {
@@ -230,26 +229,39 @@ const Quotation = () => {
   const [filterOpen, setFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
-  const [discountFilter, setDiscountFilter] = useState("pending"); // pending | approved | all
-  // Status dropdown value for the "All" and "Customer Status" tabs ("" = no filter)
+  const [discountFilter, setDiscountFilter] = useState("pending");
   const [statusFilter, setStatusFilter] = useState({ all: "", customer: "" });
+
+  const [activeQuotation, setActiveQuotation] = useState(null);
+  const [popupPosition, setPopupPosition] = useState({
+    top: 0,
+    left: 0,
+  });
 
   const openQuotationMenu = (q, e) => {
     e.stopPropagation();
-    // Hook up your actions menu here (view / history / edit / download / invoice)
-    console.log("Quotation actions", {
-      id: q.id,
-      email: q.email,
-      approved: q.approved,
-      locked: q.locked,
-      view: `${BASE}/${q.id}`,
-      history: `${BASE}/${q.id}/activity`,
-      edit: `${BASE}/${q.id}/edit`,
-      download: `${BASE}/${q.id}/download`,
-      invoiceDownload: `${BASE}/${q.id}/invoice/download`,
-    });
-  };
 
+    const buttonRect = e.currentTarget.getBoundingClientRect();
+
+    const popupWidth = 260;
+    const popupHeight = 275;
+
+    const left = Math.max(
+      12,
+      Math.min(
+        buttonRect.right - popupWidth,
+        window.innerWidth - popupWidth - 12,
+      ),
+    );
+
+    const top = Math.min(
+      buttonRect.bottom + 8,
+      window.innerHeight - popupHeight - 12,
+    );
+
+    setPopupPosition({ top: Math.max(12, top), left });
+    setActiveQuotation((current) => (current?.id === q.id ? null : q));
+  };
   const switchTab = (key) => {
     setActiveTab(key);
     setFilterOpen(false);
@@ -258,11 +270,12 @@ const Quotation = () => {
   const visible = quotations.filter((q) =>
     `${q.code} ${q.company} ${q.contact}`
       .toLowerCase()
-      .includes(search.trim().toLowerCase())
+      .includes(search.trim().toLowerCase()),
   );
 
   const discountRows = visible.filter(
-    (q) => discountFilter === "all" || getDiscountStatus(q).key === discountFilter
+    (q) =>
+      discountFilter === "all" || getDiscountStatus(q).key === discountFilter,
   );
   const discountCount = (key) =>
     quotations.filter((q) => key === "all" || getDiscountStatus(q).key === key)
@@ -275,15 +288,15 @@ const Quotation = () => {
     activeTab === "discount"
       ? discountRows
       : activeTab === "customer"
-      ? customerRows
-      : allRows;
+        ? customerRows
+        : allRows;
   const pfx = activeTab === "customer" ? "es" : "crm"; // class prefix used by the backend markup
 
   const rowProps = (q) => ({
     key: q.id,
     className: "crm-quo-row table-row",
     style: { cursor: "pointer" },
-    onClick: () => router.push(`/crm/quotations/${q.id}`),
+    onClick: () => router.push(`/quotations/quotation-detail`),
   });
 
   const ContactCell = ({ q }) => (
@@ -371,7 +384,9 @@ const Quotation = () => {
               <div className={styles.assignedUser}>
                 <div className="user-info">
                   <div className={styles.avatarFlex}>
-                    <div className="mini-avatar primary">{q.assignee.letter}</div>
+                    <div className="mini-avatar primary">
+                      {q.assignee.letter}
+                    </div>
                     <h5>{q.assignee.name}</h5>
                   </div>
                   <small>
@@ -393,8 +408,6 @@ const Quotation = () => {
     </table>
   );
 
-  // ---------------- Tab: Discount Status ----------------
-  // Same table as "All", but the status badge is the discount-request status.
   const renderDiscount = () => renderAll(discountRows, getDiscountStatus);
 
   // ---------------- Tab: Customer Status ----------------
@@ -417,7 +430,9 @@ const Quotation = () => {
             key={q.id}
             className="es-quo-row table-row"
             style={{ cursor: "pointer" }}
-            onClick={() => router.push(`/crm/quotations/${q.id}/activity`)}
+            onClick={() =>
+              router.push(`/quotations/quotation-detail/${q.id}/activity`)
+            }
           >
             <td className={styles.orderId} data-label="Id">
               <span className="quotation-id">{q.code}</span>
@@ -444,13 +459,19 @@ const Quotation = () => {
               <span className={`badge ${q.status.type}`}>{q.status.label}</span>
             </td>
             <td className="status-col" data-label="Invoice">
-              {q.approved ? <span className="badge approved">Approved</span> : "—"}
+              {q.approved ? (
+                <span className="badge approved">Approved</span>
+              ) : (
+                "—"
+              )}
             </td>
             <td className="plan-action" data-label="Assigned To">
               <div className={styles.assignedUser}>
                 <div className="user-info">
                   <div className={styles.avatarFlex}>
-                    <div className="mini-avatar primary">{q.assignee.letter}</div>
+                    <div className="mini-avatar primary">
+                      {q.assignee.letter}
+                    </div>
                     <h5>{q.assignee.name}</h5>
                   </div>
                   <small>
@@ -478,16 +499,17 @@ const Quotation = () => {
         <div className="">
           <div className="breadcrumb welcome-text">
             <p>
-              <a href="https://superadmin.tizzygroup.com/crm/dashboard">
-                Dashboard
-              </a>
+              <a href="/">Dashboard</a>
               <span>/</span>{" "}
             </p>
           </div>
           <h2>Quotations </h2>
         </div>
         <div className={styles.crmActions}>
-          <a href="" className={`${styles.crmActionBtn} ${styles.active}`}>
+          <a
+            onClick={() => router.push("/quotations/add-quotation")}
+            className={`${styles.crmActionBtn} ${styles.active}`}
+          >
             <AiOutlineFileAdd size={20} />
             <span>Add Quotations</span>
           </a>
@@ -517,15 +539,15 @@ const Quotation = () => {
           <div className={`common-table-header ${pfx}-quo-header`}>
             <div className={`${pfx}-quo-title`}>
               <p>
-                Showing <strong>{shownRows.length ? 1 : 0} - {shownRows.length}</strong> from{" "}
-                <strong>{shownRows.length}</strong> Quotations
+                Showing{" "}
+                <strong>
+                  {shownRows.length ? 1 : 0} - {shownRows.length}
+                </strong>{" "}
+                from <strong>{shownRows.length}</strong> Quotations
               </p>
             </div>
 
-            <form
-              className="table-search"
-              onSubmit={(e) => e.preventDefault()}
-            >
+            <form className="table-search" onSubmit={(e) => e.preventDefault()}>
               <input
                 type="text"
                 id="partnerSearch"
@@ -534,6 +556,7 @@ const Quotation = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by Quotation"
                 autoComplete="off"
+                style={{outline: "none"}}
               />
               <LuSearch size={24} aria-hidden="true" />
             </form>
@@ -702,7 +725,8 @@ const Quotation = () => {
                     }`}
                     onClick={() => setDiscountFilter(key)}
                   >
-                    {label} (<span className="tab-count">{discountCount(key)}</span>)
+                    {label} (
+                    <span className="tab-count">{discountCount(key)}</span>)
                   </button>
                 ))}
               </div>
@@ -726,6 +750,78 @@ const Quotation = () => {
           </div>
         </div>
       </section>
+      {activeQuotation && (
+        <div
+          className={styles.quotationPopup}
+          style={{
+            top: popupPosition.top,
+            left: popupPosition.left,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={styles.popupTitle}>Quotation</div>
+
+          <div className={styles.popupActions}>
+            <Link
+              href={`/quotations/quotation-detail`}
+              className={styles.popupAction}
+              onClick={() => setActiveQuotation(null)}
+            >
+              <LuEye size={19} />
+              <span>View</span>
+            </Link>
+
+            <Link
+              href={`/quotations/history`}
+              className={styles.popupAction}
+              onClick={() => setActiveQuotation(null)}
+            >
+              <LuHistory size={19} />
+              <span>History</span>
+            </Link>
+
+            <Link
+              href={`/`}
+              className={styles.popupAction}
+              onClick={() => setActiveQuotation(null)}
+            >
+              <LuPencil size={19} />
+              <span>Edit</span>
+            </Link>
+
+            <Link
+              href={`/`}
+              className={styles.popupAction}
+              onClick={() => setActiveQuotation(null)}
+            >
+              <LuDownload size={19} />
+              <span>Download</span>
+            </Link>
+
+            <button
+              type="button"
+              className={styles.popupAction}
+              onClick={() => {
+                setActiveQuotation(null);
+              }}
+            >
+              <LuMail size={19} />
+              <span>Send</span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className={styles.discountBtn}
+            onClick={() => {
+              setActiveQuotation(null);
+            }}
+          >
+            <LuCornerUpRight size={18} />
+            <span>Send for more discount</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
