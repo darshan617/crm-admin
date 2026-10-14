@@ -1,0 +1,276 @@
+.quotationTopMeta {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 50px;
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 4px 2px 16px;
+  border-bottom: 1px solid #e6ebf2;
+}
+
+.qmetaField {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  /* flex: 1 1 140px; */
+  gap: 6px;
+  min-width: 140px;
+}
+
+.quotationActivityLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  margin-top: 14px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: #e7f1ff;
+  color: #0355ac;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+.quotationHeader,
+.quotation-preview .quotationHeader {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ddd !important;
+}
+
+.quotationNumber {
+  display: flex;
+  flex-direction: column;
+}
+
+.quotationCompany {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.quotationLogo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+.quotationBody {
+  max-height: 5000px;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    max-height 0.45s ease,
+    opacity 0.3s ease;
+}
+
+.quotationTo {
+  margin-top: 20px;
+}
+.quotationTo p {
+  margin: 0 0 3px;
+}
+.quotationTo strong {
+  margin-bottom: 2px;
+}
+.quotationTo strong,
+.quotationTo span {
+  display: block;
+  font-size: 14px;
+}
+
+.quotationSubject {
+  text-align: center;
+  margin: 25px 0 20px;
+}
+
+.quotationSubject strong {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.quotationContent p {
+  font-size: 14px;
+  margin: 0 0 15px;
+}
+.quotationContent p {
+  font-size: 14px;
+  margin: 0 0 15px;
+}
+
+.commercialTitle {
+  font-size: 14px;
+  margin-top: 28px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.commercialTitle strong {
+  font-weight: 500;
+}
+
+.quotationTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.quotationTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.quotationTable th {
+  background: #e6f6fb;
+  padding: 9px 10px;
+  text-align: left;
+  font-weight: 500;
+  /* border-right: 1px solid #d7e6eb; */
+}
+.quotationTable th:nth-child(4) {
+  text-align: center;
+}
+
+.quotationTable th:last-child {
+  text-align: right;
+}
+.quotationTable td:last-child {
+  text-align: right !important;
+  border-right: 0;
+}
+.quotationTable td {
+  padding: 8px 10px;
+  /* border-bottom: 1px solid #e1e5e8; */
+  /* border-right: 1px solid #e6eaed; */
+}
+
+.summaryRow {
+  border-top: 2px solid #e7e9eb;
+}
+
+.quotationTable .summaryRow td {
+  background: #fafafa;
+}
+
+.quotationTable td:nth-child(4) {
+  text-align: center;
+}
+
+.quotationTable .totalRow td {
+  background: #fafafa;
+  border: none;
+}
+
+.quotationTerms {
+  margin-top: 27px;
+}
+
+.quotationTerms p {
+  margin: 0 0 14px;
+}
+
+.quotationSignature {
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+  line-height: 1.8;
+}
+
+.quotationSignature strong {
+  font-weight: 700;
+}
+
+.quotationFooter {
+  border-top: 1px solid #ddd;
+  margin-top: 20px;
+  padding: 13px 0 27px;
+  text-align: center;
+  color: #444;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.quotationFooter small {
+  display: block;
+  font-size: 11px;
+  margin-bottom: 1px;
+  color: #555;
+}
+
+.quotationFooter strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.quotationFooter > span {
+  display: block;
+  font-size: 13px;
+}
+
+.footerContact {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 35px;
+  margin-top: 2px;
+}
+
+.footerContact span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.quotationActions {
+    position: relative;
+    background: #e4f2ff;
+    margin: 0;
+    padding: 13px 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border-radius: 0 0 10px 10px;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); */
+}
+
+.quotationActions::before {
+    content: "";
+    width: 113%;
+    height: 100%;
+    position: absolute;
+    background: #e4f2ff;
+    left: -4%;
+}
+
+.quotationActions button {
+    position: relative;
+    overflow: hidden;
+    height: 40px;
+    min-width: 130px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #d9d9d9;
+    border-radius: 22px;
+    background: #fff;
+    color: #444;
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
