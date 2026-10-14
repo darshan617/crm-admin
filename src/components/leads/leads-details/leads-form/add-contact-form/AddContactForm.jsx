@@ -1,8 +1,15 @@
 import React from "react";
 import styles from "@/components/leads/leads-details/leads-form/add-contact-form/AddContactForm.module.css";
 
-const AddContactForm = ({ leadId, initialData = null }) => {
+const AddContactForm = ({
+  leadId,
+  initialData = null,
+  formData,
+  handleFormChange,
+  formIndex = 0,
+}) => {
   const isEditing = Boolean(initialData?.id);
+  const contact = formData?.additional_contact?.[formIndex] || {};
 
   return (
     <>
@@ -33,7 +40,10 @@ const AddContactForm = ({ leadId, initialData = null }) => {
               type="text"
               name="name"
               id="contactName"
-              defaultValue={initialData?.name || ""}
+              value={contact.name || ""}
+              onChange={(event) =>
+                handleFormChange(event, "additional_contact", formIndex)
+              }
               required
             />
           </div>
@@ -43,7 +53,10 @@ const AddContactForm = ({ leadId, initialData = null }) => {
               type="text"
               name="designation"
               id="contactDesignation"
-              defaultValue={initialData?.designation || ""}
+              value={contact.designation || ""}
+              onChange={(event) =>
+                handleFormChange(event, "additional_contact", formIndex)
+              }
             />
           </div>
           <div className="form-group">
@@ -52,7 +65,10 @@ const AddContactForm = ({ leadId, initialData = null }) => {
               type="email"
               name="email"
               id="contactEmail"
-              defaultValue={initialData?.email || ""}
+              value={contact.email || ""}
+              onChange={(event) =>
+                handleFormChange(event, "additional_contact", formIndex)
+              }
             />
           </div>
           <div className="form-group">
@@ -61,9 +77,12 @@ const AddContactForm = ({ leadId, initialData = null }) => {
               type="tel"
               name="mobile"
               id="contactMobile"
-              defaultValue={initialData?.mobile || ""}
-              inputmode="numeric"
-              maxlength="15"
+              value={contact.mobile || ""}
+              onChange={(event) =>
+                handleFormChange(event, "additional_contact", formIndex)
+              }
+              inputMode="numeric"
+              maxLength="15"
               pattern="[0-9]{6,15}"
               className="js-mobile-digits"
             />
