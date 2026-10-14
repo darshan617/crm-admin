@@ -670,9 +670,15 @@ const Leads = () => {
                               <option value="" disabled>
                                 Plan Name
                               </option>
-                              <option value="basic">Basic</option>
-                              <option value="professional">Professional</option>
-                              <option value="enterprise">Enterprise</option>
+                              {Object.values(
+                                apiDropdownData?.data?.options?.plans || {},
+                              )
+                                .flat()
+                                .map((item) => (
+                                  <option key={item.id} value={item.id}>
+                                    {item.name}
+                                  </option>
+                                ))}
                             </select>
                           </div>
                         </div>
@@ -709,7 +715,7 @@ const Leads = () => {
                             <input
                               type="date"
                               name="renewal_dates"
-                              value={item.renewal_date}
+                              value={item.renewal_dates}
                               onChange={(e) =>
                                 handleFormChange(e, "current_service_info", idx)
                               }

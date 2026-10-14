@@ -4,12 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { GoArrowLeft, GoPlus } from "react-icons/go";
 import { FaPencil } from "react-icons/fa6";
-import { FiFileText, FiTrash2 } from "react-icons/fi";
-import { FaRegEye } from "react-icons/fa";
-import { MdOutlineFileDownload } from "react-icons/md";
-import { RiFileImageLine } from "react-icons/ri";
+import { FiTrash2 } from "react-icons/fi";
 import { IoChevronDown } from "react-icons/io5";
-import { LuClock3 } from "react-icons/lu";
 import styles from "@/components/leads/leads-details/LeadsDetails.module.css";
 import CustomPopup from "@/common-components/custom-popup/CustomPopup";
 import { useRouter } from "next/router";
@@ -25,39 +21,40 @@ import AddDocumentForm from "./leads-form/add-document-form/AddDocumentForm";
 import EditDetailForm from "./leads-form/edit-detail-form/EditDetailForm";
 import { useGetSingleLeadDeatilsQuery } from "@/redux/apis/leadsApi";
 
-const contacts = [1, 2, 3].map((n) => ({
-  title: `Contact Person ${n}`,
-  fullName: "Harsh Agarwal",
-  designation: "Manager",
-  email: "harsh@agarwalenterprise.com",
-  phone: "+91 981234 56780",
-}));
+const displayValue = (value) =>
+  value === null || value === undefined || value === "" ? "-" : value;
 
-const documents = [
-  {
-    name: "images 02-09-2026 13:12:52:866.png",
-    icon: RiFileImageLine,
-    by: "Mittal Solanki",
-    date: "02/09/2026 01:12 PM",
-  },
-  {
-    name: "images.png",
-    icon: RiFileImageLine,
-    by: "Mittal Solanki",
-    date: "02/09/2026 01:11 PM",
-  },
-  {
-    name: "GST_Certificate.pdf",
-    icon: FiFileText,
-    by: "Mittal Solanki",
-    date: "02/09/2026 01:05 PM",
-  },
-];
+const formatDate = (value) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("en", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+};
+
+const formatDateTimeInput = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const pad = (part) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate(),
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
 
 export default function LeadDetail() {
   const dispatch = useDispatch();
   const router = useRouter();
   const isPopupVisible = useSelector(selectIsPopupVisble);
+  const [editingItem, setEditingItem] = useState(null);
   const { data: getLeadDeatils } = useGetSingleLeadDeatilsQuery(
     {
       lead_id: router?.query?.slug,
@@ -65,10 +62,57 @@ export default function LeadDetail() {
     { skip: !router?.query?.slug },
   );
 
-  const removeService = (formId) => {
-    if (confirm("Remove this info?")) {
-      document.getElementById(formId)?.submit();
+  const statusBg = (status) => {
+    const renamedStatus = status?.toLowerCase();
+
+    if (renamedStatus === "new") {
+      return "var(--success-text)";
+    } else if (renamedStatus === "normal") {
+      return "var(--purple)";
+    } else if (
+      renamedStatus === "contacted" ||
+      renamedStatus === "qualified" ||
+      renamedStatus === "cold"
+    ) {
+      return "var(--primary)";
+    } else if (
+      renamedStatus === "coverted" ||
+      renamedStatus === "warm" ||
+      renamedStatus === "nurturing"
+    ) {
+      return "var(--orange)";
+    } else if (renamedStatus === "closed" || renamedStatus === "hot") {
+      return "var(--danger)";
+    } else {
+      return "gray";
     }
+  };
+
+  const leadData = getLeadDeatils?.data?.lead || {};
+  const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
+  const services = Array.isArray(leadData.services) ? leadData.services : [];
+  const currentServices = services.filter(
+    (service) =>
+      service.is_info === true ||
+      service.is_info === 1 ||
+      service.is_info === "1",
+  );
+  const ourServices = services.filter(
+    (service) =>
+      service.is_info !== true &&
+      service.is_info !== 1 &&
+      service.is_info !== "1",
+  );
+  const leadId = leadData.id || router?.query?.slug;
+
+  const openPopup = (popup, item = null) => {
+    setEditingItem(item);
+    dispatch(setIsPopupVisible(popup));
+  };
+
+  const closePopup = () => {
+    setEditingItem(null);
+    dispatch(setIsPopupVisible(""));
   };
 
   return (
@@ -110,20 +154,36 @@ export default function LeadDetail() {
               <div className={`${styles.commonTableCard} p-16`}>
                 <div className={styles.leadTopMeta}>
                   <span>
-                    Status :<div className="status-interested">Interested</div>
+                    Status :
+                    <span
+                      className={`${styles?.leadStatus} `}
+                      style={{
+                        background: statusBg(leadData?.lead_status),
+                      }}
+                    >
+                      {displayValue(leadData?.lead_status)}
+                    </span>
                   </span>
 
                   <span>
-                    Category :<div className="status-hot">Hot</div>
+                    Category :
+                    <span
+                      className={styles?.leadStatus}
+                      style={{
+                        background: statusBg(leadData?.lead_category),
+                      }}
+                    >
+                      {displayValue(leadData?.lead_category)}
+                    </span>
                   </span>
 
                   <span>
-                    Created On :<div>25 Jun, 2021</div>
+                    Created On :<span>{formatDate(leadData?.created_at)}</span>
                   </span>
                 </div>
 
                 <div className={styles.leadCompanyHeader}>
-                  <h3>Goyal Infotech Pvt. Ltd.</h3>
+                  <h3>{displayValue(leadData?.company_name)}</h3>
 
                   <button
                     type="button"
@@ -140,45 +200,66 @@ export default function LeadDetail() {
                 <div className={styles.leadInfoGrid}>
                   <div className={styles.infoItem}>
                     <label>Full Name</label>
-                    <p>Harsh Agarwal</p>
+                    <p>{displayValue(leadData?.name)}</p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>Designation</label>
-                    <p>Owner</p>
+                    <p>{displayValue(leadData?.designation)}</p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>Contact No.</label>
-                    <p>+91 981234 56780</p>
+                    <p>
+                      {leadData?.mobile
+                        ? `+${leadData?.mobile_code || ""} ${leadData.mobile}`
+                        : "-"}
+                    </p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>Email</label>
-                    <p>harsh@agarwalenterprise.com</p>
+                    <p>{displayValue(leadData?.email)}</p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>Industry</label>
-                    <p>Secondary (manufacturing)</p>
+                    <p>{displayValue(leadData?.industry)}</p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>Number of Employee</label>
-                    <p>125</p>
+                    <p>{displayValue(leadData?.no_of_employees)}</p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>GSTIN</label>
-                    <p>27ABCFU1234D2Z5</p>
+                    <p>{displayValue(leadData?.gstin)}</p>
                   </div>
 
                   <div className={styles.infoItem}>
                     <label>Address</label>
                     <p>
-                      Office No. 410, 9 Business Bay, Mindspace, Malad West,
-                      Mumbai, Maharashtra-400064. INDIA
+                      {[
+                        leadData?.mailing_address,
+                        leadData?.city,
+                        leadData?.state,
+                        leadData?.pincode,
+                        leadData?.country,
+                      ]
+                        .filter(Boolean)
+                        .join(", ") || "-"}
                     </p>
+                  </div>
+
+                  <div className={styles.infoItem}>
+                    <label>Domain</label>
+                    <p>{displayValue(leadData?.domain?.domain)}</p>
+                  </div>
+
+                  <div className={styles.infoItem}>
+                    <label>Business Type</label>
+                    <p>{displayValue(leadData?.business_type)}</p>
                   </div>
                 </div>
               </div>
@@ -194,7 +275,7 @@ export default function LeadDetail() {
                   <h3>CONTACT INFORMATION</h3>
 
                   <a
-                    onClick={() => dispatch(setIsPopupVisible("add-contact"))}
+                    onClick={() => openPopup("add-contact")}
                     className={styles.addCreditBtn}
                   >
                     <GoPlus />
@@ -203,33 +284,64 @@ export default function LeadDetail() {
                 </div>
 
                 <div className={styles.contactInformationSection}>
-                  {contacts.map((contact) => (
-                    <div className={styles.leadContactCard} key={contact.title}>
-                      <h4>{contact.title}</h4>
-
-                      <div className={styles.contactInfoGrid}>
-                        <div>
-                          <label>Full Name</label>
-                          <p>{contact.fullName}</p>
+                  {contacts.length ? (
+                    contacts.map((contact, index) => (
+                      <div
+                        className={styles.leadContactCard}
+                        key={contact.id ?? `${contact.name}-${index}`}
+                      >
+                        <div
+                          className={`${styles.serviceActions} ${styles.actionAbsolute}`}
+                        >
+                          <button
+                            type="button"
+                            title="Delete contact"
+                            aria-label={`Delete contact ${contact.name || ""}`}
+                          >
+                            <FiTrash2 />
+                          </button>
+                          <button
+                            type="button"
+                            title="Edit contact"
+                            aria-label={`Edit contact ${contact.name || ""}`}
+                            onClick={() =>
+                              openPopup("add-contact", {
+                                type: "contact",
+                                data: contact,
+                              })
+                            }
+                          >
+                            <FaPencil />
+                          </button>
                         </div>
+                        <h4>{displayValue(contact.name)}</h4>
 
-                        <div>
-                          <label>Designation</label>
-                          <p>{contact.designation}</p>
-                        </div>
+                        <div className={styles.contactInfoGrid}>
+                          <div>
+                            <label>Full Name</label>
+                            <p>{displayValue(contact.name)}</p>
+                          </div>
 
-                        <div>
-                          <label>Email</label>
-                          <p>{contact.email}</p>
-                        </div>
+                          <div>
+                            <label>Designation</label>
+                            <p>{displayValue(contact.designation)}</p>
+                          </div>
 
-                        <div>
-                          <label>Contact No.</label>
-                          <p>{contact.phone}</p>
+                          <div>
+                            <label>Email</label>
+                            <p>{displayValue(contact.email)}</p>
+                          </div>
+
+                          <div>
+                            <label>Contact No.</label>
+                            <p>{displayValue(contact.mobile)}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p>No contacts added.</p>
+                  )}
                 </div>
               </div>
             </section>
@@ -242,7 +354,7 @@ export default function LeadDetail() {
                   <h3>CURRENT SERVICE (INFO)</h3>
                   <a
                     onClick={() =>
-                      dispatch(setIsPopupVisible("add-current-service"))
+                      openPopup("add-current-service")
                     }
                     className={styles.addCreditBtn}
                     id="openAddInfoService"
@@ -267,132 +379,69 @@ export default function LeadDetail() {
                     Add Current Service
                   </a>
                 </div>
-                <div
-                  className={`${styles.serviceRequiredCard} ${styles.serviceRequiredCard2}`}
-                >
-                  <div className={styles.serviceItem}>
-                    <label>Domain</label>
-                    <p>dsadsa</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Service</label>
-                    <p>Google Workspace</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Plan Name</label>
-                    <p>Google Workspace Business Standard</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Current Price</label>
-                    <p>₹ 12,960.00</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Renewal Date</label>
-                    <p>-</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>No of Users</label>
-                    <p>1</p>
-                  </div>
-                  <div
-                    className={`${styles.serviceActions} ${styles.actionAbsolute}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => removeService("delete-service-66")}
+                {currentServices.length ? (
+                  currentServices.map((service) => (
+                    <div
+                      className={`${styles.serviceRequiredCard} ${styles.serviceRequiredCard2}`}
+                      key={service.id}
                     >
-                      <FiTrash2 />
-                    </button>
-                    <button
-                      type="button"
-                      className="edit-info-service-btn"
-                      data-action="https://superadmin.tizzygroup.com/crm/leads/70/services/66/update"
-                      data-provider="3"
-                      data-plan="20"
-                      data-sku="business-standard"
-                      data-quantity="1"
-                      data-rate="12960.00"
-                      data-renewal=""
-                      data-domain="dsadsa"
-                    >
-                      <FaPencil />
-                    </button>
-                  </div>
-                  <form
-                    id="delete-service-66"
-                    method="POST"
-                    action="https://superadmin.tizzygroup.com/crm/leads/70/services/66/delete"
-                  >
-                    <input
-                      type="hidden"
-                      name="_token"
-                      value="WW2Yc8aGHganqT0MoQtZEFariu0DTM7CjtaZh8YE"
-                      autoComplete="off"
-                    />{" "}
-                  </form>
-                </div>
-                <div className={styles.serviceRequiredCard}>
-                  <div className={styles.serviceItem}>
-                    <label>Domain</label>
-                    <p>dsadsa</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Service</label>
-                    <p>Google Workspace</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Plan Name</label>
-                    <p>Google Workspace Business Standard</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Current Price</label>
-                    <p>₹ 12,960.00</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>Renewal Date</label>
-                    <p>-</p>
-                  </div>
-                  <div className={styles.serviceItem}>
-                    <label>No of Users</label>
-                    <p>1</p>
-                  </div>
-                  <div
-                    className={`${styles.serviceActions} ${styles.actionAbsolute}`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => removeService("delete-service-67")}
-                    >
-                      <FiTrash2 />
-                    </button>
-                    <button
-                      type="button"
-                      className="edit-info-service-btn"
-                      data-action="https://superadmin.tizzygroup.com/crm/leads/70/services/67/update"
-                      data-provider="3"
-                      data-plan="20"
-                      data-sku="business-standard"
-                      data-quantity="1"
-                      data-rate="12960.00"
-                      data-renewal=""
-                      data-domain="dsadsa"
-                    >
-                      <FaPencil />
-                    </button>
-                  </div>
-                  <form
-                    id="delete-service-67"
-                    method="POST"
-                    action="https://superadmin.tizzygroup.com/crm/leads/70/services/67/delete"
-                  >
-                    <input
-                      type="hidden"
-                      name="_token"
-                      value="WW2Yc8aGHganqT0MoQtZEFariu0DTM7CjtaZh8YE"
-                      autoComplete="off"
-                    />{" "}
-                  </form>
-                </div>
+                      <div
+                        className={`${styles.serviceActions} ${styles.actionAbsolute}`}
+                      >
+                        <button
+                          type="button"
+                          title="Delete current service"
+                          aria-label="Delete current service"
+                        >
+                          <FiTrash2 />
+                        </button>
+                        <button
+                          type="button"
+                          title="Edit current service"
+                          aria-label="Edit current service"
+                          onClick={() =>
+                            openPopup("add-current-service", {
+                              type: "current-service",
+                              data: service,
+                            })
+                          }
+                        >
+                          <FaPencil />
+                        </button>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>Domain</label>
+                        <p>{displayValue(service.domain)}</p>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>Service</label>
+                        <p>{displayValue(service.provider?.name)}</p>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>Plan Name</label>
+                        <p>{displayValue(service.plan?.name)}</p>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>Current Price</label>
+                        <p>
+                          {service.rate === null || service.rate === undefined
+                            ? "-"
+                            : `₹ ${service.rate}`}
+                        </p>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>Renewal Date</label>
+                        <p>{formatDate(service.renewal_date)}</p>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>No of Users</label>
+                        <p>{displayValue(service.quantity)}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No current service information.</p>
+                )}
               </div>
             </section>
 
@@ -407,7 +456,7 @@ export default function LeadDetail() {
 
                   <a
                     onClick={() =>
-                      dispatch(setIsPopupVisible("add-our-service"))
+                      openPopup("add-our-service")
                     }
                     className={styles.addCreditBtn}
                   >
@@ -416,53 +465,78 @@ export default function LeadDetail() {
                   </a>
                 </div>
 
-                <div className={styles.serviceRequiredCard}>
-                  <div className={styles.serviceCheck}>
-                    <input type="checkbox" />
-                  </div>
+                {ourServices.length ? (
+                  ourServices.map((service) => (
+                    <div
+                      className={styles.serviceRequiredCard}
+                      key={service.id}
+                    >
+                      <div
+                        className={`${styles.serviceActions} ${styles.actionAbsolute}`}
+                      >
+                        <button
+                          type="button"
+                          title="Delete service"
+                          aria-label="Delete service"
+                        >
+                          <FiTrash2 />
+                        </button>
+                        <button
+                          type="button"
+                          title="Edit service"
+                          aria-label="Edit service"
+                          onClick={() =>
+                            openPopup("add-our-service", {
+                              type: "our-service",
+                              data: service,
+                            })
+                          }
+                        >
+                          <FaPencil />
+                        </button>
+                      </div>
+                      <div className={styles.serviceItem}>
+                        <label>Service</label>
+                        <p>{displayValue(service.provider?.name)}</p>
+                      </div>
 
-                  <div className={styles.serviceItem}>
-                    <label>Service</label>
-                    <p>Tizzy Cloud Email</p>
-                  </div>
+                      <div className={styles.serviceItem}>
+                        <label>Plan Name</label>
+                        <p>{displayValue(service.plan?.name)}</p>
+                      </div>
 
-                  <div className={styles.serviceItem}>
-                    <label>Plan Name</label>
-                    <p>Tizzy Mail Platinum 50 GB</p>
-                  </div>
+                      <div className={styles.serviceItem}>
+                        <label>Quot Period</label>
+                        <p>
+                          {displayValue(
+                            service.quote_period || service.plan?.billing_cycle,
+                          )}
+                        </p>
+                      </div>
 
-                  <div className={styles.serviceItem}>
-                    <label>Quot Period</label>
-                    <p>Yearly</p>
-                  </div>
+                      <div className={styles.serviceItem}>
+                        <label>Renewal Date</label>
+                        <p>{formatDate(service.renewal_date)}</p>
+                      </div>
 
-                  <div className={styles.serviceItem}>
-                    <label>Renewal Date</label>
-                    <p>12/06/2027</p>
-                  </div>
+                      <div className={styles.serviceItem}>
+                        <label>Rate</label>
+                        <p>
+                          {service.rate === null || service.rate === undefined
+                            ? "-"
+                            : `₹ ${service.rate}`}
+                        </p>
+                      </div>
 
-                  <div className={styles.serviceItem}>
-                    <label>Rate</label>
-                    <p>₹ 6510 per user/year</p>
-                  </div>
-
-                  <div className={styles.serviceItem}>
-                    <label>No of Users</label>
-                    <p>50</p>
-                  </div>
-
-                  <div
-                    className={`${styles.actionAbsolute} ${styles.serviceActions} `}
-                  >
-                    <button type="button">
-                      <FiTrash2 />
-                    </button>
-
-                    <button type="button">
-                      <FaPencil />
-                    </button>
-                  </div>
-                </div>
+                      <div className={styles.serviceItem}>
+                        <label>No of Users</label>
+                        <p>{displayValue(service.quantity)}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No services added.</p>
+                )}
 
                 <div className={styles.submitWrap}>
                   <button type="button" className={styles.submitBtn}>
@@ -482,7 +556,7 @@ export default function LeadDetail() {
                   <h3>DOCUMENTS</h3>
 
                   <a
-                    onClick={() => dispatch(setIsPopupVisible("add-document"))}
+                    onClick={() => openPopup("add-document")}
                     className={styles.addCreditBtn}
                   >
                     <GoPlus />
@@ -505,38 +579,28 @@ export default function LeadDetail() {
 
                   {/* DOCUMENTS */}
 
-                  {documents.map((doc) => {
-                    const FileIcon = doc.icon;
-
-                    return (
-                      <div className={styles.downloadRow} key={doc.name}>
-                        <div>
-                          <a href="#" className={styles.downloadFile}>
-                            <FileIcon />
-                            {doc.name}
-                          </a>
-                        </div>
-
-                        <div>{doc.by}</div>
-
-                        <div>{doc.date}</div>
-
-                        <div className={styles.serviceActions}>
-                          <button type="button" title="Preview">
-                            <FaRegEye />
-                          </button>
-
-                          <button type="button" title="Download">
-                            <MdOutlineFileDownload />
-                          </button>
-
-                          <button type="button" title="Delete">
-                            <FiTrash2 />
-                          </button>
-                        </div>
+                  {leadData.document ? (
+                    <div className={styles.downloadRow}>
+                      <div className={styles.downloadFile}>
+                        {displayValue(
+                          typeof leadData.document === "string"
+                            ? leadData.document
+                            : leadData.document.name,
+                        )}
                       </div>
-                    );
-                  })}
+                      <div>-</div>
+                      <div>
+                        {formatDate(
+                          typeof leadData.document === "object"
+                            ? leadData.document.created_at
+                            : null,
+                        )}
+                      </div>
+                      <div>-</div>
+                    </div>
+                  ) : (
+                    <p>No documents added.</p>
+                  )}
                 </div>
               </div>
             </section>
@@ -557,7 +621,7 @@ export default function LeadDetail() {
                   <h3>SCHEDULE FOLLOW UP</h3>
                 </div>
 
-                <div className="followup-form">
+                <div className="followup-form" key={leadData.id || "loading"}>
                   {/* Lead Category */}
 
                   <div className="form-group">
@@ -566,7 +630,12 @@ export default function LeadDetail() {
                     </label>
 
                     <div className="">
-                      <select defaultValue="New">
+                      <select
+                        defaultValue={
+                          leadData.lead_category || leadData.lead_priority || ""
+                        }
+                      >
+                        <option value="">Select Category</option>
                         <option>New</option>
                         <option>Hot</option>
                         <option>Warm</option>
@@ -583,12 +652,14 @@ export default function LeadDetail() {
                     </label>
 
                     <div className="">
-                      <select defaultValue="New">
+                      <select defaultValue={leadData.lead_source || ""}>
+                        <option value="">Select Source</option>
                         <option>New</option>
                         <option>Website</option>
                         <option>Reference</option>
                         <option>Tele Caller</option>
                         <option>Social Media</option>
+                        <option>LinkedIn</option>
                       </select>
                     </div>
                   </div>
@@ -601,12 +672,14 @@ export default function LeadDetail() {
                     </label>
 
                     <div className="">
-                      <select defaultValue="New">
+                      <select defaultValue={leadData.lead_status || ""}>
+                        <option value="">Select Status</option>
                         <option>New</option>
                         <option>Contacted</option>
                         <option>Qualified</option>
                         <option>Converted</option>
                         <option>Closed</option>
+                        <option>Nurturing</option>
                       </select>
                     </div>
                   </div>
@@ -621,7 +694,7 @@ export default function LeadDetail() {
                     <div className={styles.assignedUserForm}>
                       {/* <span className="user-avatar">N</span> */}
 
-                      <span>Namrata Singh</span>
+                      <span>{displayValue(leadData.assigned_to)}</span>
 
                       <IoChevronDown />
                     </div>
@@ -636,11 +709,11 @@ export default function LeadDetail() {
 
                     <div className="time-input">
                       <input
-                        type="text"
+                        type="datetime-local"
+                        defaultValue={formatDateTimeInput(
+                          leadData.follow_up_date,
+                        )}
                         placeholder="dd/mm/yy - hh:mm"
-                        onFocus={(e) => {
-                          e.currentTarget.type = "datetime-local";
-                        }}
                       />
                     </div>
                   </div>
@@ -652,7 +725,7 @@ export default function LeadDetail() {
                       Note <span>*</span>
                     </label>
 
-                    <textarea></textarea>
+                    <textarea defaultValue={leadData.follow_up_note || ""} />
                   </div>
 
                   <div className={styles.submitWrap}>
@@ -865,27 +938,42 @@ export default function LeadDetail() {
       </div>
 
       {isPopupVisible === "add-details-popup" && (
-        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
-          <EditDetailForm />
+        <CustomPopup onClose={closePopup}>
+          <EditDetailForm leadData={leadData} />
         </CustomPopup>
       )}
       {isPopupVisible === "add-contact" && (
-        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
-          <AddContactForm />
+        <CustomPopup onClose={closePopup}>
+          <AddContactForm
+            leadId={leadId}
+            initialData={
+              editingItem?.type === "contact" ? editingItem.data : null
+            }
+          />
         </CustomPopup>
       )}
       {isPopupVisible === "add-current-service" && (
-        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
-          <AddCurrentServiceForm />
+        <CustomPopup onClose={closePopup}>
+          <AddCurrentServiceForm
+            leadId={leadId}
+            initialData={
+              editingItem?.type === "current-service" ? editingItem.data : null
+            }
+          />
         </CustomPopup>
       )}
       {isPopupVisible === "add-our-service" && (
-        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
-          <AddOurService />
+        <CustomPopup onClose={closePopup}>
+          <AddOurService
+            leadId={leadId}
+            initialData={
+              editingItem?.type === "our-service" ? editingItem.data : null
+            }
+          />
         </CustomPopup>
       )}
       {isPopupVisible === "add-document" && (
-        <CustomPopup onClose={() => dispatch(setIsPopupVisible(""))}>
+        <CustomPopup onClose={closePopup}>
           <AddDocumentForm />
         </CustomPopup>
       )}

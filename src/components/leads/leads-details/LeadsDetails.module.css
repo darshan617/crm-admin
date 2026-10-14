@@ -134,9 +134,10 @@
 }
 
 .leadContactCard {
+  position: relative;
   width: 100%;
   margin-top: 11px;
-  padding: 12px;
+  padding: 12px 76px 12px 12px;
   display: flex;
   background: #f4f8fd;
   border: 1px solid #a9d1ff;
@@ -189,8 +190,8 @@
   column-gap: 18px;
   row-gap: 13px;
   /* padding-left: 50px; */
-  padding: 12px;
-  padding-left: 40px;
+  padding: 12px 76px 12px 12px;
+  /* padding-left: 40px; */
   background: #f4f8fd;
   border: 1px solid #a9d1ff;
   border-radius: 6px;
@@ -475,48 +476,56 @@
 }
 
 .activityIcon.blue {
-    color: #006bc7;
-    background: #eaf3ff;
+  color: #006bc7;
+  background: #eaf3ff;
 }
 
 .activityIcon.purple {
-    color: #7564ff;
-    background: #f1efff;
+  color: #7564ff;
+  background: #f1efff;
 }
 
 .activityIcon {
-    width: 42px;
-    height: 42px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    position: relative;
-    z-index: 2;
-    border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  position: relative;
+  z-index: 2;
+  border-radius: 50%;
 }
 
 .activityContent {
-    padding-left: 12px;
-    padding: 0px 0 16px 12px;
+  padding-left: 12px;
+  padding: 0px 0 16px 12px;
 }
 
 .activityItem:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    left: 17px;
-    top: 34px;
-    bottom: -8px;
-    width: 1px;
-    background: #dfe4ea;
-    z-index: 1;
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 34px;
+  bottom: -8px;
+  width: 1px;
+  background: #dfe4ea;
+  z-index: 1;
 }
 
 .customerInfo {
-    position: sticky;
-    top: 20px;
-    align-self: start;
-    height: fit-content;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  height: fit-content;
 }
-
+.leadStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  margin-left: 4px;
+  border-radius: 3px;
+  color: #fff !important;
+  font-size: 13px;
+}

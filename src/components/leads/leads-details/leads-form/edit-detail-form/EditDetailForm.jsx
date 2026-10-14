@@ -1,11 +1,14 @@
 import React from "react";
 import styles from "@/components/leads/leads-details/leads-form/edit-detail-form/EditDetailForm.module.css";
-const EditDetailForm = () => {
+const EditDetailForm = ({ leadData = {} }) => {
+  const domain = leadData.domain || {};
+
   return (
     <div className={styles.creditModalBox}>
       <h2>Add / Edit Lead Details</h2>
 
       <form
+        key={leadData.id || "loading"}
         method="POST"
         action="https://superadmin.tizzygroup.com/crm/leads/70/update"
         className="common-form"
@@ -30,7 +33,7 @@ const EditDetailForm = () => {
                 name="salutation"
                 className="form-control phone-code-select title-select"
                 required
-                defaultValue="Mr"
+                defaultValue={leadData.salutation || ""}
               >
                 <option value="">Title</option>
                 <option value="Mr">Mr</option>
@@ -41,7 +44,7 @@ const EditDetailForm = () => {
               <input
                 type="text"
                 name="name"
-                defaultValue="Darshan B"
+                defaultValue={leadData.name || ""}
                 required
               />
             </div>
@@ -50,7 +53,7 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Designation</label>
 
-            <select name="designation" defaultValue="Accounts">
+            <select name="designation" defaultValue={leadData.designation || ""}>
               <option value="">Select Designation</option>
               <option value="Accounts">Accounts</option>
               <option value="Director">Director</option>
@@ -68,7 +71,7 @@ const EditDetailForm = () => {
             <input
               type="email"
               name="email"
-              defaultValue="darshan1@goyalinfotech.com"
+              defaultValue={leadData.email || ""}
               required
             />
           </div>
@@ -82,7 +85,7 @@ const EditDetailForm = () => {
               <select
                 name="mobile_code"
                 className="form-control phone-code-select"
-                defaultValue="91"
+                defaultValue={leadData.mobile_code || "91"}
               >
                 <option value="91">+91 India</option>
                 <option value="93">+93 Afghanistan</option>
@@ -259,7 +262,7 @@ const EditDetailForm = () => {
               <input
                 type="tel"
                 name="mobile"
-                defaultValue="9658745858"
+                defaultValue={leadData.mobile || ""}
                 required
                 inputMode="numeric"
                 maxLength="15"
@@ -274,13 +277,16 @@ const EditDetailForm = () => {
             <input
               type="text"
               name="company_name"
-              defaultValue="CENTRAL WARE HOUSING CORP.LTD."
+              defaultValue={leadData.company_name || ""}
             />
           </div>
 
           <div className="form-group">
             <label>Business</label>
-            <select name="business_type" defaultValue="existing">
+            <select
+              name="business_type"
+              defaultValue={leadData.business_type || ""}
+            >
               <option value="new">New Business</option>
               <option value="existing">Existing Business</option>
             </select>
@@ -291,7 +297,7 @@ const EditDetailForm = () => {
             <input
               type="text"
               name="industry"
-              defaultValue="CORPORATION"
+              defaultValue={leadData.industry || ""}
               placeholder="Filled from GSTIN"
             />
           </div>
@@ -302,7 +308,7 @@ const EditDetailForm = () => {
               type="number"
               name="no_of_employees"
               min="0"
-              defaultValue="22"
+              defaultValue={leadData.no_of_employees ?? ""}
             />
           </div>
 
@@ -313,7 +319,7 @@ const EditDetailForm = () => {
               type="text"
               name="gstin"
               id="editGstin"
-              defaultValue="24AAACC1206D1ZM"
+              defaultValue={leadData.gstin || ""}
               maxLength="15"
             />
 
@@ -330,7 +336,7 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Assigned To</label>
 
-            <select name="assigned_to" defaultValue="Darshan Bane">
+            <select name="assigned_to" defaultValue={leadData.assigned_to || ""}>
               <option value="">Select Employee</option>
               <option value="Darshan Bane">Darshan Bane</option>
               <option value="Janvi Singh">Janvi Singh</option>
@@ -341,7 +347,10 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Lead Priority</label>
 
-            <select name="lead_category" defaultValue="Hot">
+            <select
+              name="lead_category"
+              defaultValue={leadData.lead_priority || ""}
+            >
               <option value="">Select Priority</option>
               <option value="Cold">Cold</option>
               <option value="Hot">Hot</option>
@@ -355,7 +364,11 @@ const EditDetailForm = () => {
               Lead Status <span>*</span>
             </label>
 
-            <select name="lead_status" required defaultValue="Contacted">
+            <select
+              name="lead_status"
+              required
+              defaultValue={leadData.lead_status || ""}
+            >
               <option value="">Select Status</option>
               <option value="Contacted">Contacted</option>
               <option value="Lost">Lost</option>
@@ -371,7 +384,10 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Lead Bifurcation</label>
 
-            <select name="lead_bifurcation" defaultValue="B2B">
+            <select
+              name="lead_bifurcation"
+              defaultValue={leadData.lead_bifurcation || ""}
+            >
               <option value="">Select Bifurcation</option>
               <option value="B2B">B2B</option>
               <option value="B2C">B2C</option>
@@ -381,7 +397,7 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>Lead Source</label>
 
-            <select name="lead_source" defaultValue="Website">
+            <select name="lead_source" defaultValue={leadData.lead_source || ""}>
               <option value="">Select Source</option>
               <option value="Email">Email</option>
               <option value="Exhibition">Exhibition</option>
@@ -401,14 +417,14 @@ const EditDetailForm = () => {
             <input
               type="text"
               name="mailing_address"
-              defaultValue="CENTRAL WAREHOUSING CORPORATION, MAHALAXMI CHAR RASTA, PALDI, Ahmedabad, Gujarat, 380007"
+              defaultValue={leadData.mailing_address || ""}
             />
           </div>
 
           <div className="form-group">
             <label>Country</label>
 
-            <select name="country" defaultValue="India">
+            <select name="country" defaultValue={leadData.country || ""}>
               <option value="">Select Country</option>
               <option value="India">India</option>
               <option value="United States">United States</option>
@@ -420,19 +436,23 @@ const EditDetailForm = () => {
           <div className="form-group">
             <label>State</label>
 
-            <input type="text" name="state" defaultValue="Delhi" />
+            <input type="text" name="state" defaultValue={leadData.state || ""} />
           </div>
 
           <div className="form-group">
             <label>City</label>
 
-            <input type="text" name="city" defaultValue="" />
+            <input type="text" name="city" defaultValue={leadData.city || ""} />
           </div>
 
           <div className="form-group">
             <label>Pincode</label>
 
-            <input type="text" name="pincode" defaultValue="380007" />
+            <input
+              type="text"
+              name="pincode"
+              defaultValue={leadData.pincode || ""}
+            />
           </div>
 
           <div className="form-group">
@@ -441,7 +461,7 @@ const EditDetailForm = () => {
             <select
               name="domain_type"
               id="editDomainType"
-              defaultValue="existing"
+              defaultValue={domain.domain_type || ""}
             >
               <option value="">No domain</option>
               <option value="existing">Already have domain</option>
@@ -460,7 +480,7 @@ const EditDetailForm = () => {
                 type="text"
                 name="domain"
                 id="editDomainName"
-                defaultValue="dar.com"
+                defaultValue={domain.domain || ""}
                 placeholder="example.com"
               />
 
@@ -493,7 +513,7 @@ const EditDetailForm = () => {
                 type="date"
                 name="domain_renewal_date"
                 id="editDomainRenewal"
-                defaultValue="2026-10-06"
+                defaultValue={domain.domain_renewal_date?.slice(0, 10) || ""}
               />
             </div>
           </div>
@@ -504,7 +524,10 @@ const EditDetailForm = () => {
           >
             <label>Period</label>
 
-            <select name="domain_period" defaultValue="">
+            <select
+              name="domain_period"
+              defaultValue={domain.domain_period || ""}
+            >
               <option value="">Select Period</option>
               <option value="Monthly">Monthly</option>
               <option value="Quarterly">Quarterly</option>
@@ -524,7 +547,7 @@ const EditDetailForm = () => {
               name="domain_rate"
               min="0"
               step="0.01"
-              defaultValue=""
+              defaultValue={domain.domain_rate ?? ""}
             />
           </div>
 
@@ -534,7 +557,11 @@ const EditDetailForm = () => {
           >
             <label>SAC</label>
 
-            <input type="text" name="sac" defaultValue="" />
+            <input
+              type="text"
+              name="sac"
+              defaultValue={leadData.sac ?? domain.sac ?? ""}
+            />
           </div>
 
           <div
@@ -543,7 +570,11 @@ const EditDetailForm = () => {
           >
             <label>Domain Start</label>
 
-            <input type="date" name="domain_start" defaultValue="" />
+            <input
+              type="date"
+              name="domain_start"
+              defaultValue={domain.domain_start?.slice(0, 10) || ""}
+            />
           </div>
 
           <div
@@ -552,7 +583,11 @@ const EditDetailForm = () => {
           >
             <label>Domain End</label>
 
-            <input type="date" name="domain_end" defaultValue="" />
+            <input
+              type="date"
+              name="domain_end"
+              defaultValue={domain.domain_end?.slice(0, 10) || ""}
+            />
           </div>
         </div>
 
