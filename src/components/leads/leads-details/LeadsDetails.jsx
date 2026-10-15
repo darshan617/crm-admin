@@ -751,10 +751,6 @@ export default function LeadDetail() {
               </div>
             </section>
 
-            {/* =========================
-                SERVICE REQUIRED
-            ========================== */}
-
             <section className="common-table-section">
               <div className={`${styles.commonTableCard} p-16`}>
                 <div className={styles.cardHeader}>

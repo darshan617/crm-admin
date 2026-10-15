@@ -1871,13 +1871,13 @@ function QuotationCreate() {
             <p>
               <Link href="/crm/dashboard">Dashboard</Link>
               <span>/</span>
-              <Link href="/crm/quotations">Quotations</Link>
+              <Link href="/quotations">Quotations</Link>
             </p>
           </div>
           <h2>Add Quotations</h2>
         </div>
         <div className="back">
-          <Link href="/crm/quotations" className="back-btn">
+          <Link href="/quotations" className="back-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="22"
