@@ -4,12 +4,6 @@
   gap: 26px;
 }
 
-.crmActions {
-  display: flex;
-  align-items: center;
-  gap: 26px;
-}
-
 .crmActionBtn {
   width: 154px;
   height: 44px;
@@ -118,90 +112,82 @@
 }
 
 .cardIcon {
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    font-size: var(--font-size-20px);
-    margin-bottom: 5px;
-    transition: .35s;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: var(--font-size-20px);
+  margin-bottom: 5px;
+  transition: 0.35s;
 }
 
 .cardIcon.blue {
-    background: #0355AC15;
-    color: #0355AC;
+  background: #0355ac15;
+  color: #0355ac;
 }
 
 .cardIcon.green {
-    background: #02BC9C15;
-    color: #02BC9C;
+  background: #02bc9c15;
+  color: #02bc9c;
 }
 
 .cardIcon.orange {
-    background: #F9BF5915;
-    color: #F9BF59;
+  background: #f9bf5915;
+  color: #f9bf59;
 }
 
 .cardIcon.purple {
-    background: #7B70EF15;
-    color: #7B70EF;
+  background: #7b70ef15;
+  color: #7b70ef;
 }
 
 .cardIcon.red {
-    background: #F7577E15;
-    color: #F7577E;
+  background: #f7577e15;
+  color: #f7577e;
 }
 
 .statContent h4 {
-    font-size: var(--font-size-14px);
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    color: #9BA6B7;
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  color: #9ba6b7;
 }
 
 .statContent h2 {
-    font-size: var(--font-size-24px);
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    color: #444444;
+  font-size: var(--font-size-24px);
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  color: #444444;
 }
 
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@media (max-width: 575px) {
+  .crmActions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .crmActionBtn {
+    width: 100% !important;
+  }
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  .pageHeader{
+    display: flex;
+    flex-direction: column;
+  }
+}
 
 @media (max-width: 991px) {
   .crm-actions {

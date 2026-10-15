@@ -307,13 +307,14 @@
 }
 
 .downloadRow {
-  display: grid;
-  grid-template-columns: minmax(280px, 2fr) 1fr 1fr 130px;
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
   border-bottom: 1px solid #e5e7eb;
   color: #4c4c5c;
   font-size: 13px;
   padding: 10px;
+  gap: 10px;
 }
 
 .downloadFile {

@@ -22,7 +22,10 @@ import EditDetailForm from "./leads-form/edit-detail-form/EditDetailForm";
 import {
   useGetDdDataQuery,
   useGetSingleLeadDeatilsQuery,
+  useUpdateLeadMutation,
 } from "@/redux/apis/leadsApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { ImAttachment } from "react-icons/im";
 
 const displayValue = (value) =>
   value === null || value === undefined || value === "" ? "-" : value;
@@ -146,6 +149,7 @@ const createLeadFormData = (leadData) => {
 };
 
 export default function LeadDetail() {
+  const { showToast } = useToast();
   const dispatch = useDispatch();
   const router = useRouter();
   const isPopupVisible = useSelector(selectIsPopupVisble);
@@ -235,11 +239,13 @@ export default function LeadDetail() {
     },
     { skip: !router?.query?.slug },
   );
-  const { data: apiDropdownData } = useGetDdDataQuery();
+
+  const [updateLead, { isLoading }] = useUpdateLeadMutation();
 
   const leadData = getLeadDeatils?.data?.lead || {};
   const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
   const services = Array.isArray(leadData.services) ? leadData.services : [];
+
   const currentServices = services.filter(
     (service) =>
       service.is_info === true ||
@@ -269,7 +275,7 @@ export default function LeadDetail() {
     const serviceSections = ["current_service_info", "our_service_plan_detail"];
     const selectedPlan =
       stateField === "plan_id"
-        ? Object.values(apiDropdownData?.data?.options?.plans || {})
+        ? Object.values(getLeadDeatils?.data?.options?.plans || {})
             .flat()
             .find((plan) => String(plan.id) === String(value))
         : null;
@@ -309,13 +315,21 @@ export default function LeadDetail() {
     });
   };
 
-  const handleDocumentFilesChange = (files) => {
+  const handleDocumentSelect = (event) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    if (selectedFiles.length === 0) return;
+
     setFormData((prev) => ({
       ...prev,
-      document_detail: {
-        ...prev.document_detail,
-        files,
-      },
+      documents: [...prev.documents, ...selectedFiles],
+    }));
+    event.target.value = "";
+  };
+
+  const handleDocumentRemove = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      documents: prev.documents.filter((_, fileIndex) => fileIndex !== index),
     }));
   };
 
@@ -421,6 +435,65 @@ export default function LeadDetail() {
   const closePopup = () => {
     setEditingItem(null);
     dispatch(setIsPopupVisible(""));
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const formBody = new FormData();
+      formBody.append(
+        "customer_detail",
+        JSON.stringify(formData.customer_detail),
+      );
+
+      formBody.append(
+        "address_information",
+        JSON.stringify(formData.address_information),
+      );
+
+      formBody.append("domain", JSON.stringify(formData.domain));
+
+      formBody.append(
+        "current_service_info",
+        JSON.stringify(formData.current_service_info),
+      );
+
+      formBody.append(
+        "our_service_plan_detail",
+        JSON.stringify(formData.our_service_plan_detail),
+      );
+
+      formBody.append(
+        "additional_contact",
+        JSON.stringify(formData.additional_contact),
+      );
+
+      formBody.append(
+        "lead_specification",
+        JSON.stringify(formData.lead_specification),
+      );
+
+      formBody.append(
+        "follow_up_detail",
+        JSON.stringify(formData.follow_up_detail),
+      );
+
+      formData.documents.forEach((file) => {
+        formBody.append("attachments[]", file);
+      });
+
+      const res = await updateLead({
+        lead_id: router?.query?.slug,
+        body: formBody,
+      });
+      console.log(res);
+      if (res?.data?.success) {
+        showToast(res?.data?.message, "success");
+        dispatch(setIsPopupVisible(""));
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -751,10 +824,6 @@ export default function LeadDetail() {
               </div>
             </section>
 
-            {/* =========================
-                SERVICE REQUIRED
-            ========================== */}
-
             <section className="common-table-section">
               <div className={`${styles.commonTableCard} p-16`}>
                 <div className={styles.cardHeader}>
@@ -874,35 +943,25 @@ export default function LeadDetail() {
 
                   <div className={styles.downloadHeader}>
                     <div>File Name</div>
-
-                    <div>Attached By</div>
-
-                    <div>Date Added</div>
-
-                    <div className="status-col">Action</div>
                   </div>
 
                   {/* DOCUMENTS */}
 
-                  {leadData.document ? (
-                    <div className={styles.downloadRow}>
-                      <div className={styles.downloadFile}>
-                        {displayValue(
-                          typeof leadData.document === "string"
-                            ? leadData.document
-                            : leadData.document.name,
-                        )}
-                      </div>
-                      <div>-</div>
-                      <div>
-                        {formatDate(
-                          typeof leadData.document === "object"
-                            ? leadData.document.created_at
-                            : null,
-                        )}
-                      </div>
-                      <div>-</div>
-                    </div>
+                  {leadData.document?.length > 0 ? (
+                    leadData?.document?.map((item, idx) => {
+                      return (
+                        <div className={styles.downloadRow}>
+                          <ImAttachment />
+                          <Link
+                            className={styles.downloadFile}
+                            href={item?.url}
+                            target="_blank"
+                          >
+                            {displayValue(item?.name)}
+                          </Link>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p>No documents added.</p>
                   )}
@@ -939,12 +998,17 @@ export default function LeadDetail() {
                         defaultValue={
                           leadData.lead_category || leadData.lead_priority || ""
                         }
+                        onChange={(e) =>
+                          handleFormChange(e, "lead_specification")
+                        }
+                        name="lead_priority"
                       >
                         <option value="">Select Category</option>
-                        <option>New</option>
-                        <option>Hot</option>
-                        <option>Warm</option>
-                        <option>Cold</option>
+                        {getLeadDeatils?.data?.options?.lead_priority?.map(
+                          (item, idx) => {
+                            return <option value={item}>{item}</option>;
+                          },
+                        )}
                       </select>
                     </div>
                   </div>
@@ -957,14 +1021,20 @@ export default function LeadDetail() {
                     </label>
 
                     <div className="">
-                      <select defaultValue={leadData.lead_source || ""}>
+                      <select
+                        // value={formData.lead_specification.lead_source}
+                        defaultValue={leadData.lead_source || ""}
+                        onChange={(e) =>
+                          handleFormChange(e, "lead_specification")
+                        }
+                        name="lead_source"
+                      >
                         <option value="">Select Source</option>
-                        <option>New</option>
-                        <option>Website</option>
-                        <option>Reference</option>
-                        <option>Tele Caller</option>
-                        <option>Social Media</option>
-                        <option>LinkedIn</option>
+                        {getLeadDeatils?.data?.options?.lead_source?.map(
+                          (item, idx) => {
+                            return <option value={item}>{item}</option>;
+                          },
+                        )}
                       </select>
                     </div>
                   </div>
@@ -977,14 +1047,19 @@ export default function LeadDetail() {
                     </label>
 
                     <div className="">
-                      <select defaultValue={leadData.lead_status || ""}>
+                      <select
+                        name="lead_status"
+                        onChange={(e) =>
+                          handleFormChange(e, "lead_specification")
+                        }
+                        defaultValue={leadData.lead_status || ""}
+                      >
                         <option value="">Select Status</option>
-                        <option>New</option>
-                        <option>Contacted</option>
-                        <option>Qualified</option>
-                        <option>Converted</option>
-                        <option>Closed</option>
-                        <option>Nurturing</option>
+                        {getLeadDeatils?.data?.options?.lead_status?.map(
+                          (item, idx) => {
+                            return <option value={item}>{item}</option>;
+                          },
+                        )}
                       </select>
                     </div>
                   </div>
@@ -995,14 +1070,20 @@ export default function LeadDetail() {
                     <label>
                       Assigned To <span>*</span>
                     </label>
-
-                    <div className={styles.assignedUserForm}>
-                      {/* <span className="user-avatar">N</span> */}
-
-                      <span>{displayValue(leadData.assigned_to)}</span>
-
-                      <IoChevronDown />
-                    </div>
+                    <select
+                      name="assigned_to"
+                      defaultValue={leadData.assigned_to}
+                      onChange={(e) =>
+                        handleFormChange(e, "lead_specification")
+                      }
+                    >
+                      <option value="">Select Employee</option>
+                      {getLeadDeatils?.data?.options?.assignees?.map(
+                        (item, idx) => {
+                          return <option value={item}>{item}</option>;
+                        },
+                      )}
+                    </select>
                   </div>
 
                   {/* Set Time */}
@@ -1018,6 +1099,11 @@ export default function LeadDetail() {
                         defaultValue={formatDateTimeInput(
                           leadData.follow_up_date,
                         )}
+                        name="follow_up_date"
+                        value={formData?.follow_up_detail?.follow_up_date}
+                        onChange={(e) =>
+                          handleFormChange(e, "follow_up_detail")
+                        }
                         placeholder="dd/mm/yy - hh:mm"
                       />
                     </div>
@@ -1030,11 +1116,20 @@ export default function LeadDetail() {
                       Note <span>*</span>
                     </label>
 
-                    <textarea defaultValue={leadData.follow_up_note || ""} />
+                    <textarea
+                      defaultValue={leadData.follow_up_note || ""}
+                      name="follow_up_note"
+                      value={formData?.follow_up_detail?.follow_up_note}
+                      onChange={(e) => handleFormChange(e, "follow_up_detail")}
+                    />
                   </div>
 
                   <div className={styles.submitWrap}>
-                    <button type="button" className={styles.submitBtn}>
+                    <button
+                      type="button"
+                      className={styles.submitBtn}
+                      onClick={handleUpdate}
+                    >
                       Save
                     </button>
                   </div>
@@ -1249,7 +1344,8 @@ export default function LeadDetail() {
             formData={formData}
             setFormData={setFormData}
             handleFormChange={handleFormChange}
-            apiDropdownData={apiDropdownData}
+            apiDropdownData={getLeadDeatils}
+            handleUpdate={handleUpdate}
           />
         </CustomPopup>
       )}
@@ -1264,6 +1360,8 @@ export default function LeadDetail() {
             handleFormChange={handleFormChange}
             formIndex={editingItem?.index}
             formSection="additional_contact"
+            handleUpdate={handleUpdate}
+            apiDropdownData={getLeadDeatils}
           />
         </CustomPopup>
       )}
@@ -1271,7 +1369,7 @@ export default function LeadDetail() {
         <CustomPopup onClose={closePopup}>
           <AddCurrentServiceForm
             leadId={leadId}
-            apiDropdownData={apiDropdownData}
+            apiDropdownData={getLeadDeatils}
             initialData={
               editingItem?.type === "current-service" ? editingItem.data : null
             }
@@ -1279,6 +1377,7 @@ export default function LeadDetail() {
             handleFormChange={handleFormChange}
             formIndex={editingItem?.index}
             formSection="current_service_info"
+            handleUpdate={handleUpdate}
           />
         </CustomPopup>
       )}
@@ -1286,7 +1385,7 @@ export default function LeadDetail() {
         <CustomPopup onClose={closePopup}>
           <AddOurService
             leadId={leadId}
-            apiDropdownData={apiDropdownData}
+            apiDropdownData={getLeadDeatils}
             initialData={
               editingItem?.type === "our-service" ? editingItem.data : null
             }
@@ -1294,6 +1393,7 @@ export default function LeadDetail() {
             handleFormChange={handleFormChange}
             formIndex={editingItem?.index}
             formSection="our_service_plan_detail"
+            handleUpdate={handleUpdate}
           />
         </CustomPopup>
       )}
@@ -1302,8 +1402,9 @@ export default function LeadDetail() {
           <AddDocumentForm
             leadId={leadId}
             formData={formData}
-            handleFormChange={handleFormChange}
-            onFilesChange={handleDocumentFilesChange}
+            handleDocumentRemove={handleDocumentRemove}
+            handleDocumentSelect={handleDocumentSelect}
+            handleUpdate={handleUpdate}
           />
         </CustomPopup>
       )}

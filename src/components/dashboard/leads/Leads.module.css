@@ -647,22 +647,245 @@
   color: #6b7280;
 }
 
-@media (max-width: 768px) {
-  .domainSelectionGrid {
-    grid-template-columns: minmax(0, 1fr);
+/* ================================
+   RESPONSIVE DESIGN - BELOW 768px
+================================ */
+
+@media (max-width: 767px) {
+  /* Main form layout */
+  .mainFormLayout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
 
-  .commonForm {
-    padding: 20px;
+  .formLeft,
+  .formRight {
+    width: 100%;
+    min-width: 0;
   }
-  .formGrid {
-    grid-template-columns: 1fr;
-    gap: 18px;
+
+  /* Page header */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* Form grids */
+  .formGrid,
+  .formGrid3,
+  .serviceGrid,
+  .domainSelectionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  /* Full-width fields */
+  .formGrid .full-width {
+    grid-column: 1 / -1;
+  }
+
+  /* Name input group */
+  .nameInputGroup {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .nameInputGroup select {
+    flex: 0 0 90px;
+    min-width: 0;
+  }
+
+  .nameInputGroup input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* All form controls */
+  .formLeft input,
+  .formLeft select,
+  .formLeft textarea,
+  .formRight input,
+  .formRight select,
+  .formRight textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Phone number */
+  .phone-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .phone-group select {
+    flex: 0 0 80px;
+    width: 80px;
+  }
+
+  .phone-group input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Business type */
+  .businessTypeOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  /* Current services */
+  .serviceHeader,
+  .section-heading,
+  .servicePanelTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .servicePanel,
+  .planBox,
+  .addContactWrapper {
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  /* Domain section */
+  .domainSection {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .domainField,
+  .serviceField {
+    min-width: 0;
+  }
+
+  /* Plan details */
+  .plan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* Additional contacts */
+  .additional-contact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Sidebar cards */
+  .sideCard,
+  .leadSpecification,
+  .document-section {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin-bottom: 18px;
+  }
+
+  /* File upload */
+  .uploadBox {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .fileItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .fileName {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Save button */
+  .submitWrap {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  .submitBtn {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .pageHeader{
+    display: flex;
+    flex-direction: column;
   }
 }
 
-@media (max-width: 600px) {
-  .formLeft {
-    grid-template-columns: 1fr;
+/* ================================
+   SMALL MOBILE - BELOW 480px
+================================ */
+
+@media (max-width: 479px) {
+  .formGrid,
+  .formGrid3,
+  .serviceGrid,
+  .domainSelectionGrid,
+  .additional-contact-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .formLeft h3,
+  .formRight h3 {
+    font-size: 17px;
+  }
+
+  .formLeft,
+  .formRight {
+    min-width: 0;
+  }
+
+  .servicePanel,
+  .planBox,
+  .addContactWrapper {
+    padding: 12px;
+  }
+
+  .serviceHeader,
+  .section-heading {
+    align-items: flex-start;
+  }
+
+  .addServiceBtn,
+  .addPlanBtn {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .businessTypeOptions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nameInputGroup select {
+    flex-basis: 75px;
+  }
+
+  .phone-group select {
+    flex-basis: 72px;
+    width: 72px;
+  }
+
+  .submitBtn {
+    max-width: 100%;
   }
 }

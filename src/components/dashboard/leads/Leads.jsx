@@ -89,7 +89,6 @@ const Leads = () => {
   console.log(formData);
 
   const [createLead, { isLoading: isCreatingLead }] = useCreateLeadMutation();
-
   const documentInputRef = useRef(null);
 
   const handleFormChange = (e, section, index = null) => {
@@ -329,9 +328,9 @@ const Leads = () => {
 
   return (
     <section className="content">
-      <div class="page-header">
-        <div class="">
-          <div class="breadcrumb welcome-text">
+      <div className="page-header">
+        <div className="">
+          <div className="breadcrumb welcome-text">
             <p>
               <a href="">Dashboard</a> <span>/</span>
               <a href="">Leads</a>
@@ -339,8 +338,8 @@ const Leads = () => {
           </div>
           <h2>Add New Lead</h2>
         </div>
-        <div class="back">
-          <a href="/" class="back-btn">
+        <div className="back">
+          <a href="/" className="back-btn">
             <IoMdArrowBack />
             <span>Back</span>
           </a>
@@ -399,7 +398,7 @@ const Leads = () => {
                   onChange={(e) => handleFormChange(e, "customer_detail")}
                 >
                   <option value="" disabled>
-                    Designation
+                    Select Designation
                   </option>
                   {apiDropdownData?.data?.options?.designation?.map(
                     (item, idx) => {
@@ -1100,8 +1099,7 @@ const Leads = () => {
             </div>
           </div>
 
-          {/* =================== RIGHT SIDE =================== */}
-          <div className="form-right">
+          <div className={styles.formRight}>
             {/* FOLLOW UP DETAIL */}
             <div className={`${styles.sideCard} followup-card`}>
               <h3>Follow Up Detail</h3>
@@ -1255,13 +1253,13 @@ const Leads = () => {
                 <p>Click to Upload</p>
               </button>
 
-              {formData.documents.length > 0 && (
+              {formData?.documents?.length > 0 && (
                 <div className={styles.uploadedStatus}>
                   <div className={styles.uploadTitle}>
                     <span>Attached Files</span>
                   </div>
 
-                  {formData.documents.map((file, index) => (
+                  {formData?.documents?.map((file, index) => (
                     <div
                       className={styles.fileItem}
                       key={`${file.name}-${index}`}

@@ -9,25 +9,26 @@ const AddCurrentServiceForm = ({
   handleFormChange,
   formIndex = 0,
   formSection = "current_service_info",
+  handleUpdate,
 }) => {
   const isEditing = Boolean(initialData?.id);
   const providers = apiDropdownData?.data?.options?.providers || [];
   const service = formData?.[formSection]?.[formIndex] || {};
-  const plans = Object.values(apiDropdownData?.data?.options?.plans || {})
-    .flat()
-    .filter(
-      (plan) =>
-        !service.provider_id ||
-        String(plan.provider_id) === String(service.provider_id),
-    );
+  const plans = Object.values(
+    apiDropdownData?.data?.options?.plans || {},
+  ).flat();
+  // .filter(
+  //   (plan) =>
+  //     !service.provider_id ||
+  //     String(plan.provider_id) === String(service.provider_id),
+  // );
   if (
     initialData?.plan &&
     !plans.some((plan) => String(plan.id) === String(initialData.plan_id))
   ) {
     plans.push(initialData.plan);
   }
-  const onChange = (event) =>
-    handleFormChange(event, formSection, formIndex);
+  const onChange = (event) => handleFormChange(event, formSection, formIndex);
 
   return (
     <div className={styles.creditModalBox}>
@@ -35,10 +36,7 @@ const AddCurrentServiceForm = ({
         {isEditing ? "Edit Current Service" : "Add Current Service"}
       </h2>{" "}
       <form
-        method="POST"
-        action={`https://superadmin.tizzygroup.com/crm/leads/${leadId}/services${
-          isEditing ? `/${initialData.id}/update` : ""
-        }`}
+        onSubmit={handleUpdate}
         key={initialData?.id || "new-current-service"}
         id="leadServiceForm"
         className="common-form"

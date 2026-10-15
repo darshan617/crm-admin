@@ -11,7 +11,7 @@ import { GoTrophy } from "react-icons/go";
 const LeadSummary = () => {
   return (
     <div className="">
-      <div className="page-header">
+      <div className={`${styles.pageHeader} page-header`}>
         <div className="">
           <div className="breadcrumb welcome-text">
             <p>

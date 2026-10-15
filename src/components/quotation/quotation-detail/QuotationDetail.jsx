@@ -181,7 +181,7 @@ function QuotationCard({ quotation, onOpenModal }) {
 
   const [isClosed, setIsClosed] = useState(!!quotation.closed);
 
-  const activityPath = "/crm/quotations/" + quotation.id + "/activity";
+  const activityPath = "/quotations/" + quotation.id + "/activity";
 
   const handleSendForDiscount = () => {
     if (onOpenModal) onOpenModal("sendDiscountModal");
@@ -407,7 +407,7 @@ function QuotationCard({ quotation, onOpenModal }) {
 
           {has("download") && (
             <button type="button">
-              <LuDownload size={18}/>
+              <LuDownload size={18} />
               Download
             </button>
           )}
@@ -416,10 +416,10 @@ function QuotationCard({ quotation, onOpenModal }) {
             <button
               type="button"
               onClick={() =>
-                router.push("/crm/quotations/" + quotation.id + "/edit")
+                router.push("/quotations/" + quotation.id + "/edit")
               }
             >
-              <GoPencil size={18}/>
+              <GoPencil size={18} />
               Edit
             </button>
           )}
@@ -437,7 +437,7 @@ function QuotationCard({ quotation, onOpenModal }) {
 
           {has("history") && (
             <button type="button" onClick={() => router.push(activityPath)}>
-              <RiHistoryLine size={18}  />
+              <RiHistoryLine size={18} />
               History
             </button>
           )}
@@ -456,7 +456,7 @@ function QuotationDetail({ quotations, badge = "New", onOpenModal }) {
             <p>
               <Link href="/crm/dashboard">Dashboard</Link>
               <span>/</span>
-              <Link href="/crm/quotations">Quotations</Link>
+              <Link href="/quotations">Quotations</Link>
             </p>
           </div>
           <h2>
@@ -465,7 +465,7 @@ function QuotationDetail({ quotations, badge = "New", onOpenModal }) {
         </div>
 
         <div className="back">
-          <Link href="/crm/quotations" className="back-btn">
+          <Link href="/quotations" className="back-btn">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="22"

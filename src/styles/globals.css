@@ -233,6 +233,8 @@ textarea {
   color: #111827;
   outline: none;
   transition: 0.3s;
+  cursor: pointer;
+  cursor: pointer;
 }
 
 .section-title {
@@ -252,6 +254,7 @@ textarea {
   border-bottom-right-radius: 0;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .common-table-card {
@@ -457,7 +460,7 @@ table {
   font-weight: 600;
   cursor: pointer;
   margin-top: -15px;
-  z-index: 9;
+  z-index: 1;
   transition: all 0.3s ease;
 }
 #filterPanel .filter-options select,
@@ -478,6 +481,7 @@ table {
   font-size: 14px;
   line-height: 38px;
   font-family: inherit;
+  cursor: pointer;
 }
 
 .crm-quo-header .table-search,
@@ -551,7 +555,8 @@ table {
   width: 148px;
   flex: 0 0 148px;
   min-height: 42px;
-  /* height: 42px; */
+  height: 42px;
+  cursor: pointer;
 }
 
 .credit-modal-box h2 {
@@ -848,7 +853,7 @@ table {
 }
 .quotation-status-select option {
   background-color: #ffffff;
-  color: #333333; 
+  color: #333333;
 }
 .quotation-status-select.is-not_shared,
 .quotation-status-select.is-not_sent {
@@ -867,4 +872,288 @@ table {
 
 .quotation-status-select.is-rejected {
   background-color: #e11d48;
+}
+
+@media (max-width: 992px) {
+  .content {
+    padding: 30px 0;
+  }
+}
+
+@media (max-width: 575px) {
+  .page-header {
+    /* flex-direction: column; */
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 1200px) {
+  .crmActions {
+    width: 100%;
+  }
+
+  .crmActionBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .crmLeadTabs {
+    gap: 6px;
+    padding: 0 12px;
+  }
+
+  .crmLeadTabs a {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 44px;
+    padding: 0 6px;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+  }
+  #filterPanel .filter-grid {
+    display: block;
+    margin-bottom: 25px;
+  }
+
+  .crm-quo-list.common-table-header,
+  .crm-quo-list .crm-quo-header,
+  .crm-quo-list .es-quo-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .crm-quo-list.crm-quo-title p,
+  .crm-quo-list .es-quo-title p {
+    border-right: 0;
+    padding-right: 0;
+    white-space: normal;
+  }
+
+  .crm-quo-list .table-search {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .crm-quo-list .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .crm-quo-list .filter-action-group {
+    display: none;
+  }
+
+  .crm-quo-list .date-range {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .crm-quo-list .date-input {
+    min-width: 0;
+  }
+
+  .crm-quo-list .date-input input,
+  .crm-quo-list .filter-options select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .crm-quo-list .table-filter {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .partnerTabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .partnerTab {
+    flex: 1 1 auto;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .crm-quo-list .crm-quo-table,
+  .crm-quo-list .es-quo-table,
+  .crm-quo-list .crm-quo-table tbody,
+  .crm-quo-list .es-quo-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .crm-quo-list .crm-quo-table thead,
+  .crm-quo-list .es-quo-table thead {
+    display: none;
+  }
+
+  .crm-quo-list .crm-quo-table .crm-quo-row,
+  .crm-quo-list .es-quo-table .es-quo-row {
+    display: grid;
+    align-items: center;
+    gap: 12px 10px;
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 14px;
+    border: 1px solid #e7e9eb;
+    border-radius: 10px;
+    background: #fff;
+    box-sizing: border-box;
+  }
+
+  .crm-quo-list .crm-quo-table .crm-quo-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "id status"
+      "contact contact"
+      "plan plan"
+      "assigned assigned";
+  }
+
+  .crm-quo-list .es-quo-table .es-quo-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "id status invoice"
+      "contact contact contact"
+      "plan plan plan"
+      "assigned assigned assigned";
+  }
+
+  .crm-quo-list .crm-quo-row > td,
+  .crm-quo-list .es-quo-row > td {
+    min-width: 0;
+    width: auto;
+    padding: 0;
+    border: 0;
+  }
+
+  .crm-quo-list td[data-label="Id"] {
+    grid-area: id;
+  }
+  .crm-quo-list td[data-label="Contact"] {
+    grid-area: contact;
+  }
+  .crm-quo-list td[data-label="Plan"] {
+    grid-area: plan;
+  }
+  .crm-quo-list td[data-label="Status"] {
+    grid-area: status;
+    width: auto !important;
+    text-align: right !important;
+  }
+  .crm-quo-list td[data-label="Invoice"] {
+    grid-area: invoice;
+    width: auto !important;
+    text-align: right !important;
+  }
+  .crm-quo-list td[data-label="Invoice"]::before {
+    content: "Invoice: ";
+    font-size: 12px;
+    color: #7b7e8d;
+  }
+  .crm-quo-list td[data-label="Assigned To"] {
+    grid-area: assigned;
+  }
+
+  .crm-quo-list .quotation-id,
+  .crm-quo-list .customer h5,
+  .crm-quo-list .customer p,
+  .crm-quo-list .plan-info h5 {
+    overflow-wrap: anywhere;
+  }
+
+  .crm-quo-list .customer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 10px !important;
+    border-top: 1px dashed #e7e9eb !important;
+  }
+
+  .crm-quo-list .plan-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .crm-quo-list .plan-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .assignedUser {
+    border-left: 0;
+    border-top: 1px solid #e7e9eb;
+    padding-left: 0;
+    padding-top: 10px;
+    gap: 8px;
+  }
+
+  .crm-quo-list tbody tr.table-row:not .crm-quo-row:not .es-quo-row,
+  .crm-quo-list tbody tr.table-row:not.crm-quo-row:not.es-quo-row td {
+    display: block;
+    width: 100%;
+  }
+
+  .crm-quo-list .table-pagination {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .crm-quo-list .page-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .quotationPopup {
+    max-width: calc(100vw - 24px);
+  }
+}
+
+@media (max-width: 420px) {
+  .crmLeadTabs {
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .crmLeadTabs a {
+    font-size: 12px;
+    height: 40px;
+  }
+
+  .crm-quo-list .date-range {
+    grid-template-columns: 1fr;
+  }
+
+  .crm-quo-list .crm-quo-table .crm-quo-row,
+  .crm-quo-list .es-quo-table .es-quo-row {
+    padding: 12px;
+    gap: 10px 8px;
+  }
+
+  .crm-quo-list .es-quo-table .es-quo-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "id status"
+      "invoice invoice"
+      "contact contact"
+      "plan plan"
+      "assigned assigned";
+  }
+
+  .crm-quo-list td[data-label="Invoice"] {
+    text-align: left !important;
+  }
+
+  .crm-quo-list .page-btn {
+    width: 32px;
+    height: 32px;
+  }
 }

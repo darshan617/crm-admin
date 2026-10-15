@@ -225,3 +225,67 @@
     font-size: 11px;
   }
 }
+
+
+@media (max-width: 992px) {
+
+  .crmLeadTabs {
+    gap: 6px;
+    padding: 0 12px;
+  }
+
+  .crmLeadTabs a {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 44px;
+    padding: 0 6px;
+    font-size: 13px;
+    text-align: center;
+    text-decoration: none;
+  } 
+
+  .partnerTabs {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .partnerTab {
+    flex: 1 1 auto;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .assignedUser {
+    border-left: 0;
+    border-top: 1px solid #e7e9eb;
+    padding-left: 0;
+    padding-top: 10px;
+    gap: 8px;
+  }
+
+  .quotationPopup {
+    max-width: calc(100vw - 24px);
+  }
+}
+
+@media(max-width: 768px){
+  .partnerTabs {
+    background: none;
+   }
+}
+
+@media (max-width: 420px) {
+  .crmLeadTabs {
+    padding: 0 8px;
+    gap: 4px;
+  }
+
+  .crmLeadTabs a {
+    font-size: 12px;
+    height: 40px;
+  }
+
+ 
+
+
+}

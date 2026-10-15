@@ -8,7 +8,6 @@ import styles from "@/components/leads/all-leads/AllLeads.module.css";
 import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
 import { useRouter } from "next/router";
 
-/* ---------------- DATA ---------------- */
 
 const TABS = [
   { label: "All Leads", href: "#", active: true },
@@ -451,7 +450,7 @@ export default function AllLeads() {
         </table>
 
         {/* Pagination */}
-        {/* <div className={styles.tablePagination}>
+        <div className={styles.tablePagination}>
           <a href="#" className={styles.pageBtn}>
             <HiChevronLeft size={16} />
           </a>
@@ -469,7 +468,7 @@ export default function AllLeads() {
           <a href="#" className={styles.pageBtn}>
             <HiChevronRight size={16} />
           </a>
-        </div> */}
+        </div>
       </div>
     </section>
   );
