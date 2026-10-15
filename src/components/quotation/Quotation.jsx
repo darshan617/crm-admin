@@ -410,7 +410,6 @@ const Quotation = () => {
 
   const renderDiscount = () => renderAll(discountRows, getDiscountStatus);
 
-  // ---------------- Tab: Customer Status ----------------
   const renderCustomer = () => (
     <table className="es-quo-table">
       <thead>
@@ -694,7 +693,7 @@ const Quotation = () => {
               <span>{filterOpen ? "Close" : "Filters"}</span>
             </button>
             <Link
-              href="/crm/quotations"
+              href="/quotations"
               className="filter-btn"
               id="resetFilters"
               role="button"

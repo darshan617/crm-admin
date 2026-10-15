@@ -17,7 +17,7 @@ const TeamPerformance = ({ team }) => {
       label: "Upload Leads",
     },
     {
-      href: "/",
+      href: "/quotations",
       icon: LuFilePlus2,
       label: "Add Quotation",
     },

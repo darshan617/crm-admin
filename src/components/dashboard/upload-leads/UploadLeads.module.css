@@ -13,7 +13,6 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    /* padding: 22px 20px 30px; */
     box-sizing: border-box;
 }
 
@@ -21,17 +20,14 @@
     margin: 0 0 14px;
     text-align: center;
     color: #313A46;
-    /* font-family: Arial, Helvetica, sans-serif; */
     font-size: var(--font-size-16px);
     font-weight: 700;
-    /* line-height: 1.4; */
 }
 
 .uploadLeadBox {
     position: relative;
     width: 100%;
     padding: 25px;
-    /* height: 82px; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -58,30 +54,23 @@
 }
 .uploadLeadText {
     color: #414957;
-    /* font-family: Arial, Helvetica, sans-serif; */
     font-size: var(--font-size-16px);
     font-weight: 600;
-    /* line-height: 14px; */
 }
 .uploadLeadFormat {
     color: #7D8490;
-    /* font-family: Arial, Helvetica, sans-serif; */
     font-size: var(--font-size-14px);
-    /* line-height: 11px; */
 }
 
 .uploadFileTitle {
     margin-bottom: 5px;
     color: #252B34;
-    /* font-family: Arial, Helvetica, sans-serif; */
     font-size: var(--font-size-16px);
     font-weight: 400;
-    /* line-height: 16px; */
 }
 
 .uploadFileRow {
     width: 100%;
-    /* height: 29px; */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -157,4 +146,10 @@
     width: 58%;
     height: 100%;
     background: #0068C9;
+}
+
+@media(max-width: 768px){
+    .uploadLeadCard {
+        width: 100%;
+    }
 }

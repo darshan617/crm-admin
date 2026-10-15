@@ -16,6 +16,12 @@
   transition: margin-left 160ms ease;
 }
 
+@media (max-width: 992px) {
+  .expanded {
+    --sidebar-width: 255px;
+  }
+}
+
 @media (max-width: 560px) {
   .content {
     padding: 78px 16px 24px;

@@ -329,9 +329,9 @@ const Leads = () => {
 
   return (
     <section className="content">
-      <div class="page-header">
-        <div class="">
-          <div class="breadcrumb welcome-text">
+      <div className="page-header">
+        <div className="">
+          <div className="breadcrumb welcome-text">
             <p>
               <a href="">Dashboard</a> <span>/</span>
               <a href="">Leads</a>
@@ -339,8 +339,8 @@ const Leads = () => {
           </div>
           <h2>Add New Lead</h2>
         </div>
-        <div class="back">
-          <a href="/" class="back-btn">
+        <div className="back">
+          <a href="/" className="back-btn">
             <IoMdArrowBack />
             <span>Back</span>
           </a>
@@ -384,13 +384,6 @@ const Leads = () => {
 
               {/* Designation */}
               <div className="form-group">
-                {/* <label>Designation</label>
-                <input
-                  type="text"
-                  value={formData?.customer_detail?.designation}
-                  name="designation"
-                  onChange={(e) => handleFormChange(e, "customer_detail")}
-                /> */}
                 <select
                   aria-label="Designation"
                   type="text"
@@ -1100,8 +1093,7 @@ const Leads = () => {
             </div>
           </div>
 
-          {/* =================== RIGHT SIDE =================== */}
-          <div className="form-right">
+          <div className={styles.formRight}>
             {/* FOLLOW UP DETAIL */}
             <div className={`${styles.sideCard} followup-card`}>
               <h3>Follow Up Detail</h3>
