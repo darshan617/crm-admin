@@ -5,6 +5,7 @@ const EditDetailForm = ({
   formData,
   handleFormChange,
   apiDropdownData,
+  handleUpdate,
 }) => {
   return (
     <div className={styles.creditModalBox}>
@@ -12,11 +13,8 @@ const EditDetailForm = ({
 
       <form
         key={leadData.id || "loading"}
-        method="POST"
-        action="https://superadmin.tizzygroup.com/crm/leads/70/update"
         className="common-form"
         id="leadDetailsForm"
-        noValidate
       >
         <input
           type="hidden"
@@ -367,11 +365,9 @@ const EditDetailForm = ({
               onChange={(e) => handleFormChange(e, "lead_specification")}
             >
               <option value="">Select Employee</option>
-              {![
-                "Darshan Bane",
-                "Janvi Singh",
-                "Pratik V",
-              ].includes(formData?.lead_specification?.assigned_to) &&
+              {!["Darshan Bane", "Janvi Singh", "Pratik V"].includes(
+                formData?.lead_specification?.assigned_to,
+              ) &&
                 formData?.lead_specification?.assigned_to && (
                   <option value={formData.lead_specification.assigned_to}>
                     {formData.lead_specification.assigned_to}
@@ -390,12 +386,7 @@ const EditDetailForm = ({
               name="lead_category"
               value={formData?.lead_specification?.lead_priority || ""}
               onChange={(e) =>
-                handleFormChange(
-                  e,
-                  "lead_specification",
-                  null,
-                  "lead_priority",
-                )
+                handleFormChange(e, "lead_specification", null, "lead_priority")
               }
             >
               <option value="">Select Priority</option>
@@ -669,7 +660,11 @@ const EditDetailForm = ({
         </div>
 
         <div className={styles.submitWrap}>
-          <button type="submit" className={styles.submitBtn}>
+          <button
+            type="submit"
+            className={styles.submitBtn}
+            onClick={handleUpdate}
+          >
             Save Details
           </button>
         </div>

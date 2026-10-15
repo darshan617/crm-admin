@@ -31,6 +31,14 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["leads"],
     }),
+    updateLead: builder.mutation({
+      query: ({ body, lead_id }) => ({
+        url: `/leads/${lead_id}/update`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
   }),
 });
 
@@ -39,4 +47,5 @@ export const {
   useGetDdDataQuery,
   useCreateLeadMutation,
   useGetSingleLeadDeatilsQuery,
+  useUpdateLeadMutation,
 } = leadsApi;

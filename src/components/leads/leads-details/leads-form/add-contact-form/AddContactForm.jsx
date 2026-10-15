@@ -7,9 +7,12 @@ const AddContactForm = ({
   formData,
   handleFormChange,
   formIndex = 0,
+  handleUpdate,
+  apiDropdownData,
 }) => {
   const isEditing = Boolean(initialData?.id);
   const contact = formData?.additional_contact?.[formIndex] || {};
+  const designation = apiDropdownData?.data?.options?.designation;
 
   return (
     <>
@@ -18,13 +21,10 @@ const AddContactForm = ({
           {isEditing ? "Edit Contact" : "Add Contact"}
         </h2>{" "}
         <form
-          method="POST"
-          action={`https://superadmin.tizzygroup.com/crm/leads/${leadId}/contacts${
-            isEditing ? `/${initialData.id}/update` : ""
-          }`}
           key={initialData?.id || "new-contact"}
           id="contactForm"
           className={`${styles.formGrid} common-form`}
+          onSubmit={handleUpdate}
         >
           <input
             type="hidden"
@@ -58,6 +58,20 @@ const AddContactForm = ({
                 handleFormChange(event, "additional_contact", formIndex)
               }
             />
+            {/* <select
+              aria-label="Designation"
+              type="text"
+              value={formData?.customer_detail?.designation}
+              name="designation"
+              onChange={(e) => handleFormChange(e, "customer_detail")}
+            >
+              <option value="" disabled>
+                Designation
+              </option>
+              {designation?.map((item, idx) => {
+                return <option value={item}>{item}</option>;
+              })}
+            </select> */}
           </div>
           <div className="form-group">
             <label>Email</label>

@@ -89,7 +89,6 @@ const Leads = () => {
   console.log(formData);
 
   const [createLead, { isLoading: isCreatingLead }] = useCreateLeadMutation();
-
   const documentInputRef = useRef(null);
 
   const handleFormChange = (e, section, index = null) => {
@@ -384,6 +383,13 @@ const Leads = () => {
 
               {/* Designation */}
               <div className="form-group">
+                {/* <label>Designation</label>
+                <input
+                  type="text"
+                  value={formData?.customer_detail?.designation}
+                  name="designation"
+                  onChange={(e) => handleFormChange(e, "customer_detail")}
+                /> */}
                 <select
                   aria-label="Designation"
                   type="text"
@@ -392,7 +398,7 @@ const Leads = () => {
                   onChange={(e) => handleFormChange(e, "customer_detail")}
                 >
                   <option value="" disabled>
-                    Designation
+                    Select Designation
                   </option>
                   {apiDropdownData?.data?.options?.designation?.map(
                     (item, idx) => {
@@ -1247,13 +1253,13 @@ const Leads = () => {
                 <p>Click to Upload</p>
               </button>
 
-              {formData.documents.length > 0 && (
+              {formData?.documents?.length > 0 && (
                 <div className={styles.uploadedStatus}>
                   <div className={styles.uploadTitle}>
                     <span>Attached Files</span>
                   </div>
 
-                  {formData.documents.map((file, index) => (
+                  {formData?.documents?.map((file, index) => (
                     <div
                       className={styles.fileItem}
                       key={`${file.name}-${index}`}
