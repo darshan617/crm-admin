@@ -233,6 +233,8 @@ textarea {
   color: #111827;
   outline: none;
   transition: 0.3s;
+  cursor: pointer;
+  cursor: pointer;
 }
 
 .section-title {
@@ -252,6 +254,7 @@ textarea {
   border-bottom-right-radius: 0;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .common-table-card {
@@ -478,6 +481,7 @@ table {
   font-size: 14px;
   line-height: 38px;
   font-family: inherit;
+  cursor: pointer;
 }
 
 .crm-quo-header .table-search,
@@ -551,7 +555,8 @@ table {
   width: 148px;
   flex: 0 0 148px;
   min-height: 42px;
-  /* height: 42px; */
+  height: 42px;
+  cursor: pointer;
 }
 
 .credit-modal-box h2 {

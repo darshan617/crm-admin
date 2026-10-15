@@ -9,25 +9,27 @@ const AddOurService = ({
   handleFormChange,
   formIndex = 0,
   formSection = "our_service_plan_detail",
+  handleUpdate,
 }) => {
   const isEditing = Boolean(initialData?.id);
   const providers = apiDropdownData?.data?.options?.providers || [];
+  const quote_period = apiDropdownData?.data?.options?.quote_period;
   const service = formData?.[formSection]?.[formIndex] || {};
-  const plans = Object.values(apiDropdownData?.data?.options?.plans || {})
-    .flat()
-    .filter(
-      (plan) =>
-        !service.provider_id ||
-        String(plan.provider_id) === String(service.provider_id),
-    );
+  const plans = Object.values(
+    apiDropdownData?.data?.options?.plans || {},
+  ).flat();
+  // .filter(
+  //   (plan) =>
+  //     !service.provider_id ||
+  //     String(plan.provider_id) === String(service.provider_id),
+  // );
   if (
     initialData?.plan &&
     !plans.some((plan) => String(plan.id) === String(initialData.plan_id))
   ) {
     plans.push(initialData.plan);
   }
-  const onChange = (event) =>
-    handleFormChange(event, formSection, formIndex);
+  const onChange = (event) => handleFormChange(event, formSection, formIndex);
 
   return (
     <div className={styles.creditModalBox}>
@@ -35,10 +37,7 @@ const AddOurService = ({
         {isEditing ? "Edit Service" : "Add Our Service"}
       </h2>{" "}
       <form
-        method="POST"
-        action={`https://superadmin.tizzygroup.com/crm/leads/${leadId}/services${
-          isEditing ? `/${initialData.id}/update` : ""
-        }`}
+        onSubmit={handleUpdate}
         key={initialData?.id || "new-our-service"}
         id="leadServiceForm"
         className="common-form"
@@ -96,10 +95,11 @@ const AddOurService = ({
               value={service.quote_period || "Yearly"}
               onChange={onChange}
             >
-              <option value="Monthly">Monthly</option>
-              <option value="Quarterly">Quarterly</option>
-              <option value="Half Yearly">Half Yearly</option>
-              <option value="Yearly">Yearly</option>
+              {quote_period.map((plan) => (
+                <option key={plan} value={plan}>
+                  {plan}
+                </option>
+              ))}
             </select>
           </div>
           <div className="form-group">
