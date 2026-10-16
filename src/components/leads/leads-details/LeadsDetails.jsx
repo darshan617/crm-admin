@@ -513,10 +513,10 @@ export default function LeadDetail() {
         </div>
 
         <div className="back">
-          <Link href="/b2b-partners" className="back-btn">
+          <a onClick={() => router.back()}  className="back-btn">
             <GoArrowLeft />
             <span>Back</span>
-          </Link>
+          </a>
         </div>
       </div>
 
