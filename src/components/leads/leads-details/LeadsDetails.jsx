@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { GoArrowLeft, GoPlus } from "react-icons/go";
 import { FaPencil } from "react-icons/fa6";
@@ -20,12 +20,15 @@ import AddOurService from "./leads-form/add-our-service/AddOurService";
 import AddDocumentForm from "./leads-form/add-document-form/AddDocumentForm";
 import EditDetailForm from "./leads-form/edit-detail-form/EditDetailForm";
 import {
+  useContactandServicePlanDeleteMutation,
   useGetDdDataQuery,
   useGetSingleLeadDeatilsQuery,
+  useLeadDocumentDeleteMutation,
   useUpdateLeadMutation,
 } from "@/redux/apis/leadsApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { ImAttachment } from "react-icons/im";
+import { BiTrash } from "react-icons/bi";
 
 const displayValue = (value) =>
   value === null || value === undefined || value === "" ? "-" : value;
@@ -50,7 +53,8 @@ const formatDateTimeInput = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
 
-  const pad = (part) => String(part).padStart(2, "0");
+  const pad = (num) => String(num).padStart(2, "0");
+
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate(),
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -144,8 +148,44 @@ const createLeadFormData = (leadData) => {
       document_type: "PAN Card",
       files: [],
     },
-    documents: leadData.document ? [leadData.document] : [],
+    documents: [],
   };
+};
+
+const fileNameFromDocument = (item) => {
+  if (item && typeof item === "object" && item.name) return item.name;
+
+  const url = typeof item === "string" ? item : item?.url || "";
+  const last = url.split("?")[0].split("/").pop() || "document";
+
+  try {
+    return decodeURIComponent(last);
+  } catch {
+    return last;
+  }
+};
+
+const fetchStoredDocument = async (item) => {
+  const url = typeof item === "string" ? item : item?.url;
+  const name = fileNameFromDocument(item);
+
+  if (!url) {
+    throw new Error(`Could not read ${name}`);
+  }
+
+  const response = await fetch(
+    `/api/lead-document?url=${encodeURIComponent(url)}`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Could not read ${name}`);
+  }
+
+  const blob = await response.blob();
+
+  return new File([blob], name, {
+    type: blob.type || "application/octet-stream",
+  });
 };
 
 export default function LeadDetail() {
@@ -154,6 +194,7 @@ export default function LeadDetail() {
   const router = useRouter();
   const isPopupVisible = useSelector(selectIsPopupVisble);
   const [editingItem, setEditingItem] = useState(null);
+  const selectedDocumentFilesRef = useRef(new Map());
   const [formData, setFormData] = useState({
     customer_detail: {
       salutation: "",
@@ -230,6 +271,13 @@ export default function LeadDetail() {
     },
     documents: [],
   });
+  const [deleteInfo, setDeleteInfo] = useState({
+    lead_id: "",
+    id: "",
+    type: "",
+    idx: "",
+  });
+  console.log(deleteInfo);
 
   console.log(formData);
 
@@ -239,8 +287,11 @@ export default function LeadDetail() {
     },
     { skip: !router?.query?.slug },
   );
-
-  const [updateLead, { isLoading }] = useUpdateLeadMutation();
+  const [updateLead, { isLoading: isLeadUpdating }] = useUpdateLeadMutation();
+  const [deleteContactService, { isLoading: isDeletingContactService }] =
+    useContactandServicePlanDeleteMutation();
+  const [deleteDocument, { isLoading: isDeletingDocuments }] =
+    useLeadDocumentDeleteMutation();
 
   const leadData = getLeadDeatils?.data?.lead || {};
   const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
@@ -315,30 +366,48 @@ export default function LeadDetail() {
     });
   };
 
+  const rememberDocumentFile = (file) => {
+    if (file instanceof File && file.name) {
+      selectedDocumentFilesRef.current.set(file.name, file);
+    }
+  };
+
   const handleDocumentSelect = (event) => {
     const selectedFiles = Array.from(event.target.files ?? []);
     if (selectedFiles.length === 0) return;
 
+    selectedFiles.forEach(rememberDocumentFile);
+
     setFormData((prev) => ({
       ...prev,
-      documents: [...prev.documents, ...selectedFiles],
+      documents: [
+        ...(prev.documents || []).filter((file) => file instanceof File),
+        ...selectedFiles,
+      ],
     }));
     event.target.value = "";
   };
 
   const handleDocumentRemove = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      documents: prev.documents.filter((_, fileIndex) => fileIndex !== index),
-    }));
+    setFormData((prev) => {
+      const removed = prev.documents?.[index];
+      if (removed?.name) {
+        selectedDocumentFilesRef.current.delete(removed.name);
+      }
+
+      return {
+        ...prev,
+        documents: prev.documents.filter((_, fileIndex) => fileIndex !== index),
+      };
+    });
   };
 
   const statusBg = (status) => {
     const renamedStatus = status?.toLowerCase();
 
-    if (renamedStatus === "new") {
+    if (renamedStatus === "new" || renamedStatus === "won") {
       return "var(--success-text)";
-    } else if (renamedStatus === "normal") {
+    } else if (renamedStatus === "normal" || renamedStatus === "quote send") {
       return "var(--purple)";
     } else if (
       renamedStatus === "contacted" ||
@@ -352,7 +421,11 @@ export default function LeadDetail() {
       renamedStatus === "nurturing"
     ) {
       return "var(--orange)";
-    } else if (renamedStatus === "closed" || renamedStatus === "hot") {
+    } else if (
+      renamedStatus === "closed" ||
+      renamedStatus === "hot" ||
+      renamedStatus === "lost"
+    ) {
       return "var(--danger)";
     } else {
       return "gray";
@@ -437,6 +510,45 @@ export default function LeadDetail() {
     dispatch(setIsPopupVisible(""));
   };
 
+  const collectDocumentFiles = async () => {
+    const serverDocs = Array.isArray(leadData.document)
+      ? leadData.document
+      : leadData.document
+        ? [leadData.document]
+        : [];
+    const files = [];
+    const usedNames = new Set();
+
+    const addFile = (file) => {
+      if (!(file instanceof File) || !file.name || usedNames.has(file.name)) {
+        return;
+      }
+
+      usedNames.add(file.name);
+      files.push(file);
+    };
+
+    (formData.documents || []).forEach(addFile);
+
+    for (const doc of serverDocs) {
+      const name = fileNameFromDocument(doc);
+      const cached = selectedDocumentFilesRef.current.get(name);
+
+      if (cached) {
+        addFile(cached);
+        continue;
+      }
+
+      if (usedNames.has(name)) continue;
+
+      addFile(await fetchStoredDocument(doc));
+    }
+
+    selectedDocumentFilesRef.current.forEach(addFile);
+
+    return files;
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -478,8 +590,10 @@ export default function LeadDetail() {
         JSON.stringify(formData.follow_up_detail),
       );
 
-      formData.documents.forEach((file) => {
-        formBody.append("attachments[]", file);
+      const documentFiles = await collectDocumentFiles();
+
+      documentFiles.forEach((file) => {
+        formBody.append("documents[]", file, file.name);
       });
 
       const res = await updateLead({
@@ -493,8 +607,60 @@ export default function LeadDetail() {
       }
     } catch (error) {
       console.log(error);
+      showToast(error?.message || "Could not save the lead documents", "error");
     }
   };
+
+  const handleDeleteContactService = async (lead_id, id, type) => {
+    try {
+      const res = await deleteContactService({
+        body: {},
+        lead_id,
+        id,
+        type,
+      });
+      console.log(res);
+      if (res?.data?.success) {
+        showToast(res?.data?.message, "success");
+        dispatch(setIsPopupVisible(""));
+      }
+    } catch (error) {
+      console.log(error, "error in handleDeleteContactService");
+    }
+  };
+  const handleDeleteDocument = async (lead_id, idx) => {
+    try {
+      const res = await deleteDocument({
+        body: {
+          index: idx,
+        },
+        lead_id,
+      });
+      console.log(res);
+      if (res?.data?.success) {
+        const removedName = fileNameFromDocument(leadData.document?.[idx]);
+        if (removedName) {
+          selectedDocumentFilesRef.current.delete(removedName);
+        }
+        showToast(res?.data?.message, "success");
+        dispatch(setIsPopupVisible(""));
+      }
+    } catch (error) {
+      console.log(error, "error in handleDeleteDocument");
+    }
+  };
+
+  useEffect(() => {
+    if (!leadData?.id) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      follow_up_detail: {
+        follow_up_date: formatDateTimeInput(leadData.follow_up_date),
+        follow_up_note: leadData.follow_up_note || "",
+      },
+    }));
+  }, [leadData?.id, leadData?.follow_up_date, leadData?.follow_up_note]);
 
   return (
     <>
@@ -663,11 +829,11 @@ export default function LeadDetail() {
                 </div>
 
                 <div className={styles.contactInformationSection}>
-                  {contacts.length ? (
-                    contacts.map((contact, index) => (
+                  {contacts?.length ? (
+                    contacts?.map((contact, index) => (
                       <div
                         className={styles.leadContactCard}
-                        key={contact.id ?? `${contact.name}-${index}`}
+                        key={contact?.id ?? `${contact?.name}-${index}`}
                       >
                         <div
                           className={`${styles.serviceActions} ${styles.actionAbsolute}`}
@@ -675,14 +841,23 @@ export default function LeadDetail() {
                           <button
                             type="button"
                             title="Delete contact"
-                            aria-label={`Delete contact ${contact.name || ""}`}
+                            aria-label={`Delete contact ${contact?.name || ""}`}
+                            onClick={() => {
+                              dispatch(setIsPopupVisible("deletePopup"));
+                              setDeleteInfo((prev) => ({
+                                ...prev,
+                                id: contact?.id,
+                                lead_id: contact?.lead_id,
+                                type: "contacts",
+                              }));
+                            }}
                           >
                             <FiTrash2 />
                           </button>
                           <button
                             type="button"
                             title="Edit contact"
-                            aria-label={`Edit contact ${contact.name || ""}`}
+                            aria-label={`Edit contact ${contact?.name || ""}`}
                             onClick={() =>
                               openPopup("add-contact", {
                                 type: "contact",
@@ -694,7 +869,6 @@ export default function LeadDetail() {
                             <FaPencil />
                           </button>
                         </div>
-                        <h4>{displayValue(contact.name)}</h4>
 
                         <div className={styles.contactInfoGrid}>
                           <div>
@@ -727,102 +901,112 @@ export default function LeadDetail() {
             </section>
 
             {/* current service */}
-
-            <section className="common-table-section lead-show-full">
-              <div className="common-table-card p-16">
-                <div className={styles.cardHeader}>
-                  <h3>CURRENT SERVICE (INFO)</h3>
-                  <a
-                    onClick={() => openPopup("add-current-service")}
-                    className={styles.addCreditBtn}
-                    id="openAddInfoService"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="plus"
-                      aria-hidden="true"
-                      className="lucide lucide-plus"
+            {leadData?.business_type === "existing" && (
+              <section className="common-table-section lead-show-full">
+                <div className="common-table-card p-16">
+                  <div className={styles.cardHeader}>
+                    <h3>CURRENT SERVICE (INFO)</h3>
+                    <a
+                      onClick={() => openPopup("add-current-service")}
+                      className={styles.addCreditBtn}
+                      id="openAddInfoService"
                     >
-                      <path d="M5 12h14"></path>
-                      <path d="M12 5v14"></path>
-                    </svg>
-                    Add Current Service
-                  </a>
-                </div>
-                {currentServices.length ? (
-                  currentServices.map((service, index) => (
-                    <div
-                      className={`${styles.serviceRequiredCard} ${styles.serviceRequiredCard2}`}
-                      key={service.id}
-                    >
-                      <div
-                        className={`${styles.serviceActions} ${styles.actionAbsolute}`}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        data-lucide="plus"
+                        aria-hidden="true"
+                        className="lucide lucide-plus"
                       >
-                        <button
-                          type="button"
-                          title="Delete current service"
-                          aria-label="Delete current service"
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5v14"></path>
+                      </svg>
+                      Add Current Service
+                    </a>
+                  </div>
+                  {currentServices?.length ? (
+                    currentServices?.map((service, index) => (
+                      <div
+                        className={`${styles.serviceRequiredCard} ${styles.serviceRequiredCard2}`}
+                        key={service?.id}
+                      >
+                        <div
+                          className={`${styles.serviceActions} ${styles.actionAbsolute}`}
                         >
-                          <FiTrash2 />
-                        </button>
-                        <button
-                          type="button"
-                          title="Edit current service"
-                          aria-label="Edit current service"
-                          onClick={() =>
-                            openPopup("add-current-service", {
-                              type: "current-service",
-                              data: service,
-                              index,
-                            })
-                          }
-                        >
-                          <FaPencil />
-                        </button>
+                          <button
+                            type="button"
+                            title="Delete current service"
+                            aria-label="Delete current service"
+                            onClick={() => {
+                              dispatch(setIsPopupVisible("deletePopup"));
+                              setDeleteInfo((prev) => ({
+                                ...prev,
+                                id: service?.id,
+                                lead_id: service?.lead_id,
+                                type: "services",
+                              }));
+                            }}
+                          >
+                            <FiTrash2 />
+                          </button>
+                          <button
+                            type="button"
+                            title="Edit current service"
+                            aria-label="Edit current service"
+                            onClick={() =>
+                              openPopup("add-current-service", {
+                                type: "current-service",
+                                data: service,
+                                index,
+                              })
+                            }
+                          >
+                            <FaPencil />
+                          </button>
+                        </div>
+                        <div className={styles.serviceItem}>
+                          <label>Domain</label>
+                          <p>{displayValue(service.domain)}</p>
+                        </div>
+                        <div className={styles.serviceItem}>
+                          <label>Service</label>
+                          <p>{displayValue(service.provider?.name)}</p>
+                        </div>
+                        <div className={styles.serviceItem}>
+                          <label>Plan Name</label>
+                          <p>{displayValue(service.plan?.name)}</p>
+                        </div>
+                        <div className={styles.serviceItem}>
+                          <label>Current Price</label>
+                          <p>
+                            {service.rate === null || service.rate === undefined
+                              ? "-"
+                              : `₹ ${service.rate}`}
+                          </p>
+                        </div>
+                        <div className={styles.serviceItem}>
+                          <label>Renewal Date</label>
+                          <p>{formatDate(service.renewal_date)}</p>
+                        </div>
+                        <div className={styles.serviceItem}>
+                          <label>No of Users</label>
+                          <p>{displayValue(service.quantity)}</p>
+                        </div>
                       </div>
-                      <div className={styles.serviceItem}>
-                        <label>Domain</label>
-                        <p>{displayValue(service.domain)}</p>
-                      </div>
-                      <div className={styles.serviceItem}>
-                        <label>Service</label>
-                        <p>{displayValue(service.provider?.name)}</p>
-                      </div>
-                      <div className={styles.serviceItem}>
-                        <label>Plan Name</label>
-                        <p>{displayValue(service.plan?.name)}</p>
-                      </div>
-                      <div className={styles.serviceItem}>
-                        <label>Current Price</label>
-                        <p>
-                          {service.rate === null || service.rate === undefined
-                            ? "-"
-                            : `₹ ${service.rate}`}
-                        </p>
-                      </div>
-                      <div className={styles.serviceItem}>
-                        <label>Renewal Date</label>
-                        <p>{formatDate(service.renewal_date)}</p>
-                      </div>
-                      <div className={styles.serviceItem}>
-                        <label>No of Users</label>
-                        <p>{displayValue(service.quantity)}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>No current service information.</p>
-                )}
-              </div>
-            </section>
+                    ))
+                  ) : (
+                    <p>No current service information.</p>
+                  )}
+                </div>
+              </section>
+            )}
 
             <section className="common-table-section">
               <div className={`${styles.commonTableCard} p-16`}>
@@ -838,11 +1022,11 @@ export default function LeadDetail() {
                   </a>
                 </div>
 
-                {ourServices.length ? (
-                  ourServices.map((service, index) => (
+                {ourServices?.length ? (
+                  ourServices?.map((service, index) => (
                     <div
                       className={styles.serviceRequiredCard}
-                      key={service.id}
+                      key={service?.id}
                     >
                       <div
                         className={`${styles.serviceActions} ${styles.actionAbsolute}`}
@@ -851,6 +1035,15 @@ export default function LeadDetail() {
                           type="button"
                           title="Delete service"
                           aria-label="Delete service"
+                          onClick={() => {
+                            dispatch(setIsPopupVisible("deletePopup"));
+                            setDeleteInfo((prev) => ({
+                              ...prev,
+                              id: service?.id,
+                              lead_id: service?.lead_id,
+                              type: "services",
+                            }));
+                          }}
                         >
                           <FiTrash2 />
                         </button>
@@ -890,7 +1083,7 @@ export default function LeadDetail() {
 
                       <div className={styles.serviceItem}>
                         <label>Renewal Date</label>
-                        <p>{formatDate(service.renewal_date)}</p>
+                        <p>{service.sku}</p>
                       </div>
 
                       <div className={styles.serviceItem}>
@@ -959,6 +1152,18 @@ export default function LeadDetail() {
                           >
                             {displayValue(item?.name)}
                           </Link>
+                          <button
+                            onClick={() => {
+                              dispatch(setIsPopupVisible("deleteDocument"));
+                              setDeleteInfo((prev) => ({
+                                ...prev,
+                                idx: idx,
+                              }));
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <BiTrash color="red" />
+                          </button>
                         </div>
                       );
                     })
@@ -1100,7 +1305,10 @@ export default function LeadDetail() {
                           leadData.follow_up_date,
                         )}
                         name="follow_up_date"
-                        value={formData?.follow_up_detail?.follow_up_date}
+                        value={
+                          formData?.follow_up_detail?.follow_up_date ||
+                          leadData?.follow_up_date
+                        }
                         onChange={(e) =>
                           handleFormChange(e, "follow_up_detail")
                         }
@@ -1119,7 +1327,10 @@ export default function LeadDetail() {
                     <textarea
                       defaultValue={leadData.follow_up_note || ""}
                       name="follow_up_note"
-                      value={formData?.follow_up_detail?.follow_up_note}
+                      value={
+                        formData?.follow_up_detail?.follow_up_note ||
+                        leadData?.follow_up_note
+                      }
                       onChange={(e) => handleFormChange(e, "follow_up_detail")}
                     />
                   </div>
@@ -1406,6 +1617,86 @@ export default function LeadDetail() {
             handleDocumentSelect={handleDocumentSelect}
             handleUpdate={handleUpdate}
           />
+        </CustomPopup>
+      )}
+      {isPopupVisible === "deletePopup" && (
+        <CustomPopup onClose={closePopup} maxWidth="500px">
+          <div className={styles.deletePopup}>
+            <div className={styles.deleteContent}>
+              <h3>Delete Confirmation</h3>
+
+              <p>
+                Are you sure you want to delete this{" "}
+                {deleteInfo?.type === "contacts" ? "contact" : "service plan"}?
+              </p>
+
+              <p className={styles.deleteWarning}>
+                This action cannot be undone.
+              </p>
+            </div>
+
+            <div className={styles.deleteActions}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={closePopup}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className={styles.confirmDeleteBtn}
+                onClick={() =>
+                  handleDeleteContactService(
+                    deleteInfo?.lead_id,
+                    deleteInfo?.id,
+                    deleteInfo?.type,
+                  )
+                }
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </CustomPopup>
+      )}
+      {isPopupVisible === "deleteDocument" && (
+        <CustomPopup onClose={closePopup} maxWidth="500px">
+          <div className={styles.deletePopup}>
+            <div className={styles.deleteContent}>
+              <h3>Delete Confirmation</h3>
+
+              <p>
+                Are you sure you want to delete this{" "}
+                {deleteInfo?.type === "contacts" ? "contact" : "service plan"}?
+              </p>
+
+              <p className={styles.deleteWarning}>
+                This action cannot be undone.
+              </p>
+            </div>
+
+            <div className={styles.deleteActions}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={closePopup}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className={styles.confirmDeleteBtn}
+                onClick={() =>
+                  handleDeleteDocument(router?.query?.slug, deleteInfo?.idx)
+                }
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </CustomPopup>
       )}
     </>
