@@ -3,8 +3,8 @@ import { apiSlice } from "../apiSlice";
 const leadsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllLeads: builder.query({
-      query: () => ({
-        url: "/leads",
+      query: ({ source }) => ({
+        url: `/leads?source=${source}`,
         method: "GET",
       }),
       providesTags: ["leads"],

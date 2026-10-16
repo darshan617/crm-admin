@@ -9,7 +9,7 @@ import {
 import { GoTrophy } from "react-icons/go";
 import { useRouter } from "next/router";
 
-const LeadSummary = () => {
+const LeadSummary = ({ allLeadsListData }) => {
   const router = useRouter();
 
   return (
@@ -52,7 +52,7 @@ const LeadSummary = () => {
 
             <div className={styles.statContent}>
               <h4>Total Leads</h4>
-              <h2>4,250</h2>
+              <h2>{allLeadsListData?.data?.stats?.total}</h2>
             </div>
           </div>
 
@@ -64,7 +64,7 @@ const LeadSummary = () => {
 
             <div className={styles.statContent}>
               <h4>New Leads</h4>
-              <h2>145</h2>
+              <h2>{allLeadsListData?.data?.stats?.new}</h2>
             </div>
           </div>
 
@@ -76,7 +76,7 @@ const LeadSummary = () => {
 
             <div className={styles.statContent}>
               <h4>Qualified Leads</h4>
-              <h2>35</h2>
+              <h2>{allLeadsListData?.data?.stats?.qualified}</h2>
             </div>
           </div>
 
@@ -88,7 +88,7 @@ const LeadSummary = () => {
 
             <div className={styles.statContent}>
               <h4>Won Leads</h4>
-              <h2>15</h2>
+              <h2>{allLeadsListData?.data?.stats?.won}</h2>
             </div>
           </div>
 
@@ -100,7 +100,7 @@ const LeadSummary = () => {
 
             <div className={styles.statContent}>
               <h4>Lost Leads</h4>
-              <h2>5</h2>
+              <h2>{allLeadsListData?.data?.stats?.lost}</h2>
             </div>
           </div>
         </div>

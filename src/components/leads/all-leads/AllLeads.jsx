@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
 import { LuCalendarDays } from "react-icons/lu";
@@ -8,11 +8,10 @@ import styles from "@/components/leads/all-leads/AllLeads.module.css";
 import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
 import { useRouter } from "next/router";
 
-
 const TABS = [
-  { label: "All Leads", href: "#", active: true },
-  { label: "JD Leads", href: "#", active: false },
-  { label: "Exhibition Leads", href: "#", active: false },
+  { label: "All Leads", href: "#", active: false, query: "all" },
+  { label: "JD Leads", href: "#", active: false, query: "justdial" },
+  { label: "Exhibition Leads", href: "#", active: false, query: "exhibition" },
 ];
 
 const FILTER_SELECTS = [
@@ -176,12 +175,11 @@ const PAGES = [1, 2, 3, 4, 5];
 
 const TOTAL_CUSTOMERS = 124;
 
-export default function AllLeads() {
+export default function AllLeads({ allLeadsListData }) {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-
-  const { data: allLeadsListData } = useGetAllLeadsQuery();
+  const [tabs, setTabs] = useState(TABS);
 
   const toggleOne = (id) => {
     setSelectedIds((prev) =>
@@ -195,17 +193,31 @@ export default function AllLeads() {
     );
   };
 
+  // useEffect(() => {
+  //   setTabs(
+  //     TABS.map((tab) => ({
+  //       ...tab,
+  //       active: tab?.query === router?.query?.type,
+  //     })),
+  //   );
+  // }, [router]);
+
   return (
     <section className={styles.commonTableSection}>
       <div className={styles.crmLeadTabs}>
-        {TABS.map((tab) => (
-          <a
+        {tabs.map((tab) => (
+          <button
             key={tab.label}
-            href={tab.href}
-            className={tab.active ? styles.active : ""}
+            className={router?.query?.type === tab?.query ? styles.active : ""}
+            onClick={() => {
+              router?.push({
+                pathname: "/leads",
+                query: `type=${tab?.query}`,
+              });
+            }}
           >
             {tab.label}
-          </a>
+          </button>
         ))}
       </div>
 
