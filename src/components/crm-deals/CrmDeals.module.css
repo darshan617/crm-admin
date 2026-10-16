@@ -1,0 +1,20 @@
+.assignedUser {
+    display: flex;
+    grid-template-columns: 28px 1fr 32px;
+    align-items: center;
+    column-gap: 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    border-left: 1px solid #e7e9eb;
+    padding-left: 15px;
+    justify-content: space-between;
+}
+
+.avatarFlex {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-direction: row;
+    width: 100%;
+}

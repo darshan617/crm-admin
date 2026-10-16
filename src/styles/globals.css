@@ -874,6 +874,24 @@ table {
   background-color: #e11d48;
 }
 
+.crm-quo-table .plan-meta,
+.es-quo-table .plan-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 4px;
+}
+
+.plan-info p {
+  display: flex;
+  gap: 5px;
+  margin: 0;
+  font-size: var(--font-size-14px);
+  color: #6b7280;
+  align-items: center;
+}
+
 @media (max-width: 992px) {
   .content {
     padding: 30px 0;
