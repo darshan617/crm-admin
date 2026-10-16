@@ -1,0 +1,154 @@
+.crmLeadTitle {
+  display: flex;
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+.crmLeadTitle p {
+  margin: 0;
+  padding-right: 10px;
+  border-right: 1px solid #cccccc;
+  white-space: nowrap;
+}
+.itemsSelected {
+  margin: 0;
+  font-size: var(--font-size-14px);
+  color: #6b7280;
+  display: flex;
+  gap: 5px;
+  cursor: pointer;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.crmLeadTabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  padding-left: 20px;
+  margin-bottom: 0;
+}
+.crmLeadTabs a {
+  display: flex;
+  min-width: 140px;
+  height: 50px;
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  border-top: 3px solid #0865b500;
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 0;
+  background: #f8f9fb;
+  color: #666;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+.crmLeadTabs a.active {
+  background: #ffffff;
+  color: #303846;
+  border-top: 3px solid #0865b5;
+}
+
+.assignedUser {
+  display: flex;
+  /* grid-template-columns: 28px 1fr 32px; */
+  align-items: center;
+  column-gap: 8px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid #e7e9eb;
+  padding-left: 15px;
+  justify-content: space-between;
+}
+.userInfo small {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.avatarFlex {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+}
+
+.statusCol {
+  width: 100%;
+  text-align: center;
+}
+
+@media (max-width: 991px) {
+  .crmLeadTabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 8px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .crmLeadTabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .crmLeadTabs a {
+    flex: 0 0 auto;
+    min-width: 120px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .crmLeadTitle {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .crmLeadTitle p {
+    border-right: 0;
+    padding-right: 0;
+    white-space: normal;
+  }
+
+  .crmLeadTitle :global(.header-divider) {
+    display: none;
+  }
+
+  .statusCol {
+    text-align: left;
+  }
+
+  .assignedUser {
+    border-left: 0;
+    padding-left: 0;
+    gap: 10px;
+  }
+
+  .userInfo small {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 479px) {
+  .crmLeadTabs a {
+    min-width: 100px;
+    height: 44px;
+    font-size: 13px;
+  }
+}

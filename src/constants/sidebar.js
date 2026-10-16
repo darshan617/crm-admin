@@ -7,7 +7,7 @@ import {
 } from "react-icons/fi";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { HiOutlinePhoneArrowUpRight } from "react-icons/hi2";
-import { LuLayoutDashboard, LuUserSearch } from "react-icons/lu";
+import { LuHandshake, LuLayoutDashboard, LuUserSearch } from "react-icons/lu";
 
 export const SIDEBAR_SECTIONS = [
   {
@@ -32,6 +32,12 @@ export const SIDEBAR_SECTIONS = [
         name: "Quotations",
         url: "/quotations",
         icon: FiFileText,
+      },
+      {
+        key: "crm-deals",
+        name: "CRM Deals",
+        url: "/crm-deals",
+        icon: LuHandshake,
       },
       {
         key: "renewals",
