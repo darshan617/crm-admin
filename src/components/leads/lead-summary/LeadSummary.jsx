@@ -7,8 +7,11 @@ import {
   LuUserRoundPlus,
 } from "react-icons/lu";
 import { GoTrophy } from "react-icons/go";
+import { useRouter } from "next/router";
 
 const LeadSummary = () => {
+  const router = useRouter();
+
   return (
     <div className="">
       <div className={`${styles.pageHeader} page-header`}>
@@ -22,13 +25,16 @@ const LeadSummary = () => {
           <h2>Leads </h2>
         </div>
         <div className={styles.crmActions}>
-          <a href="/upload-leads" className={styles.crmActionBtn}>
+          <a
+            onClick={() => router.push("/upload-leads")}
+            className={styles.crmActionBtn}
+          >
             <FiUpload />
             <span>Upload Leads</span>
           </a>
 
           <a
-            href="/leads/add-new-leads"
+            onClick={() => router.push("/leads/add-new-leads")}
             className={`${styles.crmActionBtn} ${styles.active}`}
           >
             <FiUserPlus />

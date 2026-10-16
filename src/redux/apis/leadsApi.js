@@ -39,6 +39,22 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["leads"],
     }),
+    contactandServicePlanDelete: builder.mutation({
+      query: ({ body, lead_id, id, type }) => ({
+        url: `/leads/${lead_id}/${type}/${id}/delete`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
+    leadDocumentDelete: builder.mutation({
+      query: ({ body, lead_id }) => ({
+        url: `/leads/${lead_id}/documents/delete`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
   }),
 });
 
@@ -48,4 +64,6 @@ export const {
   useCreateLeadMutation,
   useGetSingleLeadDeatilsQuery,
   useUpdateLeadMutation,
+  useContactandServicePlanDeleteMutation,
+  useLeadDocumentDeleteMutation,
 } = leadsApi;

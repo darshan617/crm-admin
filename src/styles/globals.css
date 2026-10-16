@@ -887,6 +887,20 @@ table {
   }
 }
 
+@media (max-width: 1199px) {
+  .crm-page .crm-lead-table .table-head,
+  .crm-page .crm-lead-table .crm-lead-row {
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .crm-page .crm-lead-header .table-search {
+    flex: 0 0 220px;
+    width: 220px;
+    min-width: 0;
+  }
+}
+
 @media (max-width: 1200px) {
   .crmActions {
     width: 100%;
@@ -1114,6 +1128,125 @@ table {
 
   .quotationPopup {
     max-width: calc(100vw - 24px);
+  }
+}
+
+@media (max-width: 991px) {
+  .crm-page .common-table-header.crm-lead-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .crm-page .crm-lead-header .table-search {
+    flex: none;
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* grid rows need room, so let the card scroll sideways */
+  .crm-page .common-table-card {
+    overflow-x: auto;
+  }
+
+  .crm-page .crm-lead-table {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 767px) {
+  .crm-page .common-table-card {
+    overflow-x: hidden;
+  }
+
+  .crm-page .crm-lead-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .crm-page .crm-lead-table thead {
+    display: none;
+  }
+
+  .crm-page .crm-lead-table tbody {
+    display: block;
+  }
+
+  .crm-page .crm-lead-table .crm-lead-row {
+    grid-template-columns: 24px minmax(0, 1fr);
+    grid-template-areas:
+      "select customer"
+      "select contact"
+      "select status"
+      "select action";
+    gap: 10px 12px;
+    padding: 14px;
+    align-items: start;
+  }
+
+  .crm-page .crm-lead-table .crm-lead-row > td {
+    min-width: 0;
+    width: auto;
+  }
+
+  .crm-page .crm-lead-table .select-col {
+    grid-area: select;
+    align-self: start;
+    padding-top: 4px;
+  }
+
+  .crm-page .crm-lead-table .customer {
+    grid-area: customer;
+  }
+
+  .crm-page .crm-lead-table .contact-info {
+    grid-area: contact;
+  }
+
+  .crm-page .crm-lead-table td[data-label="Status"] {
+    grid-area: status;
+  }
+
+  .crm-page .crm-lead-table .plan-action {
+    grid-area: action;
+  }
+
+  /* small label above each cell, taken from data-label */
+  .crm-page .crm-lead-table td[data-label="Contact"]::before,
+  .crm-page .crm-lead-table td[data-label="Status"]::before,
+  .crm-page .crm-lead-table td[data-label="Follow Up Date"]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #8a8f98;
+  }
+
+  .crm-page .crm-lead-table .customer h5,
+  .crm-page .crm-lead-table .contact-info h5 {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 479px) {
+  .crm-page .crm-lead-table .crm-lead-row {
+    grid-template-columns: 22px minmax(0, 1fr);
+    gap: 8px 10px;
+    padding: 12px;
+  }
+
+  .crm-page .crm-lead-table .customer h5,
+  .crm-page .crm-lead-table .contact-info h5 {
+    font-size: 12.5px;
+  }
+
+  .crm-page .page-btn {
+    width: 34px;
+    height: 34px;
   }
 }
 
