@@ -7,6 +7,7 @@ import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import styles from "@/components/leads/all-leads/AllLeads.module.css";
 import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
 import { useRouter } from "next/router";
+import Pagination from "@/common-components/pagination/Pagination";
 
 const TABS = [
   { label: "All Leads", href: "#", active: false, query: "all" },
@@ -180,6 +181,15 @@ export default function AllLeads({ allLeadsListData }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [tabs, setTabs] = useState(TABS);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemPerPage, setItemPerPage] = useState(10);
+  const paginationData = allLeadsListData?.data?.pagination || {};
+  console.log(currentPage, itemPerPage);
+
+  const pageNumbersArray = Array.from(
+    { length: Math.ceil(paginationData?.total / itemPerPage) },
+    (_, i) => i + 1,
+  );
 
   const toggleOne = (id) => {
     setSelectedIds((prev) =>
@@ -193,14 +203,17 @@ export default function AllLeads({ allLeadsListData }) {
     );
   };
 
+  useEffect(() => {
+    router?.push({
+      pathname: "/leads",
+      query: `type=${router?.query?.type || "all"}`,
+    });
+  }, []);
+
   // useEffect(() => {
-  //   setTabs(
-  //     TABS.map((tab) => ({
-  //       ...tab,
-  //       active: tab?.query === router?.query?.type,
-  //     })),
-  //   );
-  // }, [router]);
+  //   setCurrentPage(paginationData?.page_no);
+  //   setItemPerPage(paginationData?.item_per_page);
+  // }, [paginationData]);
 
   return (
     <section className={styles.commonTableSection}>
@@ -463,23 +476,12 @@ export default function AllLeads({ allLeadsListData }) {
 
         {/* Pagination */}
         <div className={styles.tablePagination}>
-          <a href="#" className={styles.pageBtn}>
-            <HiChevronLeft size={16} />
-          </a>
-
-          {PAGES.map((p) => (
-            <a
-              href="#"
-              key={p}
-              className={`${styles.pageBtn} ${p === 1 ? styles.active : ""}`}
-            >
-              {p}
-            </a>
-          ))}
-
-          <a href="#" className={styles.pageBtn}>
-            <HiChevronRight size={16} />
-          </a>
+          <Pagination
+            pageNumbersArray={pageNumbersArray}
+            setCurrentPage={setCurrentPage}
+            currentPage={currentPage}
+            itemPerPage={itemPerPage}
+          />
         </div>
       </div>
     </section>
