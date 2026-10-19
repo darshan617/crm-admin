@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -8,18 +7,31 @@ import { SIDEBAR_CHAT, SIDEBAR_SECTIONS } from "@/constants/sidebar";
 import styles from "./Sidebar.module.css";
 
 const Sidebar = ({ collapsed, onExpandSidebar }) => {
-  const [manageOpen, setManageOpen] = useState(true);
+  const [manageOpen, setManageOpen] = useState(false);
+
   const router = useRouter();
   const currentPath = router.asPath.split(/[?#]/)[0];
 
-  const toggleManage = () => {
+  const handleManageMouseEnter = () => {
     if (collapsed) {
-      setManageOpen(true);
-      onExpandSidebar();
-      return;
+      onExpandSidebar?.();
     }
 
-    setManageOpen((open) => !open);
+    setManageOpen(true);
+  };
+
+  const handleManageMouseLeave = () => {
+    setManageOpen(false);
+  };
+
+  const handleManageFocus = () => {
+    setManageOpen(true);
+  };
+
+  const handleManageBlur = (event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      setManageOpen(false);
+    }
   };
 
   return (
@@ -28,69 +40,79 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
       className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
       aria-label="Main navigation"
     >
-      <div className={styles.brand}>
-        <Image
-          className={styles.brandLogo}
-          src="/logo.png"
-          alt="Tizz Group"
-          width={150}
-          height={42}
-          priority
-        />
-      </div>
       <nav className={styles.navigation}>
         {SIDEBAR_SECTIONS.map((section) => (
           <React.Fragment key={section.key}>
             <span
-              className={`${styles.sectionLabel} ${section.key !== "menu" ? styles.settingsLabel : ""}`}
+              className={`${styles.sectionLabel} ${
+                section.key !== "menu" ? styles.settingsLabel : ""
+              }`}
             >
               {section.name}
             </span>
+
             {section.items.map((item) => {
               const Icon = item.icon;
 
               if (item.children) {
                 return (
-                  <React.Fragment key={item.key}>
+                  <div
+                    key={item.key}
+                    className={styles.manageWrapper}
+                    onMouseEnter={handleManageMouseEnter}
+                    onMouseLeave={handleManageMouseLeave}
+                    onFocus={handleManageFocus}
+                    onBlur={handleManageBlur}
+                  >
                     <button
-                      className={`${styles.navItem} ${styles.manage} ${styles.manageButton}`}
+                      className={`${styles.navItem} ${styles.manage} ${
+                        styles.manageButton
+                      }`}
                       type="button"
                       aria-label={item.name}
                       aria-expanded={manageOpen}
                       aria-controls="manage-submenu"
                       title={collapsed ? item.name : undefined}
-                      onClick={toggleManage}
                     >
                       <span className={styles.navIcon}>
                         <Icon aria-hidden="true" />
                       </span>
+
                       <span className={styles.navLabel}>{item.name}</span>
+
                       <FiChevronDown
-                        className={`${styles.chevron} ${manageOpen ? styles.chevronOpen : ""}`}
+                        className={`${styles.chevron} ${
+                          manageOpen ? styles.chevronOpen : ""
+                        }`}
                         aria-hidden="true"
                       />
                     </button>
-                    {manageOpen && (
-                      <div id="manage-submenu" className={styles.subnav}>
-                        {item.children.map((child) => (
+
+                    <div
+                      id="manage-submenu"
+                      className={`${styles.subnav} ${
+                        manageOpen ? styles.subnavOpen : ""
+                      }`}
+                      aria-hidden={!manageOpen}
+                      inert={!manageOpen}
+                    >
+                      {item.children.map((child) => {
+                        const childActive = currentPath === child.url;
+
+                        return (
                           <Link
                             key={child.key}
                             href={child.url}
-                            aria-current={
-                              currentPath === child.url ? "page" : undefined
-                            }
-                            className={
-                              currentPath === child.url
-                                ? styles.subnavActive
-                                : ""
-                            }
+                            aria-current={childActive ? "page" : undefined}
+                            tabIndex={manageOpen ? 0 : -1}
+                            className={childActive ? styles.subnavActive : ""}
                           >
                             {child.name}
                           </Link>
-                        ))}
-                      </div>
-                    )}
-                  </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               }
 
@@ -110,6 +132,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                   <span className={styles.navIcon}>
                     <Icon aria-hidden="true" />
                   </span>
+
                   <span className={styles.navLabel}>{item.name}</span>
                 </Link>
               );
@@ -117,6 +140,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
           </React.Fragment>
         ))}
       </nav>
+
       <Link
         className={styles.chat}
         href={SIDEBAR_CHAT.url}
@@ -126,6 +150,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
         <span className={styles.navIcon}>
           <FiMessageSquare aria-hidden="true" />
         </span>
+
         <span className={styles.navLabel}>{SIDEBAR_CHAT.name}</span>
       </Link>
     </aside>

@@ -491,8 +491,6 @@
   }
 }
 
-/* ---------------- Responsive: down to 375px ---------------- */
-
 @media (max-width: 420px) {
   .crmLeadTabs {
     padding: 0 8px;
@@ -504,7 +502,6 @@
     height: 40px;
   }
 
-  /* stack From / To date inputs so they don't get cramped */
   .tableFilterWrap .dateRange {
     grid-template-columns: 1fr;
   }
@@ -522,5 +519,12 @@
   .pageBtn {
     width: 32px;
     height: 32px;
+  }
+  .customer h5,
+  .customer p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 50px;
   }
 }

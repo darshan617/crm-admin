@@ -76,6 +76,20 @@
     opacity 0.3s ease;
 }
 
+.closed .quotationBody {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.closed .quotationHeader .quotationLogo svg {
+  transform: rotate(-90deg);
+}
+
+.quotationLogo svg {
+  transition: transform 0.3s ease;
+}
+
 .quotationTo {
   margin-top: 20px;
 }
@@ -235,42 +249,290 @@
   white-space: nowrap;
 }
 .quotationActions {
-    position: relative;
-    background: #e4f2ff;
-    margin: 0;
-    padding: 13px 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    border-radius: 0 0 10px 10px;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); */
+  position: relative;
+  background: #e4f2ff;
+  margin: 0;
+  padding: 13px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  border-radius: 0 0 10px 10px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); */
 }
 
 .quotationActions::before {
-    content: "";
-    width: 113%;
-    height: 100%;
-    position: absolute;
-    background: #e4f2ff;
-    left: -4%;
+  content: "";
+  width: 113%;
+  height: 100%;
+  position: absolute;
+  background: #e4f2ff;
+  left: -4%;
 }
 
 .quotationActions button {
-    position: relative;
-    overflow: hidden;
-    height: 40px;
-    min-width: 130px;
-    padding: 0 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 7px;
-    border: 1px solid #d9d9d9;
-    border-radius: 22px;
-    background: #fff;
-    color: #444;
+  position: relative;
+  overflow: hidden;
+  height: 40px;
+  min-width: 130px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #d9d9d9;
+  border-radius: 22px;
+  background: #fff;
+  color: #444;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.quotationBody,
+.quotationTableWrap {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (min-width: 1400px) {
+  .quotationTopMeta {
+    gap: 60px;
+  }
+  .quotationContent p,
+  .quotationTo strong,
+  .quotationTo span {
+    font-size: 15px;
+  }
+  .quotationTable {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .quotationTopMeta {
+    gap: 36px;
+  }
+  .quotationCompany {
+    font-size: 16px;
+  }
+  .footerContact {
+    gap: 24px;
+  }
+  .quotationActions {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 991px) {
+  .quotationTopMeta {
+    gap: 28px;
+  }
+
+  .quotationHeader,
+  .quotation-preview .quotationHeader {
+    grid-template-columns: 1fr 1.2fr auto;
+    gap: 10px;
+  }
+
+  .quotationCompany {
+    font-size: 15px;
+  }
+
+  .quotationLogo {
+    gap: 12px;
+  }
+  .quotationLogo img {
+    max-width: 120px;
+    height: auto;
+  }
+
+  .quotationTable {
+    font-size: 12.5px;
+  }
+  .quotationTable th,
+  .quotationTable td {
+    padding: 8px;
+  }
+
+  .footerContact {
+    flex-wrap: wrap;
+    gap: 12px 24px;
+  }
+
+  .quotationActions {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .quotationTopMeta {
+    gap: 18px 24px;
+    padding-bottom: 14px;
+  }
+  .qmetaField {
+    min-width: 120px;
+  }
+
+  .quotationHeader,
+  .quotation-preview .quotationHeader {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "number logo"
+      "company company";
+    row-gap: 10px;
+  }
+  .quotationNumber {
+    grid-area: number;
+  }
+  .quotationLogo {
+    grid-area: logo;
+  }
+  .quotationCompany {
+    grid-area: company;
+    text-align: left;
+    font-size: 15px;
+  }
+
+  .quotationBody {
+    max-height: 8000px;
+  }
+
+  .quotationTo {
+    margin-top: 16px;
+  }
+  .quotationSubject {
+    margin: 20px 0 16px;
+  }
+  .commercialTitle {
+    margin-top: 22px;
+  }
+
+  .quotationTableWrap {
+    -webkit-overflow-scrolling: touch;
+  }
+  .quotationTable {
+    min-width: 620px;
+  }
+
+  .quotationFooter {
+    padding: 12px 0 22px;
+    font-size: 12.5px;
+  }
+  .footerContact span {
+    white-space: normal;
     font-size: 13px;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .quotationActions::before {
+    width: 100%;
+    left: 0;
+  }
+  .quotationActions button {
+    flex: 1 1 calc(50% - 12px);
+    min-width: 0;
+  }
+}
+
+@media (max-width: 575px) {
+  .quotationTopMeta {
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 0 14px;
+  }
+  .qmetaField {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+  }
+  .quotationActivityLink {
+    margin-top: 4px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .quotationLogo img {
+    max-width: 96px;
+  }
+
+  .quotationContent p,
+  .quotationTo strong,
+  .quotationTo span {
+    font-size: 13.5px;
+  }
+  .quotationContent p {
+    margin-bottom: 12px;
+  }
+
+  .quotationSubject strong,
+  .commercialTitle {
+    font-size: 13.5px;
+  }
+
+  .quotationTable {
+    min-width: 560px;
+    font-size: 12px;
+  }
+
+  .quotationTerms {
+    margin-top: 20px;
+  }
+  .quotationSignature {
+    line-height: 1.6;
+  }
+
+  .footerContact {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .quotationActions {
+    padding: 12px 8px;
+  }
+  .quotationActions button {
+    flex: 1 1 100%;
+    height: 38px;
+  }
+}
+
+@media (max-width: 375px) {
+  .quotationCompany {
+    font-size: 14px;
+  }
+  .quotationLogo {
+    gap: 8px;
+  }
+  .quotationLogo img {
+    max-width: 80px;
+  }
+  .quotationNumber strong {
+    font-size: 13px;
+  }
+  .quotationTable {
+    min-width: 520px;
+  }
+  .quotationFooter strong {
+    font-size: 14px;
+  }
+  .quotationFooter small {
+    font-size: 10.5px;
+  }
+}
+
+@media (max-height: 480px) {
+  .quotationHeader,
+  .quotation-preview .quotationHeader {
+    padding-bottom: 8px;
+  }
+  .quotationActions button {
+    height: 34px;
+  }
 }
