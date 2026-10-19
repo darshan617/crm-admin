@@ -1,64 +1,178 @@
-.leadTopMeta {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  align-items: center;
-  margin-bottom: 12px;
-  font-size: 12px;
-}
+/* =========================================================
+   LeadsDetails.module.css
+   Matches LeadDetail JSX (every `styles.*` class used there)
+   ========================================================= */
 
-.leadTopMeta span:nth-child(2) {
-  text-align: center;
-}
-
-.leadTopMeta span:nth-child(3) {
-  display: flex;
-  text-align: right;
-}
-
-.customerContent {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0 18px;
-  align-items: start;
-}
+/* ---------- Page layout ---------- */
 
 .orderDashboardGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 385px;
   gap: 18px;
   align-items: start;
+  width: 100%;
 }
+
+.customerContent {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  align-items: start;
+  min-width: 0;
+}
+
+.customerInfo {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  height: fit-content;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Keep native form controls inside the sidebar from overflowing */
+.customerInfo :global(.followup-form) select,
+.customerInfo :global(.followup-form) input,
+.customerInfo :global(.followup-form) textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.customerInfo :global(.followup-form) textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* ---------- Cards ---------- */
+
+.commonTableCard {
+  position: relative;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--Border-Colors-Additive-deactive, #e7e9eb);
+}
+
+.cardHeader h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--font-size-14px, 14px);
+  font-weight: 500;
+}
+
+.addCreditBtn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 31px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1px solid #dedede;
+  border-radius: 18px;
+  color: #444;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addCreditBtn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* ---------- Lead top meta (Status / Category / Created On) ---------- */
+
+.leadTopMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.leadTopMeta > span:nth-child(2) {
+  text-align: center;
+}
+
+.leadTopMeta > span:nth-child(3) {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  text-align: right;
+}
+
+.leadStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  margin-left: 4px;
+  border-radius: 3px;
+  color: #fff !important;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+/* "Created On" value is a plain span inside the 3rd meta cell */
+.leadTopMeta > span:nth-child(3) > span {
+  margin-left: 0;
+}
+
+/* ---------- Company header ---------- */
 
 .leadCompanyHeader {
   position: relative;
   width: 100%;
-  height: 70px;
-  padding: 0 15px 0 20px;
+  min-height: 70px;
+  padding: 10px 15px 10px 20px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   background: linear-gradient(105deg, #1684ef, #075dbb);
   border-radius: 7px;
   box-sizing: border-box;
 }
 
 .leadCompanyHeader h3 {
-  font-size: 18px;
-  line-height: 1.3;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: unset;
-  word-break: break-word;
-  max-width: 100%;
+  flex: 1;
+  min-width: 0;
   margin: 0;
   color: #fff;
+  font-size: 18px;
   font-weight: 500;
+  line-height: 1.3;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .editLeadBtn {
-  position: absolute;
-  right: 15px;
-  top: 15px;
+  flex-shrink: 0;
   height: 26px;
   padding: 0 10px;
   display: flex;
@@ -69,8 +183,11 @@
   background: #fff;
   color: #444;
   font-size: 10px;
+  white-space: nowrap;
   cursor: pointer;
 }
+
+/* ---------- Lead info grid ---------- */
 
 .leadInfoGrid {
   display: grid;
@@ -80,10 +197,15 @@
   margin-top: 19px;
 }
 
+.infoItem {
+  min-width: 0;
+}
+
 .infoItem label {
+  display: block;
   color: var(--color-grey-300-subtext, #9ba6b7);
   font-family: "Baloo Bhai 2";
-  font-size: var(--font-size-14px);
+  font-size: var(--font-size-14px, 14px);
   font-style: normal;
   font-weight: 500;
   line-height: 20px;
@@ -92,45 +214,19 @@
 .leadInfoGrid .infoItem p {
   margin: 0;
   color: #414756;
-  font-size: var(--font-size-14px);
+  font-size: var(--font-size-14px, 14px);
   line-height: 1.5;
+  word-break: break-word;
 }
 
-.cardHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 10px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--Border-Colors-Additive-deactive, #e7e9eb);
-}
+/* ---------- Contact cards ---------- */
 
-.cardHeader h3 {
-  font-size: var(--font-size-14px);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
-
-.addCreditBtn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #fff;
-  border: 1px solid #dedede;
-  color: #444;
-  text-decoration: none;
-  padding: 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  flex-direction: row;
-  height: 31px;
-  /* border: 0; */
-  cursor: pointer;
+.contactInformationSection {
+  max-height: 355px;
+  overflow-y: auto;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #efefef transparent;
 }
 
 .leadContactCard {
@@ -139,11 +235,25 @@
   margin-top: 11px;
   padding: 12px 76px 12px 12px;
   display: flex;
+  flex-direction: column;
   background: #f4f8fd;
   border: 1px solid #a9d1ff;
   border-radius: 6px;
   box-sizing: border-box;
-  flex-direction: column;
+}
+
+.leadContactCard:first-child {
+  margin-top: 0;
+}
+
+.contactInfoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 16px;
+}
+
+.contactInfoGrid > div {
+  min-width: 0;
 }
 
 .contactInfoGrid label {
@@ -153,35 +263,12 @@
   font-size: 12px;
 }
 
-.contactInfoGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 16px;
+.contactInfoGrid p {
+  margin: 0;
+  word-break: break-word;
 }
 
-.contactInformationSection {
-  height: 355px;
-  overflow-y: auto;
-  padding-right: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: #9ba6b7 transparent;
-  scrollbar-color: #efefef !important;
-}
-
-.commonTableCard {
-  position: relative;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
-  overflow: hidden;
-}
-
-.customerContent > :global(.common-table-section):nth-child(3),
-.customerContent > :global(.common-table-section):nth-child(4) {
-  grid-column: 1 / -1;
-}
+/* ---------- Service cards (current service + our service) ---------- */
 
 .serviceRequiredCard {
   position: relative;
@@ -189,21 +276,20 @@
   grid-template-columns: 1fr 1.25fr 0.9fr;
   column-gap: 18px;
   row-gap: 13px;
-  /* padding-left: 50px; */
+  margin-top: 10px;
   padding: 12px 76px 12px 12px;
-  /* padding-left: 40px; */
   background: #f4f8fd;
   border: 1px solid #a9d1ff;
   border-radius: 6px;
   box-sizing: border-box;
-  margin-top: 10px;
 }
 
-.serviceCheck {
-  padding-top: 1px;
-  position: absolute;
-  top: 15px;
-  left: 15px;
+.serviceRequiredCard2 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.serviceItem {
+  min-width: 0;
 }
 
 .serviceItem label {
@@ -212,11 +298,15 @@
   color: #aeaeae;
   font-size: 12px;
 }
+
 .serviceItem p {
   margin: 0;
   color: #313a46;
-  font-size: var(--font-size-14px);
+  font-size: var(--font-size-14px, 14px);
+  word-break: break-word;
 }
+
+/* ---------- Edit / delete icon buttons ---------- */
 
 .serviceActions {
   display: flex;
@@ -249,38 +339,7 @@
   color: #fff;
 }
 
-.assignedUserForm {
-  width: 100%;
-  /* height: 40px; */
-  padding: 10px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 7px;
-  border: 1px solid #e0e4e9;
-  border-radius: 5px;
-  background: #fff;
-  box-sizing: border-box;
-  font-size: var(--font-size-15px);
-  display: flex;
-  justify-content: space-between;
-}
-
-.submitBtn {
-  background: var(--primary);
-  font-family: "Baloo Bhai 2";
-  color: #fff;
-  border: none;
-  padding: 10px 50px;
-  border-radius: 999px;
-  font-size: var(--font-size-14px);
-  /* font-style: normal; */
-  font-weight: 500;
-  line-height: normal;
-  margin: 0 auto;
-  cursor: pointer;
-  transition: 0.3s;
-}
+/* ---------- Submit button ---------- */
 
 .submitWrap {
   width: 100%;
@@ -289,40 +348,74 @@
   margin-top: 30px;
 }
 
+.submitBtn {
+  margin: 0 auto;
+  padding: 10px 50px;
+  background: var(--primary);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-family: "Baloo Bhai 2";
+  font-size: var(--font-size-14px, 14px);
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* ---------- Documents ---------- */
+
 .downloadList {
   width: 100%;
+  min-width: 0;
   overflow-x: auto;
 }
 
 .downloadHeader {
   display: grid;
-  grid-template-columns: minmax(280px, 2fr) 1fr 1fr 130px;
-  font-size: var(--font-size-14px);
+  grid-template-columns: 1fr;
+  padding: 0 10px 10px;
   color: #1f2937;
+  font-size: var(--font-size-14px, 14px);
   font-weight: 600;
-  padding: 10px;
-  padding-top: 0;
-  /* margin-bottom: 10px; */
   border-bottom: 1px solid var(--Border-Colors-Additive-deactive, #e7e9eb);
 }
 
 .downloadRow {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
-  border-bottom: 1px solid #e5e7eb;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px;
   color: #4c4c5c;
   font-size: 13px;
-  padding: 10px;
-  gap: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.downloadRow > svg {
+  flex-shrink: 0;
+}
+
+.downloadRow button {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  cursor: pointer;
 }
 
 .downloadFile {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 0;
   color: #898d94;
   text-decoration: none;
+  word-break: break-all;
 }
 
 .downloadFile:hover {
@@ -332,78 +425,48 @@
 .downloadFile svg {
   width: 15px;
   height: 15px;
-  color: #0355ac;
   flex-shrink: 0;
+  color: #0355ac;
+}
+
+/* ---------- Recent activity ---------- */
+
+.activityColumn {
+  width: 100%;
+  min-width: 0;
+  margin-top: 18px;
+}
+
+.commonTableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+
+.commonTableHeader h3 {
+  margin: 0;
+  color: #1e1e1e;
+  font-size: var(--font-size-18px, 18px);
+  font-weight: 600;
+}
+
+.viewAll {
+  margin-left: auto;
+  color: var(--primary);
+  font-size: var(--font-size-14px, 14px);
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .activityCard {
   position: relative;
-  /* min-height: 230px; */
   padding: 16px;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e1e6ed;
   border-radius: 10px;
-  /* box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15); */
-}
-
-.activityHeader {
-  /* min-height: 48px; */
-  padding: 5px 0;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #e7ebef;
-}
-
-.activityHeader h3 {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  /* color: #505766; */
-  font-size: var(--font-size-14px);
-  font-weight: 500;
-}
-
-.activityHeader h3 svg {
-  width: 16px;
-  height: 16px;
-}
-
-.viewAll {
-  font-size: var(--font-size-14px);
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 600;
-  margin-left: auto;
-}
-
-.activityBody {
-  padding: 12px 15px;
-}
-
-.activityTitle {
-  display: block;
-  margin-bottom: 11px;
-  color: #69727d;
-  font-size: 10px;
-}
-
-.activityList {
-  position: relative;
-  padding-left: 18px;
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-}
-
-.activityList::before {
-  content: "";
-  position: absolute;
-  left: 3px;
-  top: 4px;
-  bottom: 3px;
-  width: 1px;
-  background: #d8e0e9;
+  box-sizing: border-box;
 }
 
 .activityItem {
@@ -413,130 +476,83 @@
   min-height: 61px;
 }
 
-.activityDot {
+/* vertical connector line between icons */
+.activityItem:not(:last-child)::after {
+  content: "";
   position: absolute;
-  left: -18px;
-  top: 4px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #0667c4;
-}
-
-.addCreditBtn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #fff;
-  border: 1px solid #dedede;
-  color: #444;
-  text-decoration: none;
-  padding: 0 12px;
-  border-radius: 18px;
-  font-size: 12px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  flex-direction: row;
-  height: 31px;
-  /* border: 0; */
-  cursor: pointer;
-}
-
-.serviceRequiredCard2 {
-  grid-template-columns: 1fr 1fr 1fr;
-  padding: 12px 72px 12px 12px;
-  margin-top: 10px;
-}
-
-.commonTableHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: nowrap;
-  margin-bottom: 15px;
-}
-
-.commonTableHeader h3 {
-  font-size: var(--font-size-18px);
-  margin-bottom: 0px;
-  font-weight: 600;
-  color: #1e1e1e;
+  left: 20px;
+  top: 42px;
+  bottom: -2px;
+  width: 1px;
+  background: #dfe4ea;
+  z-index: 1;
 }
 
 .activityIcon {
   position: relative;
   z-index: 2;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-}
-.activityIcon.teal {
-  color: #16c7b1;
-  background: #e7faf7;
-}
-
-.activityIcon.blue {
-  color: #006bc7;
-  background: #eaf3ff;
-}
-
-.activityIcon.purple {
-  color: #7564ff;
-  background: #f1efff;
-}
-
-.activityIcon {
   width: 42px;
   height: 42px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  position: relative;
-  z-index: 2;
   border-radius: 50%;
 }
 
+.activityIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.teal {
+  color: #16c7b1;
+  background: #e7faf7;
+}
+
+.blue {
+  color: #006bc7;
+  background: #eaf3ff;
+}
+
+.purple {
+  color: #7564ff;
+  background: #f1efff;
+}
+
 .activityContent {
-  padding-left: 12px;
-  padding: 0px 0 16px 12px;
+  min-width: 0;
+  padding: 0 0 16px 12px;
 }
 
-.activityItem:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: 17px;
-  top: 34px;
-  bottom: -8px;
-  width: 1px;
-  background: #dfe4ea;
-  z-index: 1;
-}
-
-.customerInfo {
-  position: sticky;
-  top: 20px;
-  align-self: start;
-  height: fit-content;
-}
-.leadStatus {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 9px;
-  margin-left: 4px;
-  border-radius: 3px;
-  color: #fff !important;
+.activityContent p {
+  margin: 0 0 3px;
+  color: #313a46;
   font-size: 13px;
+  line-height: 1.4;
 }
+
+.activityContent p span {
+  display: block;
+  color: #69727d;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.activityContent small {
+  color: #9ba6b7;
+  font-size: 11px;
+}
+
+/* ---------- Delete popups ---------- */
+
 .deletePopup {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  text-align: left;
   gap: 28px;
+  text-align: left;
 }
 
 .deleteContent {
@@ -545,9 +561,9 @@
 
 .deleteContent h3 {
   margin: 0 0 16px;
+  color: #212529;
   font-size: 21px;
   font-weight: 600;
-  color: #212529;
 }
 
 .deleteContent p {
@@ -564,11 +580,11 @@
 }
 
 .deleteActions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .cancelBtn,
@@ -595,8 +611,8 @@
 
 .confirmDeleteBtn {
   background: #dc3545;
-  color: #fff;
   border-color: #dc3545;
+  color: #fff;
 }
 
 .confirmDeleteBtn:hover {
@@ -608,7 +624,67 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 1100px) {
+  .orderDashboardGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .customerInfo {
+    position: static;
+    top: auto;
+    width: 100%;
+  }
+}
+
+/* Small tablets / large phones */
+@media (max-width: 768px) {
+  .serviceRequiredCard,
+  .serviceRequiredCard2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Phones */
 @media (max-width: 480px) {
+  .commonTableCard {
+    padding: 14px;
+  }
+
+  .leadTopMeta {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .leadTopMeta > span:nth-child(2),
+  .leadTopMeta > span:nth-child(3) {
+    display: block;
+    text-align: left;
+  }
+
+  .leadCompanyHeader {
+    flex-wrap: wrap;
+    padding: 12px 15px;
+  }
+
+  .leadInfoGrid {
+    /* grid-template-columns: 1fr 1fr; */
+    row-gap: 12px;
+  }
+
+  .contactInfoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .serviceRequiredCard,
+  .serviceRequiredCard2 {
+    grid-template-columns: 1fr;
+  }
+
+  .submitBtn {
+    padding: 10px 32px;
+  }
+
   .deletePopup {
     gap: 22px;
   }
