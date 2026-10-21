@@ -94,6 +94,10 @@ body {
   font-optical-sizing: auto;
   color: var(--textBody);
 }
+a {
+  text-decoration: none;
+  color: inherit;
+}
 
 .content {
   width: 100%;
