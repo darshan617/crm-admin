@@ -63,7 +63,14 @@ const UploaadLeads = () => {
           <h2>Upload Lead</h2>
         </div>
         <div className="d-flex gap-2 align-items-center">
-          <button>Download Sample File</button>
+          <Link
+            href="/sample-lead-file/leads_sample.csv"
+            download="leads_sample.csv"
+            className={styles.downloadSampleBtn}
+          >
+            <LuFileDown size={20} />
+            <span>Download Sample File</span>
+          </Link>
           <div className="back">
             <Link href="/leads" className="back-btn">
               <svg
