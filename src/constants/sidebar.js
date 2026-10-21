@@ -20,7 +20,12 @@ export const SIDEBAR_SECTIONS = [
         url: "/dashboard",
         icon: LuLayoutDashboard,
       },
-      { key: "leads", name: "Leads", url: "/leads", icon: LuUserSearch },
+      {
+        key: "leads",
+        name: "Leads",
+        url: "/leads?type=all",
+        icon: LuUserSearch,
+      },
       {
         key: "follow-up",
         name: "Follow Up",
@@ -73,7 +78,12 @@ export const SIDEBAR_SECTIONS = [
           },
         ],
       },
-      { key: "reports", name: "Reports", url: "/reports", icon: HiOutlineDocumentReport  },
+      {
+        key: "reports",
+        name: "Reports",
+        url: "/reports",
+        icon: HiOutlineDocumentReport,
+      },
     ],
   },
 ];

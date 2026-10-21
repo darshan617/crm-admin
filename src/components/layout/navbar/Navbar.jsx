@@ -17,6 +17,8 @@ import { MdLogout } from "react-icons/md";
 import Cookies from "js-cookie";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
+import Image from "next/image";
+import Sidebar from "../sidebar/Sidebar";
 
 const subscribeToUserCookie = () => () => {};
 const getUserCookieSnapshot = () => Cookies.get("CRM_USER") || null;
@@ -71,103 +73,126 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     };
   }, []);
 
+  const handleExpandSidebar = () => {
+    setSidebarCollapsed(false);
+  };
+
   return (
-    <header className={styles.navbar}>
-      <button
-        className={styles.sidebarButton}
-        type="button"
-        aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        aria-expanded={!sidebarCollapsed}
-        aria-controls="main-sidebar"
-        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        onClick={onToggleSidebar}
-      >
-        {sidebarCollapsed ? (
-          <TbLayoutSidebarLeftExpand size={24} />
-        ) : (
-          <TbLayoutSidebarRightExpand size={24} />
-        )}
-      </button>
+    <>
+      <header className={styles.navbar}>
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onExpandSidebar={handleExpandSidebar}
+        />
 
-      <label className={styles.search}>
-        <span className={styles.visuallyHidden}>Search</span>
-        <input type="search" placeholder="Search" />
-        <FiSearch aria-hidden="true" />
-      </label>
+        <div className={styles.brand}>
+          <Image
+            className={styles.brandLogo}
+            src="/logo.png"
+            alt="Tizz Group"
+            width={150}
+            height={42}
+            priority
+          />
+        </div>
 
-      <div className={styles.account}>
         <button
-          className={styles.notification}
+          className={styles.sidebarButton}
           type="button"
-          aria-label="Notifications"
-          title="Notifications"
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!sidebarCollapsed}
+          aria-controls="main-sidebar"
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={onToggleSidebar}
         >
-          <FiBell />
-          <span className={styles.notificationDot}>5</span>
+          {sidebarCollapsed ? (
+            <TbLayoutSidebarLeftExpand size={24} />
+          ) : (
+            <TbLayoutSidebarRightExpand size={24} />
+          )}
         </button>
 
-        <div className={styles.profileWrapper} ref={profileRef}>
+        <label className={styles.search}>
+          <span className={styles.visuallyHidden}>Search</span>
+          <input type="search" placeholder="Search" />
+          <FiSearch aria-hidden="true" />
+        </label>
+
+        <div className={styles.account}>
           <button
+            className={styles.notification}
             type="button"
-            className={styles.profile}
-            aria-haspopup="menu"
-            aria-expanded={profileOpen}
-            onClick={() => setProfileOpen((o) => !o)}
+            aria-label="Notifications"
+            title="Notifications"
           >
-            <div className={styles.avatar}>
-              {userData?.name?.charAt(0) || "-"}
-            </div>
-            <div className={styles.profileInfo}>
-              <h5>{userData?.name || "-"}</h5>
-              <small>{userData?.role || "-"}</small>
-            </div>
-            <FiChevronDown
-              className={`${styles.profileArrow} ${
-                profileOpen ? styles.arrowOpen : ""
-              }`}
-            />
+            <FiBell />
+            <span className={styles.notificationDot}>5</span>
           </button>
 
-          <div
-            className={`${styles.profileDropdown} ${
-              profileOpen ? styles.show : ""
-            }`}
-          >
-            <div className={styles.profileCard}>
-              <div className={styles.profilePattern}></div>
-              <div className={styles.profileContent}>
-                <div className={styles.profileAvatar}>
-                  <span>{userData?.name?.charAt(0) || "-"}</span>
-                </div>
-                <h2>{userData?.name || "-"}</h2>
-                <div className={styles.profileMeta}>
-                  <span>Partner ID : {userData?.id || "-"}</span>
-                  <span className={styles.adminBadge}>
-                    {userData?.status || "-"}
-                  </span>
+          <div className={styles.profileWrapper} ref={profileRef}>
+            <button
+              type="button"
+              className={styles.profile}
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              onClick={() => setProfileOpen((o) => !o)}
+            >
+              <div className={styles.avatar}>
+                {userData?.name?.charAt(0) || "-"}
+              </div>
+              <div className={styles.profileInfo}>
+                <h5>{userData?.name || "-"}</h5>
+                <small>{userData?.role || "-"}</small>
+              </div>
+              <FiChevronDown
+                className={`${styles.profileArrow} ${
+                  profileOpen ? styles.arrowOpen : ""
+                }`}
+              />
+            </button>
+
+            <div
+              className={`${styles.profileDropdown} ${
+                profileOpen ? styles.show : ""
+              }`}
+            >
+              <div className={styles.profileCard}>
+                <div className={styles.profilePattern}></div>
+                <div className={styles.profileContent}>
+                  <div className={styles.profileAvatar}>
+                    <span>{userData?.name?.charAt(0) || "-"}</span>
+                  </div>
+                  <h2>{userData?.name || "-"}</h2>
+                  <div className={styles.profileMeta}>
+                    <span>Partner ID : {userData?.id || "-"}</span>
+                    <span className={styles.adminBadge}>
+                      {userData?.status || "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className={styles.profileMenu}>
-              <a href="/">
-                <FaUser />
-                <span>My Profile</span>
-              </a>
-              <a href="/">
-                <CiSettings />
-                <span>Settings</span>
-              </a>
-              <div className={styles.profileDivider}></div>
-              <button onClick={handleLogout} className={styles.logout}>
-                <MdLogout />
-                <span>Logout</span>
-              </button>
+              <div className={styles.profileMenu}>
+                <a href="/">
+                  <FaUser />
+                  <span>My Profile</span>
+                </a>
+                <a href="/">
+                  <CiSettings />
+                  <span>Settings</span>
+                </a>
+                <div className={styles.profileDivider}></div>
+                <button onClick={handleLogout} className={styles.logout}>
+                  <MdLogout />
+                  <span>Logout</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </header>
+        {/* </div> */}
+      </header>
+    </>
   );
 };
 

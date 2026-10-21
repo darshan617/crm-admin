@@ -17,13 +17,18 @@
 }
 
 @media (max-width: 992px) {
-  .expanded {
-    --sidebar-width: 255px;
+  .layout,
+  .layout.expanded {
+    --sidebar-width: 0px;
+  }
+
+  .content {
+    margin-left: 0;
   }
 }
 
 @media (max-width: 560px) {
   .content {
-    padding: 78px 16px 24px;
+    padding: 85px 16px 24px;
   }
 }

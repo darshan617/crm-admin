@@ -3,8 +3,8 @@ import { apiSlice } from "../apiSlice";
 const leadsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllLeads: builder.query({
-      query: ({ source }) => ({
-        url: `/leads?source=${source}`,
+      query: ({ source, page_no, items_per_page }) => ({
+        url: `/leads?source=${source}&page_no=${page_no}&items_per_page=${items_per_page}`,
         method: "GET",
       }),
       providesTags: ["leads"],
@@ -55,6 +55,14 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["leads"],
     }),
+    uploadLeads: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/upload",
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
   }),
 });
 
@@ -66,4 +74,5 @@ export const {
   useUpdateLeadMutation,
   useContactandServicePlanDeleteMutation,
   useLeadDocumentDeleteMutation,
+  useUploadLeadsMutation,
 } = leadsApi;

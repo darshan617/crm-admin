@@ -10,6 +10,8 @@ const index = () => {
   const { data: allLeadsListData } = useGetAllLeadsQuery(
     {
       source: router?.query?.type,
+      page_no: router?.query?.page_no || 1,
+      items_per_page: router?.query?.items_per_page || 10,
     },
     {
       skip: !router?.query?.type,

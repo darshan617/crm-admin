@@ -94,6 +94,10 @@ body {
   font-optical-sizing: auto;
   color: var(--textBody);
 }
+a {
+  text-decoration: none;
+  color: inherit;
+}
 
 .content {
   width: 100%;
@@ -369,9 +373,11 @@ table {
   line-height: normal;
   padding: 0 6px;
   border-radius: 3px;
+  text-transform: capitalize;
 }
 
-.badge.new {
+.badge.new,
+.shared {
   background: #075db5;
   color: #fff;
 }
@@ -641,6 +647,10 @@ table {
   background: #02bc9c;
   color: #fff;
 }
+.rejected {
+  background: var(--danger-bg);
+  color: #fff;
+}
 
 .common-table-header.crm-quo-header,
 .common-table-header.es-quo-header {
@@ -890,6 +900,18 @@ table {
   font-size: var(--font-size-14px);
   color: #6b7280;
   align-items: center;
+}
+
+.common-form.quotation-detail {
+  align-items: stretch;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.common-form.quotation-detail > div {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 @media (max-width: 992px) {

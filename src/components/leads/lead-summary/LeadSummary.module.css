@@ -181,9 +181,9 @@
   }
   .statsGrid {
     grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+    gap: 5px;
   }
-  .pageHeader{
+  .pageHeader {
     display: flex;
     flex-direction: column;
   }
