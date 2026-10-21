@@ -26,7 +26,7 @@ const LeadSummary = ({ allLeadsListData }) => {
         </div>
         <div className={styles.crmActions}>
           <a
-            onClick={() => router.push("/upload-leads")}
+            onClick={() => router.push("/leads/upload-leads")}
             className={styles.crmActionBtn}
           >
             <FiUpload />

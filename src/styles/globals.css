@@ -369,9 +369,11 @@ table {
   line-height: normal;
   padding: 0 6px;
   border-radius: 3px;
+  text-transform: capitalize;
 }
 
-.badge.new {
+.badge.new,
+.shared {
   background: #075db5;
   color: #fff;
 }
@@ -639,6 +641,10 @@ table {
 .low,
 .resolved {
   background: #02bc9c;
+  color: #fff;
+}
+.rejected {
+  background: var(--danger-bg);
   color: #fff;
 }
 
