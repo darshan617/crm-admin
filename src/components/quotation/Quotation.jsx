@@ -2,14 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import styles from "@/components/quotation/Quotation.module.css";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import {
   LuSearch,
   LuRotateCcw,
   LuChevronRight,
-  LuChevronLeft,
   LuEye,
   LuHistory,
   LuPencil,
@@ -17,199 +16,9 @@ import {
   LuMail,
   LuCornerUpRight,
 } from "react-icons/lu";
-
-const quotations = [
-  {
-    id: 46,
-    code: "TCCPLQ00043A-B",
-    avatar: { letter: "E", color: "purple" },
-    company: "Example Corp",
-    contact: "John Doe",
-    role: "Manager",
-    plan: "Google Workspace Business Plus",
-    licenses: 50,
-    term: "Yearly",
-    amount: "₹ 908,616.00",
-    discount: "10.92%",
-    status: { label: "Not shared", type: "pending" },
-    assignee: { name: "Admin", letter: "A" },
-    note: { prefix: "Follow up on", value: "01 Nov, 2026 12:00 AM" },
-    approved: 0,
-    locked: 0,
-    email: "johnn@example.com",
-  },
-  {
-    id: 45,
-    code: "TCCPLQ00043A-A",
-    avatar: { letter: "E", color: "blue" },
-    company: "Example Corp",
-    contact: "John Doe",
-    role: "Manager",
-    plan: "Google Workspace Business Plus",
-    licenses: 50,
-    term: "Yearly",
-    amount: "₹ 918,000.00",
-    discount: "10%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Admin", letter: "A" },
-    note: { text: "Shared 13 Oct, 2026 12:56 PM" },
-    approved: 1,
-    locked: 1,
-    email: "johnn@example.com",
-  },
-  {
-    id: 44,
-    code: "TCCPLQ00039A-A",
-    avatar: { letter: "M", color: "red" },
-    company: "MALAD RESIDENCY",
-    contact: "Kapil Maurya",
-    role: "Project Manager",
-    plan: "Microsoft 365 Business Standard (no Teams)",
-    licenses: 1,
-    term: "Yearly",
-    amount: "₹ 6,224.40",
-    discount: "22%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Pratik V", letter: "P" },
-    note: { text: "Shared 12 Oct, 2026 01:49 PM" },
-    approved: 1,
-    locked: 1,
-    email: "kapil@goyalinfotech.com",
-  },
-  {
-    id: 43,
-    code: "TCCPLQ00043A",
-    avatar: { letter: "E", color: "yellow" },
-    company: "Example Corp",
-    contact: "John Doe",
-    role: "Manager",
-    plan: "Google Workspace Business Plus",
-    licenses: 50,
-    term: "Yearly",
-    amount: "₹ 816,000.00",
-    discount: "20%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Admin", letter: "A" },
-    note: { text: "Shared 05 Oct, 2026 05:43 PM" },
-    approved: 1,
-    locked: 1,
-    email: "johnn@example.com",
-  },
-  {
-    id: 42,
-    code: "TCCPLQ00042A",
-    avatar: { letter: "M", color: "teal" },
-    company: "MINISTRY OF RAILWAYS",
-    contact: "Sushil",
-    role: "Jr. PHP Laravel Developer",
-    plan: "Microsoft 365 Apps for business",
-    licenses: 1,
-    term: "Yearly",
-    amount: "₹ 8,764.80",
-    discount: "12%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Darshan Bane", letter: "D" },
-    note: { text: "Shared 05 Oct, 2026 12:29 PM" },
-    approved: 1,
-    locked: 1,
-    email: "sushil@goyalinfotech.com",
-  },
-  {
-    id: 41,
-    code: "TCCPLQ00041A",
-    avatar: { letter: "K", color: "purple" },
-    company: "KIRLOSKAR PNEUMATIC COMPANY LIMITED",
-    contact: "Mittal Solanki",
-    role: "Figma Designer",
-    plan: "Microsoft 365 Business Standard (no Teams)",
-    licenses: 1,
-    term: "Yearly",
-    amount: "₹ 6,783.00",
-    discount: "15%",
-    status: { label: "Not shared", type: "pending" },
-    assignee: { name: "Darshan Bane", letter: "D" },
-    note: { prefix: "Follow up on", value: "29 Sep, 2026 12:00 AM" },
-    approved: 0,
-    locked: 0,
-    email: "mittal@goyalinfotech.com",
-  },
-  {
-    id: 40,
-    code: "TCCPLQ00040A",
-    avatar: { letter: "T", color: "blue" },
-    company: "TIZZY PROPERTIES PRIVATE LIMITED",
-    contact: "Govind",
-    role: "P Manager",
-    plan: "Google Workspace Business Standard",
-    licenses: 23,
-    term: "Yearly",
-    amount: "₹ 268,272.00",
-    discount: "10%",
-    status: { label: "Shared", type: "pending" },
-    assignee: { name: "Unassigned", letter: "U" },
-    note: { text: "Shared 28 Sep, 2026 03:27 PM" },
-    approved: 0,
-    locked: 0,
-    email: "websites@tizzycloud.com",
-  },
-  {
-    id: 39,
-    code: "TCCPLQ00039A",
-    avatar: { letter: "M", color: "red" },
-    company: "MALAD RESIDENCY",
-    contact: "Kapil Maurya",
-    role: "Project Manager",
-    plan: "Microsoft 365 Business Standard (no Teams)",
-    licenses: 1,
-    term: "Yearly",
-    amount: "₹ 7,102.20",
-    discount: "11%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Pratik V", letter: "P" },
-    note: { text: "Shared 24 Sep, 2026 06:43 PM" },
-    approved: 1,
-    locked: 1,
-    email: "kapil@goyalinfotech.com",
-  },
-  {
-    id: 38,
-    code: "TCCPLQ00038A",
-    avatar: { letter: "I", color: "yellow" },
-    company: "IT TEAMWORK",
-    contact: "Janvi Singh",
-    role: "Project Manager",
-    plan: "Tizzy® Mail Corporate – 1 TB",
-    licenses: 1,
-    term: "Yearly",
-    amount: "₹ 7,040.00",
-    discount: "12%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Pratik V", letter: "P" },
-    note: { text: "Shared 24 Sep, 2026 06:29 PM" },
-    approved: 1,
-    locked: 1,
-    email: "janvi@goyalinfotech.com",
-  },
-  {
-    id: 37,
-    code: "TCCPLQ00037A",
-    avatar: { letter: "W", color: "teal" },
-    company: "WNS GLOBAL SERVICES PRIVATE LIMITED",
-    contact: "Pratik Vardekar",
-    role: "Desinger",
-    plan: "Microsoft 365 Apps for business",
-    licenses: 1,
-    term: "Yearly",
-    amount: "₹ 8,266.80",
-    discount: "17%",
-    status: { label: "Approved", type: "approved" },
-    assignee: { name: "Pratik V", letter: "P" },
-    note: { text: "Shared 24 Sep, 2026 06:26 PM" },
-    approved: 1,
-    locked: 1,
-    email: "pratik@goyalinfotech.com",
-  },
-];
+import styles from "@/components/quotation/Quotation.module.css";
+import { useGetAllQuotationsQuery } from "@/redux/apis/quotationApi";
+import Pagination from "@/common-components/pagination/Pagination";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -217,604 +26,558 @@ const TABS = [
   { key: "customer", label: "Customer Status" },
 ];
 
-const getDiscountStatus = (q) => {
-  const key = q.discountStatus ?? "pending";
-  return { key, type: key, label: key.charAt(0).toUpperCase() + key.slice(1) };
+const DISCOUNT_TABS = [
+  ["pending", "Pending Requests"],
+  ["approved", "Approved Requests"],
+  ["all", "All Requests"],
+];
+
+const STATUS_OPTIONS = [
+  "pending",
+  "approved",
+  "rejected",
+  "expired",
+  "accepted",
+];
+
+const getStatus = (quotation, fallback = "-") => {
+  const status =
+    quotation.status ??
+    quotation.quotation_status ??
+    quotation.discount_status ??
+    quotation.customer_status;
+
+  if (typeof status === "string") return status;
+  return status?.name || status?.label || fallback;
 };
 
-const isShared = (q) => q.status.label !== "Not shared";
+const getStatusClass = (status) =>
+  String(status || "")
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+
+const getCompany = (quotation) => quotation.company_name || "-";
+const getContact = (quotation) =>
+  quotation.contact_name || quotation.name || quotation.email || "-";
+const getAssignee = (quotation) =>
+  quotation.assigned_to?.name ||
+  quotation.assigned_to ||
+  quotation.assignee?.name ||
+  quotation.assignee ||
+  "Unassigned";
+const getFollowUp = (quotation) =>
+  quotation.follow_up_date || quotation.shared_at || quotation.created_at || "";
+const getAmount = (quotation) =>
+  quotation.total_amount ?? quotation.grand_total ?? quotation.amount ?? "";
+const getPlan = (quotation) =>
+  quotation.plan_name || quotation.product_name || quotation.plan || "";
+const getDiscountStatus = (quotation) =>
+  quotation.discount_status || quotation.discount_request_status || "pending";
 
 const Quotation = () => {
   const router = useRouter();
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
-  const [search, setSearch] = useState("");
-  const [discountFilter, setDiscountFilter] = useState("pending");
-  const [statusFilter, setStatusFilter] = useState({ all: "", customer: "" });
-
-  const [activeQuotation, setActiveQuotation] = useState(null);
-  const [popupPosition, setPopupPosition] = useState({
-    top: 0,
-    left: 0,
+  const [view, setView] = useState({
+    filterOpen: false,
+    activeTab: "all",
+    search: "",
+    discountFilter: "pending",
+    statusFilter: { all: "", customer: "" },
+    dateType: "",
+    from: "",
+    to: "",
+    activeQuotationId: null,
+    popupPosition: { top: 0, left: 0 },
   });
 
-  const openQuotationMenu = (q, e) => {
-    e.stopPropagation();
+  const updateView = (updates) =>
+    setView((current) => ({ ...current, ...updates }));
 
-    const buttonRect = e.currentTarget.getBoundingClientRect();
+  const status =
+    view.activeTab === "discount"
+      ? view.discountFilter === "all"
+        ? ""
+        : view.discountFilter
+      : view.statusFilter[view.activeTab] || "";
+  const {
+    data: quotationResponse,
+    isLoading,
+    isFetching,
+    isError,
+  } = useGetAllQuotationsQuery({
+    search: view.search,
+    tab: view.activeTab,
+    status,
+    date_type: view.dateType,
+    from: view.from,
+    to: view.to,
+    page: 1,
+  });
 
+  const quotations = Array.isArray(quotationResponse?.data?.quotations)
+    ? quotationResponse.data.quotations
+    : Array.isArray(quotationResponse?.data)
+      ? quotationResponse.data
+      : [];
+  const pagination = quotationResponse?.data?.pagination;
+  const total = pagination?.total ?? quotations.length;
+
+  const selectTab = (activeTab) => updateView({ activeTab, filterOpen: false });
+
+  const resetFilters = () =>
+    updateView({
+      search: "",
+      discountFilter: "pending",
+      statusFilter: { all: "", customer: "" },
+      dateType: "",
+      from: "",
+      to: "",
+    });
+
+  const openQuotationMenu = (quotation, event) => {
+    event.stopPropagation();
+    const rect = event.currentTarget.getBoundingClientRect();
     const popupWidth = 260;
     const popupHeight = 275;
-
     const left = Math.max(
       12,
-      Math.min(
-        buttonRect.right - popupWidth,
-        window.innerWidth - popupWidth - 12,
-      ),
+      Math.min(rect.right - popupWidth, window.innerWidth - popupWidth - 12),
     );
-
-    const top = Math.min(
-      buttonRect.bottom + 8,
-      window.innerHeight - popupHeight - 12,
+    const top = Math.max(
+      12,
+      Math.min(rect.bottom + 8, window.innerHeight - popupHeight - 12),
     );
-
-    setPopupPosition({ top: Math.max(12, top), left });
-    setActiveQuotation((current) => (current?.id === q.id ? null : q));
-  };
-  const switchTab = (key) => {
-    setActiveTab(key);
-    setFilterOpen(false);
+    updateView({
+      popupPosition: { top, left },
+      activeQuotationId:
+        view.activeQuotationId === quotation.id ? null : quotation.id,
+    });
   };
 
-  const visible = quotations.filter((q) =>
-    `${q.code} ${q.company} ${q.contact}`
-      .toLowerCase()
-      .includes(search.trim().toLowerCase()),
-  );
+  const renderRows = (customerTab = false) => {
+    const columnCount = customerTab ? 6 : 5;
+    const rows = quotations;
 
-  const discountRows = visible.filter(
-    (q) =>
-      discountFilter === "all" || getDiscountStatus(q).key === discountFilter,
-  );
-  const discountCount = (key) =>
-    quotations.filter((q) => key === "all" || getDiscountStatus(q).key === key)
-      .length;
-  const byStatus = (tab) => (q) =>
-    !statusFilter[tab] || q.status.type === statusFilter[tab];
-  const allRows = visible.filter(byStatus("all"));
-  const customerRows = visible.filter(isShared).filter(byStatus("customer"));
-  const shownRows =
-    activeTab === "discount"
-      ? discountRows
-      : activeTab === "customer"
-        ? customerRows
-        : allRows;
-  const pfx = activeTab === "customer" ? "es" : "crm"; // class prefix used by the backend markup
-
-  const rowProps = (q) => ({
-    key: q.id,
-    className: "crm-quo-row table-row",
-    style: { cursor: "pointer" },
-    onClick: () => router.push(`/quotations/quotation-detail`),
-  });
-
-  const ContactCell = ({ q }) => (
-    <td className="customer" data-label="Contact">
-      <div className={`avatar ${q.avatar.color}`}>{q.avatar.letter}</div>
-      <div>
-        <h5>{q.company}</h5>
-        <p>
-          {q.contact}
-          {q.role && ` - ${q.role}`}
-        </p>
-      </div>
-    </td>
-  );
-
-  const ActionButton = ({ q }) => (
-    <div className="actions">
-      <button
-        className="action-btn"
-        type="button"
-        title="Quotation actions"
-        data-id={q.id}
-        data-email={q.email}
-        onClick={(e) => openQuotationMenu(q, e)}
-      >
-        <LuChevronRight size={24} aria-hidden="true" />
-      </button>
-    </div>
-  );
-
-  const EmptyRow = ({ cols }) => (
-    <tr className="table-row">
-      <td
-        colSpan={cols}
-        style={{ textAlign: "center", padding: "40px 16px", color: "#6b7280" }}
-      >
-        No quotation yet
-      </td>
-    </tr>
-  );
-
-  // ---------------- Tab: All ----------------
-  const renderAll = (rows = allRows, statusOf = (q) => q.status) => (
-    <table className="crm-quo-table">
-      <thead>
-        <tr className="table-head">
-          <td className={styles.orderId}>Id</td>
-          <td className={styles.orderId}>Contact Information</td>
-          <td className={styles.orderId}>Plan</td>
-          <td className="status-col">Status</td>
-          <td className="status-col">Assigned To</td>
+    if (isError) {
+      return (
+        <tr className="table-row">
+          <td colSpan={columnCount} role="alert">
+            Unable to load quotations. Please try again.
+          </td>
         </tr>
-      </thead>
-      <tbody className="table-body">
-        {rows.length === 0 && <EmptyRow cols={5} />}
-        {rows.map((q) => (
-          <tr {...rowProps(q)}>
-            <td className={styles.orderId} data-label="Id">
-              <span className="quotation-id">{q.code}</span>
-            </td>
-            <ContactCell q={q} />
-            <td className="plan-info" data-label="Plan">
-              <div className="plan-icon">
-                <img
-                  src="https://img.icons8.com/color/48/microsoft.png"
-                  alt="Plan"
-                />
-              </div>
-              <div>
-                <h5>{q.plan}</h5>
-                <p className="plan-meta">
-                  <span>{q.licenses} Licenses</span>
-                  <span>{q.term}</span>
-                  <span>{q.amount}</span>
-                  <span>{q.discount}</span>
-                </p>
-              </div>
-            </td>
-            <td className="status-col" data-label="Status">
-              <span className={`badge ${statusOf(q).type}`}>
-                {statusOf(q).label}
-              </span>
-            </td>
-            <td className="plan-action" data-label="Assigned To">
-              <div className={styles.assignedUser}>
-                <div className="user-info">
-                  <div className={styles.avatarFlex}>
-                    <div className="mini-avatar primary">
-                      {q.assignee.letter}
-                    </div>
-                    <h5>{q.assignee.name}</h5>
-                  </div>
-                  <small>
-                    {q.note.prefix ? (
-                      <>
-                        {q.note.prefix}&nbsp;<strong>{q.note.value}</strong>
-                      </>
-                    ) : (
-                      q.note.text
-                    )}
-                  </small>
-                </div>
-                <ActionButton q={q} />
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-
-  const renderDiscount = () => renderAll(discountRows, getDiscountStatus);
-
-  const renderCustomer = () => (
-    <table className="es-quo-table">
-      <thead>
-        <tr className="table-head">
-          <td className={styles.orderId}>Id</td>
-          <td className={styles.orderId}>Contact Information</td>
-          <td className={styles.orderId}>Plan</td>
-          <td className="status-col">Status</td>
-          <td className="status-col">Invoice</td>
-          <td className="status-col">Assigned To</td>
+      );
+    }
+    if (isLoading || isFetching) {
+      return (
+        <tr className="table-row">
+          <td colSpan={columnCount}>Loading quotations...</td>
         </tr>
-      </thead>
-      <tbody className="table-body">
-        {customerRows.length === 0 && <EmptyRow cols={6} />}
-        {customerRows.map((q) => (
-          <tr
-            key={q.id}
-            className="es-quo-row table-row"
-            style={{ cursor: "pointer" }}
-            onClick={() =>
-              router.push(`/quotations/quotation-detail/${q.id}/activity`)
-            }
-          >
-            <td className={styles.orderId} data-label="Id">
-              <span className="quotation-id">{q.code}</span>
-            </td>
-            <ContactCell q={q} />
-            <td className="plan-info" data-label="Plan">
-              <div className="plan-icon">
-                <img
-                  src="https://img.icons8.com/color/48/microsoft.png"
-                  alt="Plan"
-                />
-              </div>
-              <div>
-                <h5>{q.plan}</h5>
-                <p className="plan-meta">
-                  <span>{q.licenses} Licenses</span>
-                  <span>{q.term}</span>
-                  <span>{q.amount}</span>
-                  <span>{q.discount}</span>
-                </p>
-              </div>
-            </td>
-            <td className="status-col" data-label="Status">
-              <span className={`badge ${q.status.type}`}>{q.status.label}</span>
-            </td>
+      );
+    }
+    if (rows.length === 0) {
+      return (
+        <tr className="table-row">
+          <td colSpan={columnCount}>No quotations found.</td>
+        </tr>
+      );
+    }
+
+    return rows?.map((quotation) => {
+      const company = getCompany(quotation);
+      const currentStatus = getStatus(quotation);
+      const assignee = getAssignee(quotation);
+      const discountStatus = getDiscountStatus(quotation);
+      const rowStatus =
+        view.activeTab === "discount" ? discountStatus : currentStatus;
+      const contact = getContact(quotation);
+
+      return (
+        <tr
+          key={quotation.id}
+          className={`${customerTab ? "es" : "crm"}-quo-row table-row`}
+          style={{ cursor: "pointer" }}
+          onClick={() =>
+            router.push(
+              customerTab
+                ? `/quotations/quotation-detail/${quotation.id}/activity`
+                : "/quotations/quotation-detail",
+            )
+          }
+        >
+          <td className={styles.orderId} data-label="Id">
+            <span className="quotation-id">
+              {quotation.quotation_no || quotation.id}
+            </span>
+          </td>
+          <td className="customer" data-label="Contact">
+            <div className="avatar purple">{company.charAt(0)}</div>
+            <div>
+              <h5>{company}</h5>
+              <p>{contact}</p>
+            </div>
+          </td>
+          <td className="plan-info" data-label="Plan">
+            <div className="plan-icon">
+              <Image
+                src="https://img.icons8.com/color/48/microsoft.png"
+                alt="Plan"
+                width={48}
+                height={48}
+                unoptimized
+              />
+            </div>
+            <div>
+              <h5>{getPlan(quotation) || "-"}</h5>
+              <p className="plan-meta">
+                {quotation.licenses != null && (
+                  <span>{quotation.licenses} Licenses</span>
+                )}
+                {quotation.term && <span>{quotation.term}</span>}
+                {getAmount(quotation) !== "" && (
+                  <span>{getAmount(quotation)}</span>
+                )}
+                {quotation.discount != null && (
+                  <span>{quotation.discount}</span>
+                )}
+              </p>
+            </div>
+          </td>
+          <td className="status-col" data-label="Status">
+            <span className={`badge ${getStatusClass(rowStatus)}`}>
+              {rowStatus}
+            </span>
+          </td>
+          {customerTab && (
             <td className="status-col" data-label="Invoice">
-              {q.approved ? (
+              {quotation.approved ? (
                 <span className="badge approved">Approved</span>
               ) : (
                 "—"
               )}
             </td>
-            <td className="plan-action" data-label="Assigned To">
-              <div className={styles.assignedUser}>
-                <div className="user-info">
-                  <div className={styles.avatarFlex}>
-                    <div className="mini-avatar primary">
-                      {q.assignee.letter}
-                    </div>
-                    <h5>{q.assignee.name}</h5>
+          )}
+          <td className="plan-action" data-label="Assigned To">
+            <div className={styles.assignedUser}>
+              <div className="user-info">
+                <div className={styles.avatarFlex}>
+                  <div className="mini-avatar primary">
+                    {String(assignee).charAt(0)}
                   </div>
-                  <small>
-                    {q.note.prefix ? (
-                      <>
-                        {q.note.prefix}&nbsp;<strong>{q.note.value}</strong>
-                      </>
-                    ) : (
-                      q.note.text
-                    )}
-                  </small>
+                  <h5>{assignee}</h5>
                 </div>
-                <ActionButton q={q} />
+                <small>{getFollowUp(quotation) || " "}</small>
               </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+              <div className="actions">
+                <button
+                  className="action-btn"
+                  type="button"
+                  title="Quotation actions"
+                  onClick={(event) => openQuotationMenu(quotation, event)}
+                >
+                  <LuChevronRight size={24} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      );
+    });
+  };
+
+  const customerTab = view.activeTab === "customer";
+  const tableClass = customerTab ? "es-quo-table" : "crm-quo-table";
+  const activeQuotation = quotations.find(
+    (quotation) => quotation.id === view.activeQuotationId,
   );
 
   return (
     <div className="content">
       <div className="page-header">
-        <div className="">
+        <div>
           <div className="breadcrumb welcome-text">
             <p>
-              <a href="/">Dashboard</a>
-              <span>/</span>{" "}
+              <Link href="/">Dashboard</Link>
+              <span>/</span>
             </p>
           </div>
-          <h2>Quotations </h2>
+          <h2>Quotations</h2>
         </div>
         <div className={styles.crmActions}>
-          <a
-            onClick={() => router.push("/quotations/add-quotation")}
+          <Link
+            href="/quotations/add-quotation"
             className={`${styles.crmActionBtn} ${styles.active}`}
           >
             <AiOutlineFileAdd size={20} />
             <span>Add Quotations</span>
-          </a>
+          </Link>
         </div>
       </div>
 
       <section className="common-table-section crm-quo-list">
         <div className={styles.crmLeadTabs}>
-          {TABS.map((t) => (
-            <a
-              key={t.key}
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
               href="#"
               role="tab"
-              aria-selected={activeTab === t.key}
-              className={activeTab === t.key ? styles.active : ""}
-              onClick={(e) => {
-                e.preventDefault();
-                switchTab(t.key);
+              aria-selected={view.activeTab === tab.key}
+              className={view.activeTab === tab.key ? styles.active : ""}
+              onClick={(event) => {
+                event.preventDefault();
+                selectTab(tab.key);
+                router?.push({
+                  pathname: router?.pathname,
+                  query: {
+                    ...router?.query,
+                    type: tab.key,
+                    page_no: 1,
+                    items_per_page: 10,
+                  },
+                });
               }}
             >
-              {t.label}
-            </a>
+              {tab.label}
+            </button>
           ))}
         </div>
 
         <div className="common-table-card">
-          <div className={`common-table-header ${pfx}-quo-header`}>
-            <div className={`${pfx}-quo-title`}>
+          <div
+            className={`common-table-header ${
+              customerTab ? "es" : "crm"
+            }-quo-header`}
+          >
+            <div className={`${customerTab ? "es" : "crm"}-quo-title`}>
               <p>
-                Showing{" "}
-                <strong>
-                  {shownRows.length ? 1 : 0} - {shownRows.length}
-                </strong>{" "}
-                from <strong>{shownRows.length}</strong> Quotations
+                Showing <strong>{quotations.length}</strong> from{" "}
+                <strong>{total}</strong> Quotations
               </p>
             </div>
-
-            <form className="table-search" onSubmit={(e) => e.preventDefault()}>
+            <form
+              className="table-search"
+              onSubmit={(event) => event.preventDefault()}
+            >
               <input
-                type="text"
-                id="partnerSearch"
+                type="search"
                 name="search"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                value={view.search}
+                onChange={(event) => updateView({ search: event.target.value })}
                 placeholder="Search by Quotation"
                 autoComplete="off"
-                style={{outline: "none"}}
+                className={styles.searchInput}
               />
               <LuSearch size={24} aria-hidden="true" />
             </form>
           </div>
 
-          <form
-            method="GET"
-            action="/crm/quotations"
-            className={`table-filter-wrap ${filterOpen ? "" : ""}`}
+          <div
+            className="table-filter-wrap"
             id="filterPanel"
-            style={{ display: filterOpen ? undefined : "none" }}
+            style={{ display: view.filterOpen ? undefined : "none" }}
           >
-            <input
-              type="hidden"
-              name="tab"
-              value={activeTab === "customer" ? "email" : activeTab}
-            />
             <div className="filter-grid">
               <div className="filter-group">
                 <h6>Date Type :</h6>
                 <div className="filter-options">
-                  <select name="date_type" defaultValue="">
+                  <select
+                    value={view.dateType}
+                    onChange={(event) =>
+                      updateView({ dateType: event.target.value })
+                    }
+                  >
                     <option value="">Select</option>
-                    <option value="created">Created Date</option>
+                    <option value="created_at">Created Date</option>
                     <option value="sent">Shared Date</option>
                     <option value="follow_up">Follow Up Date</option>
                   </select>
                 </div>
               </div>
-
               <div className="filter-group">
                 <h6>Date Range :</h6>
                 <div className="date-range">
                   <div className="date-input">
-                    <input type="date" name="from" defaultValue="" />
+                    <input
+                      aria-label="From date"
+                      type="date"
+                      value={view.from}
+                      onChange={(event) =>
+                        updateView({ from: event.target.value })
+                      }
+                    />
                   </div>
                   <div className="date-input">
-                    <input type="date" name="to" defaultValue="" />
+                    <input
+                      aria-label="To date"
+                      type="date"
+                      value={view.to}
+                      onChange={(event) =>
+                        updateView({ to: event.target.value })
+                      }
+                    />
                   </div>
                 </div>
               </div>
-
               <div className="filter-group">
                 <h6>
-                  {activeTab === "discount" ? "Discount Status :" : "Status :"}
+                  {view.activeTab === "discount"
+                    ? "Discount Status :"
+                    : "Status :"}
                 </h6>
                 <div className="filter-options">
                   <select
-                    key={activeTab}
-                    name="status"
-                    {...(activeTab === "discount"
-                      ? {
-                          value: discountFilter === "all" ? "" : discountFilter,
-                          onChange: (e) =>
-                            setDiscountFilter(e.target.value || "all"),
-                        }
-                      : {
-                          value: statusFilter[activeTab] ?? "",
-                          onChange: (e) =>
-                            setStatusFilter((f) => ({
-                              ...f,
-                              [activeTab]: e.target.value,
-                            })),
-                        })}
+                    value={
+                      view.activeTab === "discount"
+                        ? view.discountFilter === "all"
+                          ? ""
+                          : view.discountFilter
+                        : view.statusFilter[view.activeTab] || ""
+                    }
+                    onChange={(event) =>
+                      view.activeTab === "discount"
+                        ? updateView({
+                            discountFilter: event.target.value || "all",
+                          })
+                        : updateView({
+                            statusFilter: {
+                              ...view.statusFilter,
+                              [view.activeTab]: event.target.value,
+                            },
+                          })
+                    }
                   >
                     <option value="">Select</option>
-                    {activeTab === "discount" ? (
-                      <>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="expired">Expired</option>
-                        <option value="accepted">Accepted</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="expired">Expired</option>
-                        <option value="accepted">Accepted</option>
-                      </>
-                    )}
+                    {STATUS_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
-
-              <div className="filter-group filter-action-group">
-                <h6>&nbsp;</h6>
-              </div>
             </div>
-          </form>
+          </div>
 
           <div className="table-filter">
             <div className="border-line"></div>
             <button
-              className={`filter-btn ${filterOpen ? "is-open" : ""}`}
-              id="toggleFilter"
+              className={`filter-btn ${view.filterOpen ? "is-open" : ""}`}
               type="button"
-              onClick={() => setFilterOpen((v) => !v)}
+              onClick={() => updateView({ filterOpen: !view.filterOpen })}
             >
-              {filterOpen ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 12 12"
-                  fill="none"
-                >
-                  <path
-                    d="M9 3L3 9M3 3L9 9"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="9"
-                  viewBox="0 0 12 9"
-                  fill="none"
-                >
-                  <path
-                    d="M0.75 0.75H10.75M2.75 4.25H8.75M4.25 7.75H7.25"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              )}
-              <span>{filterOpen ? "Close" : "Filters"}</span>
+              <span>{view.filterOpen ? "Close" : "Filters"}</span>
             </button>
-            <Link
-              href="/quotations"
-              className="filter-btn"
-              id="resetFilters"
-              role="button"
-              style={{ display: filterOpen ? undefined : "none" }}
-              onClick={() => {
-                setSearch("");
-                setStatusFilter({ all: "", customer: "" });
-              }}
-            >
-              <LuRotateCcw size={15} aria-hidden="true" />
-              <span>Reset</span>
-            </Link>
+            {view.filterOpen && (
+              <button
+                className="filter-btn"
+                type="button"
+                onClick={resetFilters}
+              >
+                <LuRotateCcw size={15} aria-hidden="true" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
 
-          {activeTab === "discount" && (
+          {view.activeTab === "discount" && (
             <div className={styles.partnerTabsWrap}>
               <div className={styles.partnerTabs}>
-                {[
-                  ["pending", "Pending Requests"],
-                  ["approved", "Approved Requests"],
-                  ["all", "All Requests"],
-                ].map(([key, label]) => (
+                {DISCOUNT_TABS.map(([key, label]) => (
                   <button
                     key={key}
                     type="button"
                     className={`${styles.partnerTab} ${
-                      discountFilter === key ? styles.active : ""
+                      view.discountFilter === key ? styles.active : ""
                     }`}
-                    onClick={() => setDiscountFilter(key)}
+                    onClick={() => updateView({ discountFilter: key })}
                   >
                     {label} (
-                    <span className="tab-count">{discountCount(key)}</span>)
+                    <span className="tab-count">
+                      {key === "all"
+                        ? total
+                        : quotations.filter(
+                            (quotation) => getDiscountStatus(quotation) === key,
+                          ).length}
+                    </span>
+                    )
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {activeTab === "all" && renderAll()}
-          {activeTab === "discount" && renderDiscount()}
-          {activeTab === "customer" && renderCustomer()}
+          <table className={tableClass}>
+            <thead>
+              <tr className="table-head">
+                <td className={styles.orderId}>Id</td>
+                <td className={styles.orderId}>Contact Information</td>
+                <td className={styles.orderId}>Plan</td>
+                <td className="status-col">Status</td>
+                {customerTab && <td className="status-col">Invoice</td>}
+                <td className="status-col">Assigned To</td>
+              </tr>
+            </thead>
+            <tbody className="table-body">{renderRows(customerTab)}</tbody>
+          </table>
 
-          <div className="table-pagination">
-            <a href="#" className="page-btn">
-              <LuChevronLeft size={24} aria-hidden="true" />
-            </a>
-            <a href="#" className="page-btn active">
-              1
-            </a>
-            <a href="#" className="page-btn">
-              <LuChevronRight size={24} aria-hidden="true" />
-            </a>
-          </div>
+          <div className="table-pagination">{/* <Pagination /> */}</div>
         </div>
       </section>
+
       {activeQuotation && (
         <div
           className={styles.quotationPopup}
           style={{
-            top: popupPosition.top,
-            left: popupPosition.left,
+            top: view.popupPosition.top,
+            left: view.popupPosition.left,
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
         >
           <div className={styles.popupTitle}>Quotation</div>
-
           <div className={styles.popupActions}>
             <Link
-              href={`/quotations/quotation-detail`}
+              href={`/quotations/quotation-detail/${activeQuotation.id}`}
               className={styles.popupAction}
-              onClick={() => setActiveQuotation(null)}
+              onClick={() => updateView({ activeQuotationId: null })}
             >
               <LuEye size={19} />
               <span>View</span>
             </Link>
-
             <Link
               href={`/quotations/history`}
               className={styles.popupAction}
-              onClick={() => setActiveQuotation(null)}
+              onClick={() => updateView({ activeQuotationId: null })}
             >
               <LuHistory size={19} />
               <span>History</span>
             </Link>
-
             <Link
               href={`/`}
               className={styles.popupAction}
-              onClick={() => setActiveQuotation(null)}
+              onClick={() => updateView({ activeQuotationId: null })}
             >
               <LuPencil size={19} />
               <span>Edit</span>
             </Link>
-
             <Link
               href={`/`}
               className={styles.popupAction}
-              onClick={() => setActiveQuotation(null)}
+              onClick={() => updateView({ activeQuotationId: null })}
             >
               <LuDownload size={19} />
               <span>Download</span>
             </Link>
-
             <button
               type="button"
               className={styles.popupAction}
-              onClick={() => {
-                setActiveQuotation(null);
-              }}
+              onClick={() => updateView({ activeQuotationId: null })}
             >
               <LuMail size={19} />
               <span>Send</span>
             </button>
           </div>
-
           <button
             type="button"
             className={styles.discountBtn}
-            onClick={() => {
-              setActiveQuotation(null);
-            }}
+            onClick={() => updateView({ activeQuotationId: null })}
           >
             <LuCornerUpRight size={18} />
             <span>Send for more discount</span>
