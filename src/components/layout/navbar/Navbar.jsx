@@ -93,6 +93,7 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
             width={150}
             height={42}
             priority
+            unoptimized
           />
         </div>
 
