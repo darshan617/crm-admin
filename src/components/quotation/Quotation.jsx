@@ -217,7 +217,7 @@ const Quotation = () => {
             </div>
           </td>
           {quotation?.plans?.map((plan, idx) => (
-            <td className="plan-info" data-label="Plan">
+            <td className="plan-info" data-label="Plan" key={idx}>
               <div className="plan-icon">
                 <span className={styles.iconCircle}>
                   {SIDEBAR_SERVICES_CONSTANTS?.find(
