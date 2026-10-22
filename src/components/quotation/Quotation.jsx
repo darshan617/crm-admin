@@ -19,6 +19,7 @@ import {
 import styles from "@/components/quotation/Quotation.module.css";
 import { useGetAllQuotationsQuery } from "@/redux/apis/quotationApi";
 import Pagination from "@/common-components/pagination/Pagination";
+import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -215,32 +216,39 @@ const Quotation = () => {
               <p>{contact}</p>
             </div>
           </td>
-          <td className="plan-info" data-label="Plan">
-            <div className="plan-icon">
-              <Image
-                src="https://img.icons8.com/color/48/microsoft.png"
-                alt="Plan"
-                width={48}
-                height={48}
-                unoptimized
-              />
-            </div>
-            <div>
-              <h5>{getPlan(quotation) || "-"}</h5>
-              <p className="plan-meta">
-                {quotation.licenses != null && (
-                  <span>{quotation.licenses} Licenses</span>
-                )}
-                {quotation.term && <span>{quotation.term}</span>}
-                {getAmount(quotation) !== "" && (
-                  <span>{getAmount(quotation)}</span>
-                )}
-                {quotation.discount != null && (
-                  <span>{quotation.discount}</span>
-                )}
-              </p>
-            </div>
-          </td>
+          {quotation?.plans?.map((plan, idx) => (
+            <td className="plan-info" data-label="Plan">
+              <div className="plan-icon">
+                <span className={styles.iconCircle}>
+                  {SIDEBAR_SERVICES_CONSTANTS?.find(
+                    (menu) =>
+                      menu?.id ===
+                      Number(
+                        plan?.provider_id ||
+                          plan?.provider_id ||
+                          quotation?.provider_id,
+                      ),
+                  )?.image || "-"}
+                </span>
+              </div>
+              <div>
+                <h6>{plan?.name || "-"}</h6>
+                <p className="plan-meta">
+                  {quotation.licenses != null && (
+                    <span>{quotation.licenses} Licenses</span>
+                  )}
+                  {quotation.term && <span>{quotation.term}</span>}
+                  {getAmount(quotation) !== "" && (
+                    <span>₹ {getAmount(quotation)}</span>
+                  )}
+                  {quotation.discount != null && (
+                    <span>{quotation.discount}%</span>
+                  )}
+                </p>
+              </div>
+            </td>
+          ))}
+
           <td className="status-col" data-label="Status">
             <span className={`badge ${getStatusClass(rowStatus)}`}>
               {rowStatus}
@@ -262,7 +270,7 @@ const Quotation = () => {
                   <div className="mini-avatar primary">
                     {String(assignee).charAt(0)}
                   </div>
-                  <h5>{assignee}</h5>
+                  <h6 className="m-0">{assignee}</h6>
                 </div>
                 <small>{getFollowUp(quotation) || " "}</small>
               </div>
