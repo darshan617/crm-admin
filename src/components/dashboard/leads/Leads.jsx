@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "@/components/dashboard/leads/Leads.module.css";
 import { LuFileDown } from "react-icons/lu";
 import { IoMdArrowBack } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import {
+  useCheckLeadDomainQuery,
   useCreateLeadMutation,
   useGetDdDataQuery,
 } from "@/redux/apis/leadsApi";
@@ -13,7 +14,7 @@ import { useRouter } from "next/router";
 const Leads = () => {
   const { showToast } = useToast();
   const router = useRouter();
-  const { data: apiDropdownData } = useGetDdDataQuery();
+  const documentInputRef = useRef(null);
   const [formData, setFormData] = useState({
     customer_detail: {
       salutation: "",
@@ -89,7 +90,14 @@ const Leads = () => {
   console.log(formData);
 
   const [createLead, { isLoading: isCreatingLead }] = useCreateLeadMutation();
-  const documentInputRef = useRef(null);
+  const { data: apiDropdownData } = useGetDdDataQuery();
+  const { data: domainAvailable, isLoading: isCheckingDomain } =
+    useCheckLeadDomainQuery(
+      {
+        domain: formData?.domain?.domain,
+      },
+      { skip: !formData?.domain?.domain },
+    );
 
   const handleFormChange = (e, section, index = null) => {
     const { name } = e.target;
@@ -325,6 +333,34 @@ const Leads = () => {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (!formData.domain.domain?.trim() || !domainAvailable?.data) return;
+
+    const { available, registered } = domainAvailable.data;
+
+    let domainType = formData.domain.domain_type;
+
+    if (registered && !available) {
+      domainType = "existing";
+    } else if (available && !registered) {
+      domainType = "new";
+    }
+
+    if (domainType !== formData.domain.domain_type) {
+      setFormData((prev) => ({
+        ...prev,
+        domain: {
+          ...prev.domain,
+          domain_type: domainType,
+        },
+      }));
+    }
+  }, [
+    domainAvailable?.data,
+    formData.domain.domain,
+    formData.domain.domain_type,
+  ]);
 
   return (
     <section className="content">
@@ -713,8 +749,8 @@ const Leads = () => {
                           <div className={styles.dateWrap}>
                             <input
                               type="date"
-                              name="renewal_dates"
-                              value={item.renewal_dates}
+                              name="renewal_date"
+                              value={item.renewal_date}
                               onChange={(e) =>
                                 handleFormChange(e, "current_service_info", idx)
                               }
@@ -731,146 +767,31 @@ const Leads = () => {
             <div className={styles.domainSection}>
               <div className={styles.domainTitle}>Domain</div>
 
-              {formData.domain.domain_type === "existing" ? (
-                <div className={styles.domainSelectionGrid}>
-                  <div className={styles.domainField}>
-                    <label>Domain option</label>
-                    <div className={styles.domainSelectWrap}>
-                      <select
-                        name="domain_type"
-                        value={formData.domain.domain_type}
-                        onChange={(e) => handleFormChange(e, "domain")}
-                      >
-                        <option value="no-domain">No domain</option>
-                        <option value="existing">Already have domain</option>
-                        <option value="new">Need new domain</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Domain Name</label>
-                    <input
-                      type="text"
-                      name="domain"
-                      placeholder="example.com"
-                      value={formData.domain.domain}
-                      onChange={(e) => handleFormChange(e, "domain")}
-                    />
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Renewal Date</label>
-                    <div className={styles.dateWrap}>
-                      <input
-                        type="date"
-                        name="domain_renewal_date"
-                        value={formData.domain.domain_renewal_date}
-                        onChange={(e) => handleFormChange(e, "domain")}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : formData.domain.domain_type === "new" ? (
-                <div className={styles.domainSelectionGrid}>
-                  <div className={styles.domainField}>
-                    <label>Domain option</label>
-                    <div className={styles.domainSelectWrap}>
-                      <select
-                        name="domain_type"
-                        value={formData.domain.domain_type}
-                        onChange={(e) => handleFormChange(e, "domain")}
-                      >
-                        <option value="no-domain">No domain</option>
-                        <option value="existing">Already have domain</option>
-                        <option value="new">Need new domain</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Domain Name</label>
-                    <input
-                      type="text"
-                      name="domain"
-                      placeholder="example.com"
-                      value={formData.domain.domain}
-                      onChange={(e) => handleFormChange(e, "domain")}
-                    />
-                    {/* <button type="button" className={styles.availabilityButton}>
-                      Check Availability
-                    </button> */}
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Period</label>
-                    <div className={styles.periodSelectWrap}>
-                      <select
-                        name="domain_period"
-                        value={formData.domain.domain_period}
-                        onChange={(e) => handleFormChange(e, "domain")}
-                      >
-                        <option value="">Select Period</option>
-                        {apiDropdownData?.data?.options?.domain_period?.map(
-                          (item, idx) => {
-                            return <option value={item}>{item}</option>;
-                          },
-                        )}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Rate</label>
-                    <input
-                      type="text"
-                      name="domain_rate"
-                      value={formData.domain.domain_rate ?? ""}
-                      onChange={(e) => handleFormChange(e, "domain")}
-                    />
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>SAC</label>
-                    <input
-                      type="text"
-                      name="sac"
-                      value={formData.domain.sac}
-                      onChange={(e) => handleFormChange(e, "domain")}
-                    />
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Domain Start</label>
-                    <div className={styles.dateWrap}>
-                      <input
-                        type="date"
-                        name="domain_start"
-                        value={formData.domain.domain_start}
-                        onChange={(e) => handleFormChange(e, "domain")}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.domainField}>
-                    <label>Domain End</label>
-                    <div className={styles.dateWrap}>
-                      <input
-                        type="date"
-                        name="domain_end"
-                        value={formData.domain.domain_end}
-                        onChange={(e) => handleFormChange(e, "domain")}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
+              <div className={styles.domainSelectionGrid}>
+                {/* Domain option */}
                 <div className={styles.domainField}>
                   <label>Domain option</label>
                   <div className={styles.domainSelectWrap}>
                     <select
                       name="domain_type"
                       value={formData.domain.domain_type}
+                      disabled={
+                        !!formData.domain.domain?.trim() &&
+                        !isCheckingDomain &&
+                        !!domainAvailable?.data &&
+                        domainAvailable.data.registered &&
+                        !domainAvailable.data.available
+                      }
+                      style={{
+                        cursor:
+                          !!formData.domain.domain?.trim() &&
+                          !isCheckingDomain &&
+                          !!domainAvailable?.data &&
+                          domainAvailable.data.registered &&
+                          !domainAvailable.data.available
+                            ? "not-allowed"
+                            : "pointer",
+                      }}
                       onChange={(e) => handleFormChange(e, "domain")}
                     >
                       <option value="no-domain">No domain</option>
@@ -879,7 +800,143 @@ const Leads = () => {
                     </select>
                   </div>
                 </div>
-              )}
+
+                {/* Always visible so the domain can be checked */}
+
+                {/* Existing domain fields */}
+                {formData.domain.domain_type === "existing" && (
+                  <>
+                    <div className={styles.domainField}>
+                      <label>Domain Name</label>
+                      <input
+                        type="text"
+                        name="domain"
+                        placeholder="example.com"
+                        value={formData.domain.domain}
+                        onChange={(e) => handleFormChange(e, "domain")}
+                      />
+
+                      {isCheckingDomain && <small>Checking domain...</small>}
+
+                      {!isCheckingDomain && domainAvailable?.data && (
+                        <small>
+                          {domainAvailable.data.registered &&
+                          !domainAvailable.data.available
+                            ? "Domain already registered"
+                            : domainAvailable.data.available &&
+                                !domainAvailable.data.registered
+                              ? "Domain available"
+                              : ""}
+                        </small>
+                      )}
+                    </div>
+                    <div className={styles.domainField}>
+                      <label>Renewal Date</label>
+                      <div className={styles.dateWrap}>
+                        <input
+                          type="date"
+                          name="domain_renewal_date"
+                          value={formData.domain.domain_renewal_date}
+                          onChange={(e) => handleFormChange(e, "domain")}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* New domain fields */}
+                {formData.domain.domain_type === "new" && (
+                  <>
+                    <div className={styles.domainField}>
+                      <label>Domain Name</label>
+                      <input
+                        type="text"
+                        name="domain"
+                        placeholder="example.com"
+                        value={formData.domain.domain}
+                        onChange={(e) => handleFormChange(e, "domain")}
+                      />
+
+                      {isCheckingDomain && <small>Checking domain...</small>}
+
+                      {!isCheckingDomain && domainAvailable?.data && (
+                        <small>
+                          {domainAvailable.data.registered &&
+                          !domainAvailable.data.available
+                            ? "Domain already registered"
+                            : domainAvailable.data.available &&
+                                !domainAvailable.data.registered
+                              ? "Domain available"
+                              : ""}
+                        </small>
+                      )}
+                    </div>
+                    <div className={styles.domainField}>
+                      <label>Period</label>
+                      <div className={styles.periodSelectWrap}>
+                        <select
+                          name="domain_period"
+                          value={formData.domain.domain_period}
+                          onChange={(e) => handleFormChange(e, "domain")}
+                        >
+                          <option value="">Select Period</option>
+                          {apiDropdownData?.data?.options?.domain_period?.map(
+                            (item) => (
+                              <option key={item} value={item}>
+                                {item}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={styles.domainField}>
+                      <label>Rate</label>
+                      <input
+                        type="number"
+                        name="domain_rate"
+                        value={formData.domain.domain_rate ?? ""}
+                        onChange={(e) => handleFormChange(e, "domain")}
+                      />
+                    </div>
+
+                    <div className={styles.domainField}>
+                      <label>SAC</label>
+                      <input
+                        type="text"
+                        name="sac"
+                        value={formData.domain.sac}
+                        onChange={(e) => handleFormChange(e, "domain")}
+                      />
+                    </div>
+
+                    <div className={styles.domainField}>
+                      <label>Domain Start</label>
+                      <div className={styles.dateWrap}>
+                        <input
+                          type="date"
+                          name="domain_start"
+                          value={formData.domain.domain_start}
+                          onChange={(e) => handleFormChange(e, "domain")}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.domainField}>
+                      <label>Domain End</label>
+                      <div className={styles.dateWrap}>
+                        <input
+                          type="date"
+                          name="domain_end"
+                          value={formData.domain.domain_end}
+                          onChange={(e) => handleFormChange(e, "domain")}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* PLAN DETAIL */}
@@ -1158,9 +1215,7 @@ const Leads = () => {
                 <div className={styles.selectWrap}>
                   <select
                     name="lead_bifurcation"
-                    value={
-                      formData?.lead_specification?.asslead_bifurcationigned_to
-                    }
+                    value={formData.lead_specification.lead_bifurcation}
                     onChange={(e) => handleFormChange(e, "lead_specification")}
                   >
                     <option value="">Select Bifurcation</option>

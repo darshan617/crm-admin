@@ -3,7 +3,15 @@ import { apiSlice } from "../apiSlice";
 const quotationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllQuotations: builder.query({
-      query: ({ search = "", tab = "all", status = "", date_type = "", from = "", to = "", page = 1 }) => {
+      query: ({
+        search = "",
+        tab = "all",
+        status = "",
+        date_type = "",
+        from = "",
+        to = "",
+        page = 1,
+      }) => {
         const params = new URLSearchParams({
           search,
           tab,
@@ -21,7 +29,34 @@ const quotationApi = apiSlice.injectEndpoints({
       },
       providesTags: ["quotation"],
     }),
+    getQuotationDdData: builder.query({
+      query: () => ({
+        url: `/quotations/create`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
+    createQuotation: builder.mutation({
+      query: ({ body }) => ({
+        url: `/quotation-create`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["quotation"],
+    }),
+    checkQuotaionDomain: builder.query({
+      query: ({ domain }) => ({
+        url: `/quotations/check-domain?domain=${domain}`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
   }),
 });
 
-export const { useGetAllQuotationsQuery } = quotationApi;
+export const {
+  useGetAllQuotationsQuery,
+  useGetQuotationDdDataQuery,
+  useCreateQuotationMutation,
+  useCheckQuotaionDomainQuery,
+} = quotationApi;

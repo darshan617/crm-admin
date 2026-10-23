@@ -63,6 +63,13 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["leads"],
     }),
+    checkLeadDomain: builder.query({
+      query: ({ domain }) => ({
+        url: `/leads/check-domain?domain=${domain}`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
   }),
 });
 
@@ -75,4 +82,5 @@ export const {
   useContactandServicePlanDeleteMutation,
   useLeadDocumentDeleteMutation,
   useUploadLeadsMutation,
+  useCheckLeadDomainQuery,
 } = leadsApi;
