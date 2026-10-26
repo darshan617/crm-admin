@@ -6,39 +6,12 @@ import styles from "@/components/quotation/add-quotation-form/AddQuotationForm.m
 import {
   useCheckQuotaionDomainQuery,
   useCreateQuotationMutation,
+  useGetLeadDataForQuotationQuery,
   useGetQuotationDdDataQuery,
 } from "@/redux/apis/quotationApi";
 import CustomDropdown from "@/common-components/custom-dropdown/CustomDropdown";
 import { BiX } from "react-icons/bi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
-const CSRF_TOKEN = "";
-
-const providers = [
-  { id: 3, name: "Google Workspace" },
-  { id: 2, name: "Microsoft 365" },
-  { id: 1, name: "Tizzy Mail" },
-];
-
-const salutations = ["Mr", "Mrs", "Ms"];
-
-const dealTypes = [
-  ["new", "New"],
-  ["license_addon", "License Add-on"],
-  ["renewal", "Renewal"],
-  ["upgrade", "Upgrade"],
-  ["downgrade", "Downgrade"],
-  ["partial_upgrade", "Partial Upgrade"],
-];
-
-const billingCycles = [
-  "Monthly",
-  "Quarterly",
-  "Half Yearly",
-  "Yearly",
-  "3 Yearly",
-];
 
 const countryCodes = [
   ["91", "India"],
@@ -80,7 +53,7 @@ export default function Page() {
     renewal_date: "",
     plans: [blankRow()],
   });
-  console.log(formData);
+  const [error, setError] = useState(null);
   const form = formData;
   const { plans } = formData;
 
@@ -94,18 +67,35 @@ export default function Page() {
       },
       { skip: !formData?.domain_name },
     );
+  const { data: getLeadDeatils } = useGetLeadDataForQuotationQuery(
+    {
+      lead_id: formData?.lead?.value,
+    },
+    { skip: formData?.lead === "" },
+  );
+  console.log(getLeadDeatils, "getLeadDeatils");
 
-  const setField = (name, value) =>
+  const setField = (name, value) => {
     setFormData((current) => ({ ...current, [name]: value }));
+    setError((current) => ({
+      ...current,
+      [name]: null,
+    }));
+  };
 
-  const onRowInput = (i, field, value) =>
+  const onRowInput = (i, field, value) => {
     setFormData((current) => ({
       ...current,
       plans: current.plans.map((row, idx) =>
         idx === i ? { ...row, [field]: value } : row,
       ),
     }));
-
+    setError((current) => ({
+      ...current,
+      plans: null,
+      [pname(i, field)]: null,
+    }));
+  };
   const addPlan = (e) => {
     e.preventDefault();
     setFormData((current) => ({
@@ -122,17 +112,89 @@ export default function Page() {
 
   const pname = (i, f) => "plans[" + i + "][" + f + "]";
 
-  const handleCreateQuotation = async () => {
+  const handleCreateQuotation = async (event) => {
+    event.preventDefault();
+    if (!validateForm()) return;
+
     try {
       const res = await createQuotation({
         body: formData,
-      });
-      if (res?.data?.success) {
-        showToast(res?.data?.message, "success");
+      }).unwrap();
+
+      if (res?.success) {
+        showToast(res?.message || "Quotation created successfully.", "success");
+        router.push("/quotations");
+      } else {
+        showToast(res?.message || "Could not create the quotation.", "error");
       }
     } catch (error) {
-      console.log(error, "handleCreateQuotation");
+      showToast(
+        error?.data?.message ||
+          error?.message ||
+          "Could not create the quotation.",
+        "error",
+      );
     }
+  };
+
+  const validateForm = () => {
+    const newError = {};
+
+    if (!formData.domain_type) {
+      newError.domain_type = "Please select a domain option.";
+    }
+
+    if (!formData.company_name?.trim()) {
+      newError.company_name = "Please enter company name.";
+    }
+
+    if (!formData.gstin?.trim()) {
+      newError.gstin = "Please enter GSTIN.";
+    }
+
+    if (!formData.salutation) {
+      newError.salutation = "Please select salutation.";
+    }
+
+    if (!formData.name?.trim()) {
+      newError.name = "Please enter name.";
+    }
+
+    if (!formData.email?.trim()) {
+      newError.email = "Please enter email.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newError.email = "Please enter a valid email.";
+    }
+
+    if (
+      formData.discount === "" ||
+      Number(formData.discount) < 0 ||
+      Number(formData.discount) > 100
+    ) {
+      newError.discount = "Please enter a discount between 0 and 100.";
+    }
+
+    if (!formData.plans || formData.plans.length === 0) {
+      newError.plans = "Please add at least one plan.";
+    } else if (
+      !formData.plans.every(
+        (plan) =>
+          plan.provider_id &&
+          plan.plan_id &&
+          plan.quote_period &&
+          plan.sku?.trim() &&
+          Number(plan.quantity) >= 1 &&
+          plan.rate !== "" &&
+          plan.rate !== null &&
+          Number(plan.rate) >= 0,
+      )
+    ) {
+      newError.plans = "Please fill all required fields in plan details.";
+    }
+
+    setError(newError);
+    showToast("Please fill all required fields in the form.", "error");
+    return Object.keys(newError).length === 0;
   };
 
   useEffect(() => {
@@ -146,6 +208,40 @@ export default function Page() {
       setField("domain_type", "new");
     }
   }, [domainAvailable?.data, formData.domain_name]);
+
+  useEffect(() => {
+    if (!getLeadDeatils?.data?.lead) return;
+
+    const leadData = getLeadDeatils?.data?.lead;
+    setFormData((current) => ({
+      ...current,
+      company_name: leadData?.company_name || "",
+      gstin: leadData?.gstin || "",
+      salutation: leadData?.salutation || "",
+      name: leadData?.name || "",
+      email: leadData?.email || "",
+      mobile_code: leadData?.mobile_code || "91",
+      mobile: leadData?.mobile || "",
+      domain_name: leadData?.domain || "",
+      domain_type: leadData?.domain_type || "",
+      sac: leadData?.sac || "",
+      domain_start: leadData?.domain_start || "",
+      domain_end: leadData?.domain_end || "",
+      domain_rate: leadData?.domain_rate || "",
+      renewal_date: leadData?.renewal_date || "",
+      plans: leadData?.services?.length > 0 ? leadData.services : [blankRow()],
+    }));
+    setError((current) => ({
+      ...current,
+      company_name: null,
+      gstin: null,
+      salutation: null,
+      name: null,
+      email: null,
+      domain_type: null,
+      plans: null,
+    }));
+  }, [getLeadDeatils?.data]);
 
   return (
     <main className="content">
@@ -181,7 +277,7 @@ export default function Page() {
         </div>
       </div>
 
-      <form id="quotationForm">
+      <form id="quotationForm" onSubmit={handleCreateQuotation} noValidate>
         <section className="common-form">
           <h3>Quotation Detail</h3>
 
@@ -227,6 +323,9 @@ export default function Page() {
                 onChange={(e) => setField("company_name", e.target.value)}
                 required
               />
+              {error?.company_name && (
+                <p className={styles.errorMessage}>{error.company_name}</p>
+              )}
             </div>
 
             <div className="form-group">
@@ -241,6 +340,9 @@ export default function Page() {
                 onChange={(e) => setField("gstin", e.target.value)}
                 required
               />
+              {error?.gstin && (
+                <p className={styles.errorMessage}>{error.gstin}</p>
+              )}
             </div>
 
             <div className="form-group">
@@ -272,6 +374,11 @@ export default function Page() {
                   required
                 />
               </div>
+              {(error?.salutation || error?.name) && (
+                <p className={styles.errorMessage}>
+                  {error?.salutation || error?.name}
+                </p>
+              )}
             </div>
 
             {/* Email */}
@@ -292,6 +399,9 @@ export default function Page() {
                   onChange={(e) => setField("email", e.target.value)}
                 />
               </div>
+              {error?.email && (
+                <p className={styles.errorMessage}>{error.email}</p>
+              )}
             </div>
 
             {/* Mobile */}
@@ -344,9 +454,12 @@ export default function Page() {
                 onChange={(e) => setField("discount", e.target.value)}
                 required
               />
+              {error?.discount && (
+                <p className={styles.errorMessage}>{error.discount}</p>
+              )}
             </div>
 
-            <div className="form-group">
+            {/* <div className="form-group">
               <label>
                 Order Type <span>*</span>
               </label>
@@ -364,7 +477,7 @@ export default function Page() {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
           </div>
 
           {/* Domain */}
@@ -373,7 +486,9 @@ export default function Page() {
 
             <div className="form-grid">
               <div className="form-group">
-                <label>Domain option</label>
+                <label>
+                  Domain option <span>*</span>
+                </label>
                 <select
                   name="domain_type"
                   id="domainType"
@@ -385,10 +500,15 @@ export default function Page() {
                     domainAvailable?.data?.registered
                   }
                 >
-                  <option value="">No domain</option>
+                  <option value="" disabled>
+                    Select domain option
+                  </option>
                   <option value="existing">Already have domain</option>
                   <option value="new">Need new domain</option>
                 </select>
+                {error?.domain_type && (
+                  <p className={styles.errorMessage}>{error.domain_type}</p>
+                )}
               </div>
 
               <div
@@ -657,13 +777,15 @@ export default function Page() {
               </div>
             ))}
           </div>
+          {error?.plans && <p className={styles.errorMessage}>{error.plans}</p>}
 
           <div className={styles.submitWrap}>
             <button
-              onClick={handleCreateQuotation}
+              type="submit"
               className={styles.submitBtn}
+              disabled={isCreatingQuotation}
             >
-              Save Quotation
+              {isCreatingQuotation ? "Saving..." : "Save Quotation"}
             </button>
           </div>
         </section>

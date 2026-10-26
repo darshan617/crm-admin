@@ -51,6 +51,13 @@ const quotationApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["quotation"],
     }),
+    getLeadDataForQuotation: builder.query({
+      query: ({ lead_id }) => ({
+        url: `/quotations/create?lead_id=${lead_id}`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
   }),
 });
 
@@ -59,4 +66,5 @@ export const {
   useGetQuotationDdDataQuery,
   useCreateQuotationMutation,
   useCheckQuotaionDomainQuery,
+  useGetLeadDataForQuotationQuery,
 } = quotationApi;

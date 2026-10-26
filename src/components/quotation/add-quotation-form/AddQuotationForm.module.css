@@ -131,6 +131,12 @@
   margin-top: 30px;
 }
 
+.errorMessage {
+  margin: 4px 0 0;
+  color: #dc2626;
+  font-size: 13px;
+}
+
 .submitBtn {
   background: var(--primary);
   font-family: "Baloo Bhai 2";
