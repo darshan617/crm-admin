@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import styles from "@/components/quotation/quotation-detail/QuotationDetail.module.css";
 import tizzyLogo from "@/assets/images/logo.png";
 import Image from "next/image";
@@ -11,6 +11,7 @@ import { RiGlobalLine, RiHistoryLine } from "react-icons/ri";
 import { CiMail } from "react-icons/ci";
 import { MdOutlineEmail, MdOutlineTurnRight } from "react-icons/md";
 import { GoPencil } from "react-icons/go";
+import { useGetQuotationDetailQuery } from "@/redux/apis/quotationApi";
 
 const SAMPLE_QUOTATIONS = [
   {
@@ -116,65 +117,6 @@ const SAMPLE_QUOTATIONS = [
     actions: ["download", "history"],
   },
 ];
-
-const iconProps = {
-  xmlns: "http://www.w3.org/2000/svg",
-  width: "24",
-  height: "24",
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: "2",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-  "aria-hidden": "true",
-};
-
-function CornerUpRightIcon() {
-  return (
-    <svg
-      {...iconProps}
-      data-lucide="corner-up-right"
-      className="lucide lucide-corner-up-right"
-    >
-      <path d="m15 14 5-5-5-5"></path>
-      <path d="M4 20v-7a4 4 0 0 1 4-4h12"></path>
-    </svg>
-  );
-}
-
-function DownloadIcon() {
-  return (
-    <svg
-      {...iconProps}
-      data-lucide="download"
-      className="lucide lucide-download"
-    >
-      <path d="M12 15V3"></path>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-      <path d="m7 10 5 5 5-5"></path>
-    </svg>
-  );
-}
-
-function PencilIcon() {
-  return (
-    <svg {...iconProps} data-lucide="pencil" className="lucide lucide-pencil">
-      <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
-      <path d="m15 5 4 4"></path>
-    </svg>
-  );
-}
-
-function HistoryIcon() {
-  return (
-    <svg {...iconProps} data-lucide="history" className="lucide lucide-history">
-      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-      <path d="M3 3v5h5"></path>
-      <path d="M12 7v5l4 2"></path>
-    </svg>
-  );
-}
 
 function QuotationCard({ quotation, onOpenModal }) {
   const router = useRouter();
@@ -448,6 +390,16 @@ function QuotationCard({ quotation, onOpenModal }) {
 }
 
 function QuotationDetail({ quotations, badge = "New", onOpenModal }) {
+  const router = useRouter();
+  const {
+    data: quotationDetail,
+    isLoading,
+    isError,
+  } = useGetQuotationDetailQuery(
+    { quotation_id: router?.query?.slug },
+    { skip: !router?.query?.slug },
+  );
+
   return (
     <main className="content">
       <div className="page-header">

@@ -200,7 +200,7 @@ const Quotation = () => {
             router.push(
               customerTab
                 ? `/quotations/quotation-detail/${quotation.id}/activity`
-                : "/quotations/quotation-detail",
+                : `/quotations/quotation-detail/${quotation.id}`,
             )
           }
         >
@@ -216,23 +216,23 @@ const Quotation = () => {
               <p>{contact}</p>
             </div>
           </td>
-          {quotation?.plans?.map((plan, idx) => (
-            <td className="plan-info" data-label="Plan" key={idx}>
+          <td>
+            <div className="plan-info" data-label="Plan">
               <div className="plan-icon">
                 <span className={styles.iconCircle}>
                   {SIDEBAR_SERVICES_CONSTANTS?.find(
                     (menu) =>
                       menu?.id ===
                       Number(
-                        plan?.provider_id ||
-                          plan?.provider_id ||
+                        quotation?.plans?.[0]?.provider_id ||
+                          quotation?.plans?.[0]?.provider_id ||
                           quotation?.provider_id,
                       ),
                   )?.image || "-"}
                 </span>
               </div>
               <div>
-                <h6>{plan?.name || "-"}</h6>
+                <h6>{quotation?.plans?.[0]?.name || "-"}</h6>
                 <p className="plan-meta">
                   {quotation.licenses != null && (
                     <span>{quotation.licenses} Licenses</span>
@@ -246,8 +246,14 @@ const Quotation = () => {
                   )}
                 </p>
               </div>
-            </td>
-          ))}
+            </div>
+            {quotation?.plans?.length > 1 && (
+              <p className="plan-meta">
+                + {quotation?.plans?.length - 1} more plans
+              </p>
+            )}
+            <p></p>
+          </td>
 
           <td className="status-col" data-label="Status">
             <span className={`badge ${getStatusClass(rowStatus)}`}>

@@ -646,6 +646,12 @@
   font-size: 12px;
   color: #6b7280;
 }
+.errorMessage {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #e30000;
+}
 
 /* ================================
    RESPONSIVE DESIGN - BELOW 768px
@@ -824,7 +830,7 @@
     max-width: 320px;
   }
 
-  .pageHeader{
+  .pageHeader {
     display: flex;
     flex-direction: column;
   }
