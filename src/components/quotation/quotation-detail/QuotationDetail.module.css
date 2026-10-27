@@ -46,7 +46,6 @@
   grid-template-columns: 1fr 1.5fr 1fr;
   align-items: center;
   padding-bottom: 12px;
-  border-bottom: 1px solid #ddd !important;
 }
 
 .quotationNumber {
@@ -64,7 +63,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 18px;
+  gap: 10px;
 }
 
 .quotationBody {
@@ -258,6 +257,7 @@
   align-items: center;
   gap: 20px;
   border-radius: 0 0 10px 10px;
+  flex-wrap: wrap;
   /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); */
 }
 
@@ -298,6 +298,21 @@
 .quotationTableWrap {
   min-width: 0;
   max-width: 100%;
+}
+
+.quotationDetail {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+}
+.quotationVersionDiv {
+  border-radius: 15px;
+  border: 1px solid #cdcdcd;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
 }
 
 @media (min-width: 1400px) {
