@@ -87,7 +87,32 @@ const Leads = () => {
     },
     documents: [],
   });
-  console.log(formData);
+
+  const [error, setError] = useState(null);
+  const validateForm = () => {
+    const newError = {};
+
+    if (!formData?.customer_detail?.salutation) {
+      newError.salutation = "Please select title";
+    }
+    if (!formData?.customer_detail?.name) {
+      newError.name = "Please enter name";
+    }
+    if (!formData?.customer_detail?.email) {
+      newError.email = "Please enter email";
+    }
+    if (!formData?.lead_specification?.lead_status) {
+      newError.lead_status = "Please select lead status";
+    }
+    if (!formData?.customer_detail?.mobile) {
+      newError.mobile = "Please enter mobile";
+    }
+    setError(newError);
+    if (Object.keys(newError).length > 0) {
+      showToast("Please fill all required fields in the form.", "error");
+    }
+    return Object.keys(newError).length === 0;
+  };
 
   const [createLead, { isLoading: isCreatingLead }] = useCreateLeadMutation();
   const { data: apiDropdownData } = useGetDdDataQuery();
@@ -107,6 +132,14 @@ const Leads = () => {
           ? null
           : Number(e.target.value)
         : e.target.value;
+
+    setError((prev) => {
+      if (!prev?.[name]) return prev;
+
+      const nextError = { ...prev };
+      delete nextError[name];
+      return nextError;
+    });
 
     setFormData((prev) => {
       // Handle array sections
@@ -206,6 +239,7 @@ const Leads = () => {
   };
 
   const handleCreateLead = async () => {
+    if (!validateForm()) return;
     try {
       const formBody = new FormData();
       formBody.append(
@@ -415,6 +449,14 @@ const Leads = () => {
                     onChange={(e) => handleFormChange(e, "customer_detail")}
                   />
                 </div>
+                {error?.salutation && (
+                  <span className={styles.errorMessage}>
+                    {error.salutation}
+                  </span>
+                )}
+                {error?.name && (
+                  <span className={styles.errorMessage}>{error.name}</span>
+                )}
               </div>
 
               {/* Designation */}
@@ -453,6 +495,9 @@ const Leads = () => {
                   name="email"
                   onChange={(e) => handleFormChange(e, "customer_detail")}
                 />
+                {error?.email && (
+                  <span className={styles.errorMessage}>{error.email}</span>
+                )}
               </div>
 
               {/* Mobile */}
@@ -476,6 +521,9 @@ const Leads = () => {
                     onChange={(e) => handleFormChange(e, "customer_detail")}
                   />
                 </div>
+                {error?.mobile && (
+                  <span className={styles.errorMessage}>{error.mobile}</span>
+                )}
               </div>
 
               {/* Company Name 2 */}
@@ -1245,6 +1293,11 @@ const Leads = () => {
                     )}
                   </select>
                 </div>
+                {error?.lead_status && (
+                  <span className={styles.errorMessage}>
+                    {error.lead_status}
+                  </span>
+                )}
               </div>
 
               {/* Lead Source */}
