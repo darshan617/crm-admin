@@ -12,118 +12,81 @@ import { CiMail } from "react-icons/ci";
 import { MdOutlineEmail, MdOutlineTurnRight } from "react-icons/md";
 import { GoPencil } from "react-icons/go";
 import { useGetQuotationDetailQuery } from "@/redux/apis/quotationApi";
+import { BiChevronDown } from "react-icons/bi";
 
-const SAMPLE_QUOTATIONS = [
-  {
-    id: 46,
-    number: "TCCPLQ00043A-B",
-    date: "13 October 2026",
-    customerStatus: "Not shared",
-    invoice: "—",
-    closed: false,
-    toName: "John Doe",
-    greeting: "Mr. John Doe",
-    toCompany: "Example Corp",
-    addressLine1: "1090C, Municipal no 1197/1090C, 15th Main, Mumbai",
-    addressLine2: "Mumbai, Maharashtra 400001 India",
-    requirement: "Google Workspace",
-    items: [
-      {
-        sku: "business-plus",
-        description: "Google Workspace Business Plus (Yearly)",
-        pricePerUnit: "₹ 20,400.00",
-        licenses: 50,
-        total: "₹ 1,020,000.00",
-      },
-    ],
-    totalLicenses: 50,
-    subTotal: "₹ 1,020,000.00",
-    discountLabel: "Discount 10.92%",
-    discountAmount: "₹ 111,384.00",
-    gstLabel: "GST (18%)",
-    gstAmount: "₹ 163,550.88",
-    grandTotal: "₹ 1,072,166.88",
-    validTill: "28 October 2026",
-    licenseTerm: "Yearly",
-    email: "johnn@example.com",
-    actions: ["discount", "download", "edit", "send", "history"],
-  },
-  {
-    id: 45,
-    number: "TCCPLQ00043A-A",
-    date: "13 October 2026",
-    customerStatus: "Approved",
-    invoice: "Approved",
-    closed: true,
-    toName: "John Doe",
-    greeting: "Mr. John Doe",
-    toCompany: "Example Corp",
-    addressLine1: "1090C, Municipal no 1197/1090C, 15th Main, Mumbai",
-    addressLine2: "Mumbai, Maharashtra 400001 India",
-    requirement: "Google Workspace",
-    items: [
-      {
-        sku: "business-plus",
-        description: "Google Workspace Business Plus (Yearly)",
-        pricePerUnit: "₹ 20,400.00",
-        licenses: 50,
-        total: "₹ 1,020,000.00",
-      },
-    ],
-    totalLicenses: 50,
-    subTotal: "₹ 1,020,000.00",
-    discountLabel: "Discount 10%",
-    discountAmount: "₹ 102,000.00",
-    gstLabel: "GST (18%)",
-    gstAmount: "₹ 165,240.00",
-    grandTotal: "₹ 1,083,240.00",
-    validTill: "28 October 2026",
-    licenseTerm: "Yearly",
-    email: "johnn@example.com",
-    actions: ["download", "history"],
-  },
-  {
-    id: 43,
-    number: "TCCPLQ00043A",
-    date: "05 October 2026",
-    customerStatus: "Approved",
-    invoice: "Approved",
-    closed: false,
-    toName: "John Doe",
-    greeting: "Mr. John Doe",
-    toCompany: "Example Corp",
-    addressLine1: "1090C, Municipal no 1197/1090C, 15th Main, Mumbai",
-    addressLine2: "Mumbai, Maharashtra 400001 India",
-    requirement: "Google Workspace",
-    items: [
-      {
-        sku: "business-plus",
-        description: "Google Workspace Business Plus (Yearly)",
-        pricePerUnit: "₹ 20,400.00",
-        licenses: 50,
-        total: "₹ 1,020,000.00",
-      },
-    ],
-    totalLicenses: 50,
-    subTotal: "₹ 1,020,000.00",
-    discountLabel: "Discount 20%",
-    discountAmount: "₹ 204,000.00",
-    gstLabel: "GST (18%)",
-    gstAmount: "₹ 146,880.00",
-    grandTotal: "₹ 962,880.00",
-    validTill: "20 October 2026",
-    licenseTerm: "Yearly",
-    email: "johnn@example.com",
-    actions: ["download", "history"],
-  },
-];
-
-function QuotationCard({ quotation, onOpenModal }) {
+function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
   const router = useRouter();
 
-  const [isClosed, setIsClosed] = useState(!!quotation.closed);
+  const isClosed = !isOpen;
 
-  const activityPath = "/quotations/" + quotation.id + "/activity";
+  const plans = Array.isArray(quotation?.plans)
+    ? quotation?.plans
+    : Array.isArray(quotation?.items)
+      ? quotation?.items
+      : [];
+  const items = plans.map((plan) => {
+    const rawQuantity = plan?.quantity ?? plan?.licenses;
+    const rawRate = plan?.rate ?? plan?.price;
+    const quantity = Number(rawQuantity);
+    const rate = Number(rawRate);
+
+    return {
+      sku: plan?.sku || plan?.name || plan?.plan_name || "—",
+      description: plan?.description || plan?.name || plan?.plan_name || "—",
+      pricePerUnit: rawRate ?? "—",
+      licenses: rawQuantity ?? "—",
+      total:
+        plan?.total_amount ??
+        plan?.total ??
+        (rawRate !== undefined &&
+        rawRate !== null &&
+        rawQuantity !== undefined &&
+        rawQuantity !== null &&
+        Number.isFinite(rate) &&
+        Number.isFinite(quantity)
+          ? rate * quantity
+          : null),
+    };
+  });
+  const totalLicenses =
+    quotation?.total_licenses ??
+    plans.reduce(
+      (total, plan) => total + Number(plan?.quantity ?? plan?.licenses ?? 0),
+      0,
+    );
+  const calculatedSubtotal =
+    items.length > 0
+      ? items.reduce((total, item) => {
+          const value = Number(item.total);
+          return total + (Number.isFinite(value) ? value : 0);
+        }, 0)
+      : null;
+  const subTotal =
+    quotation?.subtotal ?? quotation?.sub_total ?? calculatedSubtotal;
+  const requirement =
+    quotation?.requirement ||
+    plans
+      .map((plan) => plan?.name || plan?.plan_name)
+      .filter(Boolean)
+      .join(", ") ||
+    "—";
+  const contactName =
+    quotation?.contact_name ||
+    quotation?.name ||
+    quotation?.customer_detail?.name ||
+    "—";
+  const email = quotation?.email || quotation?.customer_detail?.email || "";
+  const actions = quotation?.actions || [];
+
+  const formatAmount = (value) => {
+    if (value === null || value === undefined || value === "") return "—";
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return value;
+    return `₹ ${numericValue.toLocaleString("en-IN", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 
   const handleSendForDiscount = () => {
     if (onOpenModal) onOpenModal("sendDiscountModal");
@@ -131,34 +94,43 @@ function QuotationCard({ quotation, onOpenModal }) {
 
   const handleSend = () => {
     const quotationIdInput = document.getElementById("sendQuotationId");
-    if (quotationIdInput) quotationIdInput.value = String(quotation.id);
+    if (quotationIdInput) quotationIdInput.value = String(quotation?.id ?? "");
 
     const emailsInput = document.getElementById("sendQuotationEmails");
-    if (emailsInput) emailsInput.value = quotation.email;
+    if (emailsInput) emailsInput.value = email;
 
     const primaryEmailInput = document.getElementById(
       "sendQuotationPrimaryEmail",
     );
-    if (primaryEmailInput) primaryEmailInput.value = quotation.email;
+    if (primaryEmailInput) primaryEmailInput.value = email;
 
     if (onOpenModal) onOpenModal("sendQuotationModal");
   };
 
-  const has = (action) => quotation.actions.includes(action);
-
   return (
-    <div className={isClosed ? "closed" : undefined}>
+    <div
+      className={`${styles.quotationVersionDiv} ${
+        isClosed ? styles.closed : ""
+      }`}
+    >
       <div className={styles.quotationTopMeta}>
         <div className={styles.qmetaField}>
           <span>Customer status</span>
-          <strong>{quotation.customerStatus}</strong>
+          <strong>
+            {quotation?.customer_status || quotation?.status || "—"}
+          </strong>
         </div>
         <div className={styles.qmetaField}>
           <span>Invoice</span>
-          <strong>{quotation.invoice}</strong>
+          <strong>
+            {quotation?.invoice_status || quotation?.invoice || "—"}
+          </strong>
         </div>
         <div className={styles.qmetaField}>
-          <Link href={activityPath} className={styles.quotationActivityLink}>
+          <Link
+            href={`/quotations/history/${quotation?.id}`}
+            className={styles.quotationActivityLink}
+          >
             Send &amp; approval history
           </Link>
         </div>
@@ -166,12 +138,19 @@ function QuotationCard({ quotation, onOpenModal }) {
 
       <div
         className={`${styles.quotationHeader} ${styles.quotationToggle}`}
-        onClick={() => setIsClosed((previous) => !previous)}
+        onClick={onToggle}
       >
         <div className={styles.quotationNumber}>
           <span>Quotation No :</span>
-          <strong>{quotation.number}</strong>
-          <small>{quotation.date}</small>
+          <strong>
+            {quotation?.quotation_no ||
+              quotation?.number ||
+              quotation?.id ||
+              "—"}
+          </strong>
+          <small>
+            {quotation?.quotation_date || quotation?.created_at || "—"}
+          </small>
         </div>
 
         <div className={styles.quotationCompany}>
@@ -180,39 +159,24 @@ function QuotationCard({ quotation, onOpenModal }) {
 
         <div className={styles.quotationLogo}>
           <Image src={tizzyLogo} alt="Tizzy Cloud Group" />
-          <div className="quotation-arrow">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6 9l6 6 6-6"></path>
-            </svg>
-          </div>
+          <BiChevronDown size={24} />
         </div>
       </div>
 
       <div className={styles.quotationBody}>
+        <hr />
         <div className={styles.quotationTo}>
           <p>To,</p>
-          <strong>{quotation.toName},</strong>
-          <span>{quotation.toCompany}</span>
-          {quotation.addressLine1 && <span>{quotation.addressLine1}</span>}
-          {quotation.addressLine2 && <span>{quotation.addressLine2}</span>}
+          <strong>{contactName},</strong>
+          <span>{quotation?.company_name || quotation?.toCompany || "—"}</span>
+          {quotation?.addressLine1 && <span>{quotation?.addressLine1}</span>}
+          {quotation?.addressLine2 && <span>{quotation?.addressLine2}</span>}
         </div>
-
         <div className={styles.quotationSubject}>
-          Subject :<strong>Quotation for {quotation.requirement}</strong>
+          Subject :<strong>Quotation for {requirement}</strong>
         </div>
-
         <div className={styles.quotationContent}>
-          <p>Dear {quotation.greeting},</p>
+          <p>Dear {quotation?.greeting || contactName},</p>
           <p>
             Tizzy Cloud is a team of enthusiastic techies specialized in Cloud
             Computing Services. Since inception we are focused on educating
@@ -237,12 +201,9 @@ function QuotationCard({ quotation, onOpenModal }) {
             technical assistance.
           </p>
         </div>
-
         <div className={styles.commercialTitle}>
-          Commercial Proposal for requirement :
-          <strong>{quotation.requirement}</strong>
+          Commercial Proposal for requirement :<strong>{requirement}</strong>
         </div>
-
         <div className={styles.quotationTableWrap}>
           <table className={styles.quotationTable}>
             <thead>
@@ -255,33 +216,44 @@ function QuotationCard({ quotation, onOpenModal }) {
               </tr>
             </thead>
             <tbody>
-              {quotation.items.map((item, index) => (
+              {items.map((item, index) => (
                 <tr key={index}>
-                  <td>{item.sku}</td>
-                  <td>{item.description}</td>
-                  <td>{item.pricePerUnit}</td>
-                  <td>{item.licenses}</td>
-                  <td>{item.total}</td>
+                  <td>{item?.sku}</td>
+                  <td>{item?.description}</td>
+                  <td>{formatAmount(item?.pricePerUnit)}</td>
+                  <td>{item?.licenses}</td>
+                  <td>{formatAmount(item?.total)}</td>
                 </tr>
               ))}
               <tr className={styles.summaryRow}>
                 <td></td>
                 <td>Sub Total</td>
                 <td></td>
-                <td>{quotation.totalLicenses}</td>
-                <td>{quotation.subTotal}</td>
+                <td>{totalLicenses}</td>
+                <td>{formatAmount(subTotal)}</td>
               </tr>
               <tr>
                 <td></td>
-                <td colSpan={2}>{quotation.discountLabel}</td>
+                <td colSpan={2}>
+                  Discount
+                  {quotation?.discount_percentage != null
+                    ? ` (${quotation?.discount_percentage}%)`
+                    : ""}
+                </td>
                 <td></td>
-                <td>{quotation.discountAmount}</td>
+                <td>
+                  {formatAmount(
+                    quotation?.discount_amount ?? quotation?.discount,
+                  )}
+                </td>
               </tr>
               <tr>
                 <td></td>
-                <td colSpan={2}>{quotation.gstLabel}</td>
+                <td colSpan={2}>GST (18%)</td>
                 <td></td>
-                <td>{quotation.gstAmount}</td>
+                <td>
+                  {formatAmount(quotation?.gst_amount ?? quotation?.tax_amount)}
+                </td>
               </tr>
               <tr className={styles.totalRow}>
                 <td></td>
@@ -290,31 +262,37 @@ function QuotationCard({ quotation, onOpenModal }) {
                 </td>
                 <td></td>
                 <td>
-                  <strong>{quotation.grandTotal}</strong>
+                  <strong>
+                    {formatAmount(
+                      quotation?.grand_total ??
+                        quotation?.total_amount ??
+                        subTotal,
+                    )}
+                  </strong>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-
         <div className={styles.quotationTerms}>
           <p>
-            This quotation is valid till {quotation.validTill}. All Orders and
-            payments will be in favour of ‘Tizzy Cloud Computing Private
+            This quotation is valid till{" "}
+            {quotation?.valid_till || quotation?.valid_until || "—"}. All Orders
+            and payments will be in favour of ‘Tizzy Cloud Computing Private
             Limited’. Price quoted is exclusive of 18% GST. Payment term is 100%
             Advance. Activation/Transfer/Renewal within 3-5 working days.
-            License term is {quotation.licenseTerm} commitment &amp; payment.
+            License term is{" "}
+            {quotation?.license_term || quotation?.quote_period || "—"}{" "}
+            commitment &amp; payment.
           </p>
           <p>It would be our pleasure serving you.</p>
         </div>
-
         <div className={styles.quotationSignature}>
           <span>Regards,</span>
           <strong>Shradha Kadam</strong>
           <span>Hr Admin – Cloud Services</span>
           <span>+91 9081929293</span>
         </div>
-
         <div className={styles.quotationFooter}>
           <small>Corporate Office Address :</small>
           <strong>Tizzy Cloud Computing Private Limited</strong>
@@ -334,63 +312,51 @@ function QuotationCard({ quotation, onOpenModal }) {
             </span>
           </div>
         </div>
-
         <div className={styles.quotationActions}>
-          {has("discount") && (
-            <button
-              type="button"
-              data-modal-open="sendDiscountModal"
-              onClick={handleSendForDiscount}
-            >
-              <MdOutlineTurnRight size={18} />
-              Send For More Discount
-            </button>
-          )}
+          <button
+            type="button"
+            data-modal-open="sendDiscountModal"
+            onClick={handleSendForDiscount}
+          >
+            <MdOutlineTurnRight size={18} />
+            Send For More Discount
+          </button>
 
-          {has("download") && (
-            <button type="button">
-              <LuDownload size={18} />
-              Download
-            </button>
-          )}
+          <button type="button">
+            <LuDownload size={18} />
+            Download
+          </button>
 
-          {has("edit") && (
-            <button
-              type="button"
-              onClick={() =>
-                router.push("/quotations/" + quotation.id + "/edit")
-              }
-            >
-              <GoPencil size={18} />
-              Edit
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => router.push(`/quotations/${quotation?.id}/edit`)}
+          >
+            <GoPencil size={18} />
+            Edit
+          </button>
 
-          {has("send") && (
-            <button
-              type="button"
-              data-modal-open="sendQuotationModal"
-              onClick={handleSend}
-            >
-              <CiMail size={18} />
-              Send
-            </button>
-          )}
+          <button
+            type="button"
+            data-modal-open="sendQuotationModal"
+            onClick={handleSend}
+          >
+            <CiMail size={18} />
+            Send
+          </button>
 
-          {has("history") && (
-            <button type="button" onClick={() => router.push(activityPath)}>
-              <RiHistoryLine size={18} />
-              History
-            </button>
-          )}
+          <button type="button" onClick={() => router.push(activityPath)}>
+            <RiHistoryLine size={18} />
+            History
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function QuotationDetail({ quotations, badge = "New", onOpenModal }) {
+function QuotationDetail({ badge = "New", onOpenModal }) {
   const router = useRouter();
+  const [openQuotationId, setOpenQuotationId] = useState(undefined);
   const {
     data: quotationDetail,
     isLoading,
@@ -399,6 +365,9 @@ function QuotationDetail({ quotations, badge = "New", onOpenModal }) {
     { quotation_id: router?.query?.slug },
     { skip: !router?.query?.slug },
   );
+  const quotations = Array.isArray(quotationDetail?.data?.quotation)
+    ? quotationDetail?.data?.quotation
+    : [];
 
   return (
     <main className="content">
@@ -437,19 +406,40 @@ function QuotationDetail({ quotations, badge = "New", onOpenModal }) {
         </div>
       </div>
 
-      <section className="common-form pb-0 quotation-detail">
-        {quotations.map((quotation) => (
-          <QuotationCard
-            key={quotation.id}
-            quotation={quotation}
-            onOpenModal={onOpenModal}
-          />
-        ))}
+      <section className={`${styles.quotationDetail} pb-0`}>
+        {isLoading ? (
+          <p>Loading quotation details...</p>
+        ) : isError ? (
+          <p role="alert">
+            Unable to load quotation details. Please try again.
+          </p>
+        ) : quotations?.length === 0 ? (
+          <p>No quotation details found.</p>
+        ) : (
+          quotations?.toReversed()?.map((quotation, index) => {
+            const isOpen =
+              openQuotationId === undefined
+                ? index === 0
+                : openQuotationId === quotation?.id;
+
+            return (
+              <QuotationCard
+                key={quotation?.id}
+                quotation={quotation}
+                onOpenModal={onOpenModal}
+                isOpen={isOpen}
+                onToggle={() =>
+                  setOpenQuotationId(isOpen ? null : quotation?.id)
+                }
+              />
+            );
+          })
+        )}
       </section>
     </main>
   );
 }
 
 export default function Page() {
-  return <QuotationDetail quotations={SAMPLE_QUOTATIONS} />;
+  return <QuotationDetail />;
 }
