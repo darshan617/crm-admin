@@ -594,6 +594,7 @@ table {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-direction: row;
 }
 .crm-quo-table .plan-icon,
 .es-quo-table .plan-icon {
