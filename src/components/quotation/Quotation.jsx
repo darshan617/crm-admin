@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -87,8 +87,8 @@ const Quotation = () => {
     from: "",
     to: "",
     activeQuotationId: null,
-    popupPosition: { top: 0, left: 0 },
   });
+  const popupRef = useRef(null);
 
   const updateView = (updates) =>
     setView((current) => ({ ...current, ...updates }));
@@ -134,24 +134,31 @@ const Quotation = () => {
       to: "",
     });
 
+  useEffect(() => {
+    if (view.activeQuotationId === null) return;
+
+    const handleOutsideClick = (event) => {
+      if (!popupRef.current?.contains(event.target)) {
+        setView((current) =>
+          current.activeQuotationId === null
+            ? current
+            : { ...current, activeQuotationId: null },
+        );
+      }
+    };
+
+    document.addEventListener("pointerdown", handleOutsideClick);
+    return () =>
+      document.removeEventListener("pointerdown", handleOutsideClick);
+  }, [view.activeQuotationId]);
+
   const openQuotationMenu = (quotation, event) => {
     event.stopPropagation();
-    const rect = event.currentTarget.getBoundingClientRect();
-    const popupWidth = 260;
-    const popupHeight = 275;
-    const left = Math.max(
-      12,
-      Math.min(rect.right - popupWidth, window.innerWidth - popupWidth - 12),
-    );
-    const top = Math.max(
-      12,
-      Math.min(rect.bottom + 8, window.innerHeight - popupHeight - 12),
-    );
-    updateView({
-      popupPosition: { top, left },
+    setView((current) => ({
+      ...current,
       activeQuotationId:
-        view.activeQuotationId === quotation.id ? null : quotation.id,
-    });
+        current.activeQuotationId === quotation.id ? null : quotation.id,
+    }));
   };
 
   const renderRows = (customerTab = false) => {
@@ -280,7 +287,10 @@ const Quotation = () => {
                 </div>
                 <small>{getFollowUp(quotation) || " "}</small>
               </div>
-              <div className="actions">
+              <div
+                className={`${styles.actionMenu} actions`}
+                ref={activeQuotation?.id === quotation.id ? popupRef : null}
+              >
                 <button
                   className="action-btn"
                   type="button"
@@ -289,6 +299,64 @@ const Quotation = () => {
                 >
                   <LuChevronRight size={24} aria-hidden="true" />
                 </button>
+                {activeQuotation?.id === quotation.id && (
+                  <div
+                    className={styles.quotationPopup}
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className={styles.popupTitle}>Quotation</div>
+                    <div className={styles.popupActions}>
+                      <Link
+                        href={`/quotations/quotation-detail/${activeQuotation.id}`}
+                        className={styles.popupAction}
+                        onClick={() => updateView({ activeQuotationId: null })}
+                      >
+                        <LuEye size={19} />
+                        <span>View</span>
+                      </Link>
+                      <Link
+                        href={`/quotations/history`}
+                        className={styles.popupAction}
+                        onClick={() => updateView({ activeQuotationId: null })}
+                      >
+                        <LuHistory size={19} />
+                        <span>History</span>
+                      </Link>
+                      <Link
+                        href={`/quotations/update-quotation?qid=${quotation?.id}`}
+                        className={styles.popupAction}
+                        onClick={() => updateView({ activeQuotationId: null })}
+                      >
+                        <LuPencil size={19} />
+                        <span>Edit</span>
+                      </Link>
+                      <Link
+                        href={`/`}
+                        className={styles.popupAction}
+                        onClick={() => updateView({ activeQuotationId: null })}
+                      >
+                        <LuDownload size={19} />
+                        <span>Download</span>
+                      </Link>
+                      <button
+                        type="button"
+                        className={styles.popupAction}
+                        onClick={() => updateView({ activeQuotationId: null })}
+                      >
+                        <LuMail size={19} />
+                        <span>Send</span>
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.discountBtn}
+                      onClick={() => updateView({ activeQuotationId: null })}
+                    >
+                      <LuCornerUpRight size={18} />
+                      <span>Send for more discount</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </td>
@@ -299,8 +367,8 @@ const Quotation = () => {
 
   const customerTab = view.activeTab === "customer";
   const tableClass = customerTab ? "es-quo-table" : "crm-quo-table";
-  const activeQuotation = quotations.find(
-    (quotation) => quotation.id === view.activeQuotationId,
+  const activeQuotation = quotations?.find(
+    (quotation) => quotation?.id === view?.activeQuotationId,
   );
 
   return (
@@ -535,69 +603,6 @@ const Quotation = () => {
           <div className="table-pagination">{/* <Pagination /> */}</div>
         </div>
       </section>
-
-      {activeQuotation && (
-        <div
-          className={styles.quotationPopup}
-          style={{
-            top: view.popupPosition.top,
-            left: view.popupPosition.left,
-          }}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <div className={styles.popupTitle}>Quotation</div>
-          <div className={styles.popupActions}>
-            <Link
-              href={`/quotations/quotation-detail/${activeQuotation.id}`}
-              className={styles.popupAction}
-              onClick={() => updateView({ activeQuotationId: null })}
-            >
-              <LuEye size={19} />
-              <span>View</span>
-            </Link>
-            <Link
-              href={`/quotations/history`}
-              className={styles.popupAction}
-              onClick={() => updateView({ activeQuotationId: null })}
-            >
-              <LuHistory size={19} />
-              <span>History</span>
-            </Link>
-            <Link
-              href={`/`}
-              className={styles.popupAction}
-              onClick={() => updateView({ activeQuotationId: null })}
-            >
-              <LuPencil size={19} />
-              <span>Edit</span>
-            </Link>
-            <Link
-              href={`/`}
-              className={styles.popupAction}
-              onClick={() => updateView({ activeQuotationId: null })}
-            >
-              <LuDownload size={19} />
-              <span>Download</span>
-            </Link>
-            <button
-              type="button"
-              className={styles.popupAction}
-              onClick={() => updateView({ activeQuotationId: null })}
-            >
-              <LuMail size={19} />
-              <span>Send</span>
-            </button>
-          </div>
-          <button
-            type="button"
-            className={styles.discountBtn}
-            onClick={() => updateView({ activeQuotationId: null })}
-          >
-            <LuCornerUpRight size={18} />
-            <span>Send for more discount</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 };

@@ -26,14 +26,18 @@ const LoginForm = () => {
           password: formState?.password,
         },
       }).unwrap();
+
       if (res?.success) {
         Cookies.set("CRM_USER", JSON.stringify(res?.data?.user));
         Cookies.set("token", JSON.stringify(res?.data?.token));
         showToast(res?.message, "success");
         router?.push("/dashboard");
+      } else {
+        showToast(res?.error?.message, "error");
       }
     } catch (error) {
       console.log(error, "Error in handleLogin");
+      showToast(error?.data?.message, "error");
     }
   };
 

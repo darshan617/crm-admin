@@ -65,6 +65,14 @@ const quotationApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["quotation"],
     }),
+    updateQuotation: builder.mutation({
+      query: ({ body, quotation_id }) => ({
+        url: `/quotations/${quotation_id}/update`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["quotation"],
+    }),
   }),
 });
 
@@ -75,4 +83,5 @@ export const {
   useCheckQuotaionDomainQuery,
   useGetLeadDataForQuotationQuery,
   useGetQuotationDetailQuery,
+  useUpdateQuotationMutation,
 } = quotationApi;
