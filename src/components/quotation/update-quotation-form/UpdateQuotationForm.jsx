@@ -5,10 +5,10 @@ import Link from "next/link";
 import styles from "@/components/quotation/add-quotation-form/AddQuotationForm.module.css";
 import {
   useCheckQuotaionDomainQuery,
-  useCreateQuotationMutation,
   useGetLeadDataForQuotationQuery,
   useGetQuotationDdDataQuery,
   useGetQuotationDetailQuery,
+  useUpdateQuotationMutation,
 } from "@/redux/apis/quotationApi";
 import CustomDropdown from "@/common-components/custom-dropdown/CustomDropdown";
 import { BiX } from "react-icons/bi";
@@ -32,6 +32,8 @@ const blankRow = () => ({
   quantity: "",
   rate: "",
 });
+
+const toDateInputValue = (value) => (value ? String(value).slice(0, 10) : "");
 
 export default function UpdateQuotationForm() {
   const router = useRouter();
@@ -57,12 +59,12 @@ export default function UpdateQuotationForm() {
     plans: [blankRow()],
   });
   const [error, setError] = useState(null);
+  const [isLeadChanged, setIsLeadChanged] = useState(false);
   const form = formData;
   const { plans } = formData;
 
   const { data: ddData } = useGetQuotationDdDataQuery();
-  const [createQuotation, { isLoading: isCreatingQuotation }] =
-    useCreateQuotationMutation();
+
   const { data: domainAvailable, isLoading: isCheckingDomain } =
     useCheckQuotaionDomainQuery(
       {
@@ -70,11 +72,15 @@ export default function UpdateQuotationForm() {
       },
       { skip: !formData?.domain_name },
     );
+  // const { data: getLeadDeatils } = useGetLeadDataForQuotationQuery(
+  //   {
+  //     lead_id: formData?.lead?.value,
+  //   },
+  //   { skip: formData?.lead === "" },
+  // );
   const { data: getLeadDeatils } = useGetLeadDataForQuotationQuery(
-    {
-      lead_id: formData?.lead?.value,
-    },
-    { skip: formData?.lead === "" },
+    { lead_id: formData?.lead?.value },
+    { skip: !formData?.lead?.value },
   );
 
   const {
@@ -85,12 +91,12 @@ export default function UpdateQuotationForm() {
     { quotation_id: router?.query?.qid },
     { skip: !router?.query?.qid },
   );
-  console.log(quotationDetail, "quotationDetail");
+  const [updateQuotation, { isLoading: isUpdatingQuoatation }] =
+    useUpdateQuotationMutation();
 
   const data = quotationDetail?.data?.quotation?.find(
     (item) => item?.id == router?.query?.qid,
   );
-  console.log(data, "sssssssss");
 
   const setField = (name, value) => {
     setFormData((current) => ({ ...current, [name]: value }));
@@ -129,26 +135,27 @@ export default function UpdateQuotationForm() {
 
   const pname = (i, f) => "plans[" + i + "][" + f + "]";
 
-  const handleCreateQuotation = async (event) => {
+  const handleUpdateQuotation = async (event) => {
     event.preventDefault();
     if (!validateForm()) return;
 
     try {
-      const res = await createQuotation({
+      const res = await updateQuotation({
         body: formData,
+        quotation_id: router?.query?.qid,
       }).unwrap();
 
       if (res?.success) {
-        showToast(res?.message || "Quotation created successfully.", "success");
+        showToast(res?.message || "Quotation updates successfully.", "success");
         router.push("/quotations");
       } else {
-        showToast(res?.message || "Could not create the quotation.", "error");
+        showToast(res?.message || "Could not update the quotation.", "error");
       }
     } catch (error) {
       showToast(
         error?.data?.message ||
           error?.message ||
-          "Could not create the quotation.",
+          "Could not update the quotation.",
         "error",
       );
     }
@@ -227,9 +234,64 @@ export default function UpdateQuotationForm() {
   }, [domainAvailable?.data, formData.domain_name]);
 
   useEffect(() => {
-    if (!getLeadDeatils?.data?.lead) return;
+    if (!data) return;
 
-    const leadData = getLeadDeatils?.data?.lead;
+    const quotationPlans = Array.isArray(data.plans) ? data.plans : [];
+    // Hydrate editable form state when the quotation query resolves.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFormData((current) => ({
+      ...current,
+      lead: data.lead_id
+        ? {
+            value: data.lead_id,
+            label: data.lead?.company_name || data.lead?.name || "",
+          }
+        : "",
+      company_name: data.company_name ?? "",
+      gstin: data.gstin ?? "",
+      salutation: data.salutation ?? "",
+      name: data.name ?? "",
+      email: data.email ?? "",
+      mobile_code: data.mobile_code ?? "91",
+      mobile: data.mobile ?? "",
+      discount: data.discount ?? "",
+      deal_type: data.deal_type ?? "new",
+      domain_type: data.domain_type ?? (data.domain_name ? "existing" : ""),
+      domain_name: data.domain_name ?? "",
+      sac: data.sac ?? "",
+      domain_start: toDateInputValue(data.domain_start),
+      domain_end: toDateInputValue(data.domain_end),
+      domain_rate: data.domain_rate ?? "",
+      renewal_date: toDateInputValue(data.renewal_date),
+      plans:
+        quotationPlans.length > 0
+          ? quotationPlans.map((plan) => ({
+              current_service_id: plan.current_service_id ?? "",
+              provider_id: plan.provider_id ?? "",
+              plan_id: plan.plan_id ?? "",
+              quote_period:
+                plan.quote_period ??
+                plan.quotation_period ??
+                data.quotation_period ??
+                "",
+              billing_start_date: toDateInputValue(
+                plan.billing_start_date ?? data.billing_start_date,
+              ),
+              sku: plan.sku ?? "",
+              quantity: plan.quantity ?? "",
+              rate: plan.rate ?? "",
+            }))
+          : [blankRow()],
+    }));
+    setError(null);
+  }, [data]);
+
+  useEffect(() => {
+    if (!getLeadDeatils?.data?.lead) return;
+    if (data && !isLeadChanged) return;
+
+    const leadData = getLeadDeatils.data.lead;
+
     setFormData((current) => ({
       ...current,
       company_name: leadData?.company_name || "",
@@ -242,23 +304,15 @@ export default function UpdateQuotationForm() {
       domain_name: leadData?.domain || "",
       domain_type: leadData?.domain_type || "",
       sac: leadData?.sac || "",
-      domain_start: leadData?.domain_start || "",
-      domain_end: leadData?.domain_end || "",
+      domain_start: toDateInputValue(leadData?.domain_start),
+      domain_end: toDateInputValue(leadData?.domain_end),
       domain_rate: leadData?.domain_rate || "",
-      renewal_date: leadData?.renewal_date || "",
+      renewal_date: toDateInputValue(leadData?.renewal_date),
       plans: leadData?.services?.length > 0 ? leadData.services : [blankRow()],
     }));
-    setError((current) => ({
-      ...current,
-      company_name: null,
-      gstin: null,
-      salutation: null,
-      name: null,
-      email: null,
-      domain_type: null,
-      plans: null,
-    }));
-  }, [getLeadDeatils?.data]);
+
+    setError({});
+  }, [getLeadDeatils?.data?.lead]);
 
   return (
     <main className="content">
@@ -294,7 +348,7 @@ export default function UpdateQuotationForm() {
         </div>
       </div>
 
-      <form id="quotationForm" onSubmit={handleCreateQuotation} noValidate>
+      <form id="quotationForm" onSubmit={handleUpdateQuotation} noValidate>
         <section className="common-form">
           <h3>Quotation Detail</h3>
 
@@ -309,7 +363,10 @@ export default function UpdateQuotationForm() {
                   label: `${lead.company_name} (${lead?.name})`,
                 }))}
                 value={form.lead}
-                onChange={(value) => setField("lead", value)}
+                onChange={(value) => {
+                  setIsLeadChanged(true);
+                  setField("lead", value);
+                }}
                 required
                 customHeight="43px"
               />
@@ -800,9 +857,9 @@ export default function UpdateQuotationForm() {
             <button
               type="submit"
               className={styles.submitBtn}
-              disabled={isCreatingQuotation}
+              disabled={isUpdatingQuoatation}
             >
-              {isCreatingQuotation ? "Saving..." : "Save Quotation"}
+              {isUpdatingQuoatation ? "Updating" : "Update Quotation"}
             </button>
           </div>
         </section>
