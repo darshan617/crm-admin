@@ -329,7 +329,9 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
 
           <button
             type="button"
-            onClick={() => router.push(`/quotations/${quotation?.id}/edit`)}
+            onClick={() =>
+              router.push(`/quotations/update-quotation?qid=${quotation?.id}`)
+            }
           >
             <GoPencil size={18} />
             Edit

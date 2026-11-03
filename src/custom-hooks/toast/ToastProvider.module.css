@@ -12,6 +12,9 @@
   color: white;
   font-weight: 500;
   animation: fadeIn 0.3s ease;
+  display: flex;
+  gap: 2px;
+  align-items: center;
 }
 
 .toast.success {
