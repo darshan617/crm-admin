@@ -135,7 +135,7 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  z-index: 9999;
+  z-index: 4;
   width: 260px;
   padding: 18px 16px 16px;
   background: #fff;
@@ -144,7 +144,10 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
   color: #333;
 }
-
+:global(.table-body) tr:nth-last-child(-n + 2) .quotationPopup {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
 .popupTitle {
   margin-bottom: 16px;
   text-align: center;
@@ -230,6 +233,249 @@
   height: 30px;
 }
 
+.gmailCompose {
+  position: relative;
+  border-top: 1px solid #e8eaed;
+  border-bottom: 1px solid #e8eaed;
+}
+.gmailToRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 20px 4px;
+}
+
+.gmailToLabel {
+  flex: 0 0 auto;
+  padding-top: 8px;
+  color: #5f6368;
+  font-size: 14px;
+  line-height: 20px;
+}
+.gmailToField {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 2px 0;
+}
+.gmailChip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 4px 0 2px;
+  border: 1px solid #dadce0;
+  border-radius: 16px;
+  background: #e8eaed;
+  color: #202124;
+  font-size: 13px;
+  line-height: 26px;
+}
+
+.gmailChipLocked {
+  padding-right: 10px;
+  background: #e8f0fe;
+  border-color: #d2e3fc;
+}
+
+.gmailChip .gmailChipAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #1a73e8;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.gmailChip .gmailChipText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#sendEmailChipInput,
+#sendCcChipInput {
+  flex: 1 1 140px;
+  min-width: 120px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font-size: 14px;
+  color: #202124;
+}
+
+.gmailChip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #5f6368;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gmailTeamChip:hover,
+.gmailTeamChip:global(.is-added) {
+  background: #e8f0fe;
+  border-color: #d2e3fc;
+  color: #1967d2;
+}
+.gmailTeamPicks {
+  padding: 4px 20px 10px 52px;
+}
+
+.gmailTeamPicks > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #80868b;
+}
+
+.gmailTeamPicks > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gmailTeamChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid #dadce0;
+  border-radius: 16px;
+  background: #fff;
+  color: #202124;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.emailChipList {
+  display: contents;
+}
+
+.gmailToSuggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 90;
+  max-height: 220px;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(60, 64, 67, 0.2);
+}
+
+.gmailToSuggest button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gmailToSuggest .gmailSuggestAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1a73e8;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.gmailToSuggest strong {
+  display: block;
+  font-size: 13px;
+  color: #202124;
+  font-weight: 500;
+}
+.gmailToSuggest small {
+  display: block;
+  font-size: 12px;
+  color: #5f6368;
+}
+.gmailToHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0 20px 10px 52px;
+  color: #80868b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.gmailToHint kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  background: #f8f9fa;
+  color: #3c4043;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.gmailSendActions {
+  display: flex;
+  justify-content: flex-start;
+  padding: 14px 20px 4px;
+}
+.submitBtn {
+  background: var(--primary);
+  font-family: "Baloo Bhai 2";
+  color: #fff;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 999px;
+  font-size: var(--font-size-14px);
+  /* font-style: normal; */
+  font-weight: 500;
+  line-height: normal;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: 0.3s;
+}
 @media (max-width: 480px) {
   .quotationPopup {
     width: 250px;

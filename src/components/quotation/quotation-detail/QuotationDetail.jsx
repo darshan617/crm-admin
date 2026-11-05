@@ -2,28 +2,40 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import styles from "@/components/quotation/quotation-detail/QuotationDetail.module.css";
 import tizzyLogo from "@/assets/images/logo.png";
-import Image from "next/image";
 import { LuDownload, LuPhone } from "react-icons/lu";
 import { RiGlobalLine, RiHistoryLine } from "react-icons/ri";
 import { CiMail } from "react-icons/ci";
 import { MdOutlineEmail, MdOutlineTurnRight } from "react-icons/md";
 import { GoPencil } from "react-icons/go";
-import { useGetQuotationDetailQuery } from "@/redux/apis/quotationApi";
 import { BiChevronDown } from "react-icons/bi";
+import {
+  useGetQuotationDetailQuery,
+  useLazyDownloadQuotationQuery,
+} from "@/redux/apis/quotationApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import SendQuotationPopup from "../send-quotation-popupo/SendQuotationPopup";
 
 function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
   const router = useRouter();
+  const [isSendOpen, setIsSendOpen] = useState(false);
+  const { showToast } = useToast();
+  const [downloadQuotation, { isFetching: isDownloading }] =
+    useLazyDownloadQuotationQuery();
+
+  const isApproved = quotation?.quotation_status?.toLowerCase() === "approved";
 
   const isClosed = !isOpen;
 
   const plans = Array.isArray(quotation?.plans)
-    ? quotation?.plans
+    ? quotation.plans
     : Array.isArray(quotation?.items)
-      ? quotation?.items
+      ? quotation.items
       : [];
+
   const items = plans.map((plan) => {
     const rawQuantity = plan?.quantity ?? plan?.licenses;
     const rawRate = plan?.rate ?? plan?.price;
@@ -48,12 +60,14 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
           : null),
     };
   });
+
   const totalLicenses =
     quotation?.total_licenses ??
     plans.reduce(
       (total, plan) => total + Number(plan?.quantity ?? plan?.licenses ?? 0),
       0,
     );
+
   const calculatedSubtotal =
     items.length > 0
       ? items.reduce((total, item) => {
@@ -61,8 +75,10 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
           return total + (Number.isFinite(value) ? value : 0);
         }, 0)
       : null;
+
   const subTotal =
     quotation?.subtotal ?? quotation?.sub_total ?? calculatedSubtotal;
+
   const requirement =
     quotation?.requirement ||
     plans
@@ -70,13 +86,20 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
       .filter(Boolean)
       .join(", ") ||
     "—";
-  const contactName =
+
+  const rawContactName =
     quotation?.contact_name ||
     quotation?.name ||
     quotation?.customer_detail?.name ||
-    "—";
+    "";
+  const contactName = rawContactName || "—";
   const email = quotation?.email || quotation?.customer_detail?.email || "";
-  const actions = quotation?.actions || [];
+
+  const popupQuotation = {
+    ...quotation,
+    email,
+    contact_name: rawContactName,
+  };
 
   const formatAmount = (value) => {
     if (value === null || value === undefined || value === "") return "—";
@@ -92,19 +115,31 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
     if (onOpenModal) onOpenModal("sendDiscountModal");
   };
 
-  const handleSend = () => {
-    const quotationIdInput = document.getElementById("sendQuotationId");
-    if (quotationIdInput) quotationIdInput.value = String(quotation?.id ?? "");
+  const handleSend = () => setIsSendOpen(true);
 
-    const emailsInput = document.getElementById("sendQuotationEmails");
-    if (emailsInput) emailsInput.value = email;
+  const handleDownload = async () => {
+    try {
+      const res = await downloadQuotation({
+        quotation_id: quotation?.id,
+      }).unwrap();
 
-    const primaryEmailInput = document.getElementById(
-      "sendQuotationPrimaryEmail",
-    );
-    if (primaryEmailInput) primaryEmailInput.value = email;
+      const { quotation_url } = res?.data || {};
 
-    if (onOpenModal) onOpenModal("sendQuotationModal");
+      if (!quotation_url) {
+        showToast("Download link not found", "error");
+        return;
+      }
+
+      window.open(quotation_url, "_blank", "noopener,noreferrer");
+      showToast(res?.message || "Quotation downloaded successfully", "success");
+    } catch (error) {
+      showToast(
+        error?.data?.message ||
+          error?.message ||
+          "Failed to download quotation",
+        "error",
+      );
+    }
   };
 
   return (
@@ -165,16 +200,19 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
 
       <div className={styles.quotationBody}>
         <hr />
+
         <div className={styles.quotationTo}>
           <p>To,</p>
           <strong>{contactName},</strong>
           <span>{quotation?.company_name || quotation?.toCompany || "—"}</span>
-          {quotation?.addressLine1 && <span>{quotation?.addressLine1}</span>}
-          {quotation?.addressLine2 && <span>{quotation?.addressLine2}</span>}
+          {quotation?.addressLine1 && <span>{quotation.addressLine1}</span>}
+          {quotation?.addressLine2 && <span>{quotation.addressLine2}</span>}
         </div>
+
         <div className={styles.quotationSubject}>
           Subject :<strong>Quotation for {requirement}</strong>
         </div>
+
         <div className={styles.quotationContent}>
           <p>Dear {quotation?.greeting || contactName},</p>
           <p>
@@ -201,9 +239,11 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
             technical assistance.
           </p>
         </div>
+
         <div className={styles.commercialTitle}>
           Commercial Proposal for requirement :<strong>{requirement}</strong>
         </div>
+
         <div className={styles.quotationTableWrap}>
           <table className={styles.quotationTable}>
             <thead>
@@ -218,11 +258,11 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
             <tbody>
               {items.map((item, index) => (
                 <tr key={index}>
-                  <td>{item?.sku}</td>
-                  <td>{item?.description}</td>
-                  <td>{formatAmount(item?.pricePerUnit)}</td>
-                  <td>{item?.licenses}</td>
-                  <td>{formatAmount(item?.total)}</td>
+                  <td>{item.sku}</td>
+                  <td>{item.description}</td>
+                  <td>{formatAmount(item.pricePerUnit)}</td>
+                  <td>{item.licenses}</td>
+                  <td>{formatAmount(item.total)}</td>
                 </tr>
               ))}
               <tr className={styles.summaryRow}>
@@ -237,7 +277,7 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
                 <td colSpan={2}>
                   Discount
                   {quotation?.discount_percentage != null
-                    ? ` (${quotation?.discount_percentage}%)`
+                    ? ` (${quotation.discount_percentage}%)`
                     : ""}
                 </td>
                 <td></td>
@@ -274,6 +314,7 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
             </tbody>
           </table>
         </div>
+
         <div className={styles.quotationTerms}>
           <p>
             This quotation is valid till{" "}
@@ -287,12 +328,14 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
           </p>
           <p>It would be our pleasure serving you.</p>
         </div>
+
         <div className={styles.quotationSignature}>
           <span>Regards,</span>
           <strong>Shradha Kadam</strong>
           <span>Hr Admin – Cloud Services</span>
           <span>+91 9081929293</span>
         </div>
+
         <div className={styles.quotationFooter}>
           <small>Corporate Office Address :</small>
           <strong>Tizzy Cloud Computing Private Limited</strong>
@@ -312,46 +355,64 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
             </span>
           </div>
         </div>
+
         <div className={styles.quotationActions}>
+          {!isApproved && (
+            <button type="button" onClick={handleSendForDiscount}>
+              <MdOutlineTurnRight size={18} />
+              Send For More Discount
+            </button>
+          )}
+
           <button
             type="button"
-            data-modal-open="sendDiscountModal"
-            onClick={handleSendForDiscount}
+            onClick={handleDownload}
+            disabled={isDownloading}
           >
-            <MdOutlineTurnRight size={18} />
-            Send For More Discount
-          </button>
-
-          <button type="button">
             <LuDownload size={18} />
-            Download
+            {isDownloading ? "Downloading..." : "Download"}
           </button>
+
+          {!isApproved && (
+            <button
+              type="button"
+              onClick={() =>
+                router.push(`/quotations/update-quotation?qid=${quotation?.id}`)
+              }
+            >
+              <GoPencil size={18} />
+              Edit
+            </button>
+          )}
+
+          {!isApproved && (
+            <button
+              type="button"
+              onClick={handleSend}
+              disabled={!email}
+              title={email ? "" : "No customer email available"}
+            >
+              <CiMail size={18} />
+              Send
+            </button>
+          )}
 
           <button
             type="button"
-            onClick={() =>
-              router.push(`/quotations/update-quotation?qid=${quotation?.id}`)
-            }
+            onClick={() => router.push(`/quotations/history/${quotation?.id}`)}
           >
-            <GoPencil size={18} />
-            Edit
-          </button>
-
-          <button
-            type="button"
-            data-modal-open="sendQuotationModal"
-            onClick={handleSend}
-          >
-            <CiMail size={18} />
-            Send
-          </button>
-
-          <button type="button" onClick={() => router.push(activityPath)}>
             <RiHistoryLine size={18} />
             History
           </button>
         </div>
       </div>
+
+      <SendQuotationPopup
+        isOpen={isSendOpen}
+        onClose={() => setIsSendOpen(false)}
+        quotation={popupQuotation}
+        mode="quotation"
+      />
     </div>
   );
 }
@@ -359,6 +420,7 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
 function QuotationDetail({ badge = "New", onOpenModal }) {
   const router = useRouter();
   const [openQuotationId, setOpenQuotationId] = useState(undefined);
+
   const {
     data: quotationDetail,
     isLoading,
@@ -367,9 +429,12 @@ function QuotationDetail({ badge = "New", onOpenModal }) {
     { quotation_id: router?.query?.slug },
     { skip: !router?.query?.slug },
   );
+
   const quotations = Array.isArray(quotationDetail?.data?.quotation)
-    ? quotationDetail?.data?.quotation
+    ? quotationDetail.data.quotation
     : [];
+
+  const orderedQuotations = [...quotations].reverse();
 
   return (
     <main className="content">
@@ -415,10 +480,10 @@ function QuotationDetail({ badge = "New", onOpenModal }) {
           <p role="alert">
             Unable to load quotation details. Please try again.
           </p>
-        ) : quotations?.length === 0 ? (
+        ) : orderedQuotations.length === 0 ? (
           <p>No quotation details found.</p>
         ) : (
-          quotations?.toReversed()?.map((quotation, index) => {
+          orderedQuotations.map((quotation, index) => {
             const isOpen =
               openQuotationId === undefined
                 ? index === 0
