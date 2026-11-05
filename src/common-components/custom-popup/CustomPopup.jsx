@@ -13,6 +13,7 @@ const CustomPopup = ({
   wide = false,
   closeIcon = true,
   maxWidth,
+  title
 }) => {
   const handleClose = onclose || onClose || (() => {});
 

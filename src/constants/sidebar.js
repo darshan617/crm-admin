@@ -44,12 +44,12 @@ export const SIDEBAR_SECTIONS = [
         url: "/crm-deals",
         icon: LuHandshake,
       },
-      {
-        key: "renewals",
-        name: "Renewals",
-        url: "/renewals",
-        icon: FiRefreshCw,
-      },
+      // {
+      //   key: "renewals",
+      //   name: "Renewals",
+      //   url: "/renewals",
+      //   icon: FiRefreshCw,
+      // },
     ],
   },
   {

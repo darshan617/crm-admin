@@ -73,6 +73,58 @@ const quotationApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["quotation"],
     }),
+    quotationHistory: builder.query({
+      query: ({ quotation_id }) => ({
+        url: `/quotations/${quotation_id}/activity`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
+    downloadQuotation: builder.query({
+      query: ({ quotation_id }) => ({
+        url: `/quotations/${quotation_id}/download`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
+    sendMail: builder.mutation({
+      query: ({ body }) => ({
+        url: `/quotations/send-mail`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["quotation"],
+    }),
+    getSuggestMail: builder.query({
+      query: () => ({
+        url: `/quotations/email-suggestions`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
+    status: builder.mutation({
+      query: ({ body, quotation_id }) => ({
+        url: `/quotations/${quotation_id}/status`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["quotation"],
+    }),
+    downloadInvoice: builder.query({
+      query: ({ quotation_id }) => ({
+        url: `/quotations/${quotation_id}/invoice/download`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
+    sendInvoice: builder.mutation({
+      query: ({ body }) => ({
+        url: `/quotations/send-invoice-mail`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["quotation"],
+    }),
   }),
 });
 
@@ -84,4 +136,13 @@ export const {
   useGetLeadDataForQuotationQuery,
   useGetQuotationDetailQuery,
   useUpdateQuotationMutation,
+  useQuotationHistoryQuery,
+  useDownloadQuotationQuery,
+  useLazyDownloadQuotationQuery,
+  useSendMailMutation,
+  useGetSuggestMailQuery,
+  useStatusMutation,
+  useDownloadInvoiceQuery,
+  useLazyDownloadInvoiceQuery,
+  useSendInvoiceMutation,
 } = quotationApi;
