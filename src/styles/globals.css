@@ -99,6 +99,10 @@ a {
   color: inherit;
 }
 
+button, input, select, optgroup, textarea, ::file-selector-button {
+outline: none;
+}
+
 .content {
   width: 100%;
   padding: 30px 6%;

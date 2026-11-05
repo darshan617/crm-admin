@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import {
   LuSearch,
@@ -17,9 +16,15 @@ import {
   LuCornerUpRight,
 } from "react-icons/lu";
 import styles from "@/components/quotation/Quotation.module.css";
-import { useGetAllQuotationsQuery } from "@/redux/apis/quotationApi";
-import Pagination from "@/common-components/pagination/Pagination";
+import {
+  useDownloadInvoiceQuery,
+  useGetAllQuotationsQuery,
+  useLazyDownloadInvoiceQuery,
+  useLazyDownloadQuotationQuery,
+} from "@/redux/apis/quotationApi";
 import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
+import SendQuotationPopup from "./send-quotation-popupo/SendQuotationPopup";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -57,6 +62,9 @@ const getStatusClass = (status) =>
     .toLowerCase()
     .replace(/\s+/g, "-");
 
+const isApproved = (quotation) =>
+  String(getStatus(quotation, "")).toLowerCase() === "approved";
+
 const getCompany = (quotation) => quotation.company_name || "-";
 const getContact = (quotation) =>
   quotation.contact_name || quotation.name || quotation.email || "-";
@@ -70,13 +78,13 @@ const getFollowUp = (quotation) =>
   quotation.follow_up_date || quotation.shared_at || quotation.created_at || "";
 const getAmount = (quotation) =>
   quotation.total_amount ?? quotation.grand_total ?? quotation.amount ?? "";
-const getPlan = (quotation) =>
-  quotation.plan_name || quotation.product_name || quotation.plan || "";
 const getDiscountStatus = (quotation) =>
   quotation.discount_status || quotation.discount_request_status || "pending";
 
 const Quotation = () => {
   const router = useRouter();
+  const popupRef = useRef(null);
+
   const [view, setView] = useState({
     filterOpen: false,
     activeTab: "all",
@@ -87,11 +95,66 @@ const Quotation = () => {
     from: "",
     to: "",
     activeQuotationId: null,
+    sendQuotationId: null,
+    sendMode: "quotation",
   });
-  const popupRef = useRef(null);
+  const { showToast } = useToast();
 
   const updateView = (updates) =>
     setView((current) => ({ ...current, ...updates }));
+
+  const [downloadQuotation, { isFetching: isDownloading }] =
+    useLazyDownloadQuotationQuery();
+
+  const [downloadQInvoice] = useLazyDownloadInvoiceQuery();
+  const handleDownload = async (quotationId) => {
+    try {
+      const res = await downloadQuotation({
+        quotation_id: quotationId,
+      }).unwrap();
+
+      const { quotation_url } = res?.data || {};
+
+      if (!quotation_url) {
+        showToast("Download link not found", "error");
+        return;
+      }
+
+      window.open(quotation_url, "_blank", "noopener,noreferrer");
+      showToast(res?.message || "Quotation downloaded successfully", "success");
+    } catch (error) {
+      showToast(
+        error?.data?.message ||
+          error?.message ||
+          "Failed to download quotation",
+        "error",
+      );
+    }
+  };
+
+  const handleInvoiceDownload = async (quotationId) => {
+    try {
+      const res = await downloadQInvoice({
+        quotation_id: quotationId,
+      }).unwrap();
+
+      const { invoice_url, quotation_url } = res?.data || {};
+      const fileUrl = invoice_url || quotation_url;
+
+      if (!fileUrl) {
+        showToast("Download link not found", "error");
+        return;
+      }
+
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+      showToast(res?.message || "Invoice downloaded successfully", "success");
+    } catch (error) {
+      showToast(
+        error?.data?.message || error?.message || "Failed to download invoice",
+        "error",
+      );
+    }
+  };
 
   const status =
     view.activeTab === "discount"
@@ -99,6 +162,7 @@ const Quotation = () => {
         ? ""
         : view.discountFilter
       : view.statusFilter[view.activeTab] || "";
+
   const {
     data: quotationResponse,
     isLoading,
@@ -122,6 +186,12 @@ const Quotation = () => {
   const pagination = quotationResponse?.data?.pagination;
   const total = pagination?.total ?? quotations.length;
 
+  const customerTab = view.activeTab === "customer";
+  const tableClass = customerTab ? "es-quo-table" : "crm-quo-table";
+  const sendQuotation = quotations.find(
+    (quotation) => quotation?.id === view.sendQuotationId,
+  );
+
   const selectTab = (activeTab) => updateView({ activeTab, filterOpen: false });
 
   const resetFilters = () =>
@@ -133,6 +203,17 @@ const Quotation = () => {
       from: "",
       to: "",
     });
+
+  const openQuotationMenu = (quotation, event) => {
+    event.stopPropagation();
+    setView((current) => ({
+      ...current,
+      activeQuotationId:
+        current.activeQuotationId === quotation.id ? null : quotation.id,
+    }));
+  };
+
+  const closeMenu = () => updateView({ activeQuotationId: null });
 
   useEffect(() => {
     if (view.activeQuotationId === null) return;
@@ -152,18 +233,10 @@ const Quotation = () => {
       document.removeEventListener("pointerdown", handleOutsideClick);
   }, [view.activeQuotationId]);
 
-  const openQuotationMenu = (quotation, event) => {
-    event.stopPropagation();
-    setView((current) => ({
-      ...current,
-      activeQuotationId:
-        current.activeQuotationId === quotation.id ? null : quotation.id,
-    }));
-  };
+  /* --------------------------- rows --------------------------- */
 
-  const renderRows = (customerTab = false) => {
+  const renderRows = () => {
     const columnCount = customerTab ? 6 : 5;
-    const rows = quotations;
 
     if (isError) {
       return (
@@ -181,7 +254,7 @@ const Quotation = () => {
         </tr>
       );
     }
-    if (rows.length === 0) {
+    if (quotations.length === 0) {
       return (
         <tr className="table-row">
           <td colSpan={columnCount}>No quotations found.</td>
@@ -189,14 +262,16 @@ const Quotation = () => {
       );
     }
 
-    return rows?.map((quotation) => {
+    return quotations.map((quotation) => {
       const company = getCompany(quotation);
-      const currentStatus = getStatus(quotation);
-      const assignee = getAssignee(quotation);
-      const discountStatus = getDiscountStatus(quotation);
-      const rowStatus =
-        view.activeTab === "discount" ? discountStatus : currentStatus;
       const contact = getContact(quotation);
+      const assignee = getAssignee(quotation);
+      const rowStatus =
+        view.activeTab === "discount"
+          ? getDiscountStatus(quotation)
+          : getStatus(quotation);
+      const isMenuOpen = view.activeQuotationId === quotation?.id;
+      const approved = isApproved(quotation);
 
       return (
         <tr
@@ -211,11 +286,14 @@ const Quotation = () => {
             )
           }
         >
+          {/* Id */}
           <td className={styles.orderId} data-label="Id">
             <span className="quotation-id">
               {quotation.quotation_no || quotation.id}
             </span>
           </td>
+
+          {/* Contact */}
           <td className="customer" data-label="Contact">
             <div className="avatar purple">{company.charAt(0)}</div>
             <div>
@@ -223,6 +301,8 @@ const Quotation = () => {
               <p>{contact}</p>
             </div>
           </td>
+
+          {/* Plan */}
           <td>
             <div className="plan-info" data-label="Plan">
               <div className="plan-icon">
@@ -232,7 +312,6 @@ const Quotation = () => {
                       menu?.id ===
                       Number(
                         quotation?.plans?.[0]?.provider_id ||
-                          quotation?.plans?.[0]?.provider_id ||
                           quotation?.provider_id,
                       ),
                   )?.image || "-"}
@@ -256,17 +335,18 @@ const Quotation = () => {
             </div>
             {quotation?.plans?.length > 1 && (
               <p className="plan-meta">
-                + {quotation?.plans?.length - 1} more plans
+                + {quotation.plans.length - 1} more plans
               </p>
             )}
-            <p></p>
           </td>
 
+          {/* Status */}
           <td className="status-col" data-label="Status">
             <span className={`badge ${getStatusClass(rowStatus)}`}>
               {rowStatus}
             </span>
           </td>
+
           {customerTab && (
             <td className="status-col" data-label="Invoice">
               {quotation.approved ? (
@@ -276,6 +356,7 @@ const Quotation = () => {
               )}
             </td>
           )}
+
           <td className="plan-action" data-label="Assigned To">
             <div className={styles.assignedUser}>
               <div className="user-info">
@@ -287,9 +368,10 @@ const Quotation = () => {
                 </div>
                 <small>{getFollowUp(quotation) || " "}</small>
               </div>
+
               <div
                 className={`${styles.actionMenu} actions`}
-                ref={activeQuotation?.id === quotation.id ? popupRef : null}
+                ref={isMenuOpen ? popupRef : null}
               >
                 <button
                   className="action-btn"
@@ -299,7 +381,8 @@ const Quotation = () => {
                 >
                   <LuChevronRight size={24} aria-hidden="true" />
                 </button>
-                {activeQuotation?.id === quotation.id && (
+
+                {isMenuOpen && (
                   <div
                     className={styles.quotationPopup}
                     onClick={(event) => event.stopPropagation()}
@@ -307,54 +390,116 @@ const Quotation = () => {
                     <div className={styles.popupTitle}>Quotation</div>
                     <div className={styles.popupActions}>
                       <Link
-                        href={`/quotations/quotation-detail/${activeQuotation.id}`}
+                        href={`/quotations/quotation-detail/${quotation.id}`}
                         className={styles.popupAction}
-                        onClick={() => updateView({ activeQuotationId: null })}
+                        onClick={closeMenu}
                       >
                         <LuEye size={19} />
                         <span>View</span>
                       </Link>
+
                       <Link
-                        href={`/quotations/history`}
+                        href={`/quotations/history/${quotation.id}`}
                         className={styles.popupAction}
-                        onClick={() => updateView({ activeQuotationId: null })}
+                        onClick={closeMenu}
                       >
                         <LuHistory size={19} />
                         <span>History</span>
                       </Link>
-                      <Link
-                        href={`/quotations/update-quotation?qid=${quotation?.id}`}
-                        className={styles.popupAction}
-                        onClick={() => updateView({ activeQuotationId: null })}
-                      >
-                        <LuPencil size={19} />
-                        <span>Edit</span>
-                      </Link>
-                      <Link
-                        href={`/`}
-                        className={styles.popupAction}
-                        onClick={() => updateView({ activeQuotationId: null })}
-                      >
-                        <LuDownload size={19} />
-                        <span>Download</span>
-                      </Link>
+                      {approved && (
+                        <Link
+                          href={`/quotations/update-quotation?qid=${quotation.id}`}
+                          className={styles.popupAction}
+                          onClick={closeMenu}
+                        >
+                          <LuPencil size={19} />
+                          <span>Edit</span>
+                        </Link>
+                      )}
+
                       <button
                         type="button"
                         className={styles.popupAction}
-                        onClick={() => updateView({ activeQuotationId: null })}
+                        disabled={isDownloading}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDownload(quotation.id);
+                          closeMenu();
+                        }}
+                      >
+                        <LuDownload size={19} />
+                        <span>Download</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={styles.popupAction}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          updateView({
+                            activeQuotationId: null,
+                            sendQuotationId: quotation.id,
+                            sendMode: "quotation",
+                          });
+                        }}
                       >
                         <LuMail size={19} />
                         <span>Send</span>
                       </button>
                     </div>
-                    <button
-                      type="button"
-                      className={styles.discountBtn}
-                      onClick={() => updateView({ activeQuotationId: null })}
-                    >
-                      <LuCornerUpRight size={18} />
-                      <span>Send for more discount</span>
-                    </button>
+
+                    {approved && (
+                      <div className={styles.quotationPopupInvoice}>
+                        <div
+                          className={`${styles.popupTitle} ${styles.invoiceTitle}`}
+                        >
+                          Invoice
+                        </div>
+                        <div
+                          className={`${styles.popupActions} ${styles.invoiceActions}`}
+                        >
+                          <button
+                            type="button"
+                            className={styles.popupAction}
+                            disabled={isDownloading}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleInvoiceDownload(quotation.id);
+                              closeMenu();
+                            }}
+                          >
+                            <LuDownload size={19} />
+                            <span>Download</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={styles.popupAction}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              updateView({
+                                activeQuotationId: null,
+                                sendQuotationId: quotation.id,
+                                sendMode: "invoice",
+                              });
+                            }}
+                          >
+                            <LuMail size={19} />
+                            <span>Email</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {!approved && (
+                      <button
+                        type="button"
+                        className={styles.discountBtn}
+                        onClick={closeMenu}
+                      >
+                        <LuCornerUpRight size={18} />
+                        <span>Send for more discount</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -365,11 +510,7 @@ const Quotation = () => {
     });
   };
 
-  const customerTab = view.activeTab === "customer";
-  const tableClass = customerTab ? "es-quo-table" : "crm-quo-table";
-  const activeQuotation = quotations?.find(
-    (quotation) => quotation?.id === view?.activeQuotationId,
-  );
+  /* ---------------------------- render ---------------------------- */
 
   return (
     <div className="content">
@@ -395,21 +536,21 @@ const Quotation = () => {
       </div>
 
       <section className="common-table-section crm-quo-list">
-        <div className={styles.crmLeadTabs}>
+        {/* Tabs */}
+        <div className={styles.crmLeadTabs} role="tablist">
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              href="#"
+              type="button"
               role="tab"
               aria-selected={view.activeTab === tab.key}
               className={view.activeTab === tab.key ? styles.active : ""}
-              onClick={(event) => {
-                event.preventDefault();
+              onClick={() => {
                 selectTab(tab.key);
-                router?.push({
-                  pathname: router?.pathname,
+                router.push({
+                  pathname: router.pathname,
                   query: {
-                    ...router?.query,
+                    ...router.query,
                     type: tab.key,
                     page_no: 1,
                     items_per_page: 10,
@@ -423,6 +564,7 @@ const Quotation = () => {
         </div>
 
         <div className="common-table-card">
+          {/* Header + search */}
           <div
             className={`common-table-header ${
               customerTab ? "es" : "crm"
@@ -451,6 +593,7 @@ const Quotation = () => {
             </form>
           </div>
 
+          {/* Filter panel */}
           <div
             className="table-filter-wrap"
             id="filterPanel"
@@ -473,6 +616,7 @@ const Quotation = () => {
                   </select>
                 </div>
               </div>
+
               <div className="filter-group">
                 <h6>Date Range :</h6>
                 <div className="date-range">
@@ -498,6 +642,7 @@ const Quotation = () => {
                   </div>
                 </div>
               </div>
+
               <div className="filter-group">
                 <h6>
                   {view.activeTab === "discount"
@@ -538,6 +683,7 @@ const Quotation = () => {
             </div>
           </div>
 
+          {/* Filter toggle */}
           <div className="table-filter">
             <div className="border-line"></div>
             <button
@@ -559,6 +705,7 @@ const Quotation = () => {
             )}
           </div>
 
+          {/* Discount sub-tabs */}
           {view.activeTab === "discount" && (
             <div className={styles.partnerTabsWrap}>
               <div className={styles.partnerTabs}>
@@ -586,6 +733,7 @@ const Quotation = () => {
             </div>
           )}
 
+          {/* Table */}
           <table className={tableClass}>
             <thead>
               <tr className="table-head">
@@ -597,12 +745,22 @@ const Quotation = () => {
                 <td className="status-col">Assigned To</td>
               </tr>
             </thead>
-            <tbody className="table-body">{renderRows(customerTab)}</tbody>
+            <tbody className="table-body">{renderRows()}</tbody>
           </table>
 
           <div className="table-pagination">{/* <Pagination /> */}</div>
         </div>
       </section>
+
+      <SendQuotationPopup
+        isOpen={view.sendQuotationId !== null && Boolean(sendQuotation)}
+        onClose={() =>
+          updateView({ sendQuotationId: null, sendMode: "quotation" })
+        }
+        quotation={sendQuotation}
+        mode={view.sendMode}
+        title={view.sendMode === "invoice" ? "Send Invoice" : "Send Quotation"}
+      />
     </div>
   );
 };
