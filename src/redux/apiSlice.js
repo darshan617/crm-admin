@@ -74,7 +74,7 @@ export const apiSlice = createApi({
     }
   },
 
-  tagTypes: ["quotation", "auth", "leads"],
+  tagTypes: ["quotation", "auth", "leads", "followUp"],
 
   endpoints: () => ({}),
 });
