@@ -32,7 +32,7 @@
   padding-left: 20px;
   margin-bottom: 0;
 }
-.crmLeadTabs a {
+.crmLeadTabs button {
   display: flex;
   min-width: 140px;
   height: 50px;
@@ -52,7 +52,7 @@
   justify-content: center;
 }
 
-.crmLeadTabs a.active {
+.crmLeadTabs button.active {
   background: #ffffff;
   color: #303846;
   border-top: 3px solid #0865b5;
