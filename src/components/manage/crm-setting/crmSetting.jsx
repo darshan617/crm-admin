@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
@@ -17,6 +17,7 @@ import {
   FiUsers,
   FiTrendingUp,
   FiUserPlus,
+  FiUserCheck,
 } from "react-icons/fi";
 
 import styles from "@/components/manage/crm-setting/crmSetting.module.css";
@@ -24,6 +25,24 @@ import CustomPopup from "@/common-components/custom-popup/CustomPopup";
 import {
   useLeadsSourceQuery,
   useCreateLeadsMutation,
+  useUpdateLeadsMutation,
+  useDeleteLeadsMutation,
+  useLeadsStatusQuery,
+  useCreateStatusMutation,
+  useUpdateStatusMutation,
+  useDeleteLeadsStatusMutation,
+  useLeadsBifurcationQuery,
+  useCreateBifurcationMutation,
+  useUpdateBifurcationMutation,
+  useDeleteLeadsBifurcationMutation,
+  useLeadsPriorityQuery,
+  useCreatePriorityMutation,
+  useUpdatePriorityMutation,
+  useDeleteLeadsPriorityMutation,
+  useLeadsDesignationQuery,
+  useCreateDesignationMutation,
+  useUpdateDesignationMutation,
+  useDeleteLeadsDesignationMutation,
 } from "@/redux/apis/crmSettingsApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
@@ -48,7 +67,9 @@ const TABS = [
     singular: "Lead Status",
     addLabel: "Add Lead Status",
     icon: FiCheckSquare,
-    prefix: "LST",
+    prefix: "ST",
+    columnLabel: "Status",
+    showDescription: true,
     popupWidth: "380px",
     nameLabel: "Status Name",
     namePlaceholder: "Enter lead status name",
@@ -61,8 +82,10 @@ const TABS = [
     addLabel: "Add Lead Bifurcation",
     icon: FiShare2,
     prefix: "LB",
+    columnLabel: "Bifurcation",
+    showDescription: true,
     popupWidth: "380px",
-    nameLabel: "Status Name",
+    nameLabel: "Bifurcation Name",
     namePlaceholder: "e.g. B2B, B2C",
     hasDescription: true,
   },
@@ -73,6 +96,8 @@ const TABS = [
     addLabel: "Add Lead Priority",
     icon: FiFlag,
     prefix: "LP",
+    columnLabel: "Priority",
+    showDescription: true,
     popupWidth: "380px",
     nameLabel: "Priority Name",
     namePlaceholder: "e.g. Hot, Normal, Cold",
@@ -95,48 +120,12 @@ const TABS = [
   },
 ];
 
-const VISIBLE_TABS = TABS;
-
 const makeCode = (prefix, id) => `${prefix}${String(id).padStart(3, "0")}`;
 
-const makeRows = (prefix, names) =>
-  names.map((name, index) => ({
-    id: index + 1,
-    code: makeCode(prefix, index + 1),
-    name,
-    status: "active",
-    description: "",
-    department: "",
-    employeeCount: 0,
-    leads: 0,
-    createdOn: "2026-10-06",
-  }));
-
-const INITIAL_DATA = {
-  "lead-status": makeRows("LST", [
-    "New",
-    "Contacted",
-    "Qualified",
-    "Won",
-    "Lost",
-  ]),
-  "lead-bifurcation": makeRows("LB", ["Hot", "Warm", "Cold"]),
-  "lead-priority": makeRows("LP", ["High", "Medium", "Low"]),
-  designation: makeRows("DS", [
-    "Director",
-    "Manager",
-    "Team Lead",
-    "Executive",
-    "Intern",
-  ]),
-};
-
 const formatDate = (value) => {
-  if (!value) return "-";
-
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return "-";
+  if (!value || Number.isNaN(date.getTime())) return "-";
 
   return date.toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -148,26 +137,32 @@ const formatDate = (value) => {
 const getLogoUrl = (logo) => {
   if (!logo || typeof logo !== "string") return null;
 
-  if (
-    logo.startsWith("http://") ||
-    logo.startsWith("https://") ||
-    logo.startsWith("blob:") ||
-    logo.startsWith("data:")
-  ) {
-    return logo;
-  }
+  if (/^(https?:|blob:|data:)/.test(logo)) return logo;
 
   const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "").replace(
     /\/+$/,
     "",
   );
 
-  if (!base) return null;
-
-  return `${base}/${logo.replace(/^\/+/, "")}`;
+  return base ? `${base}/${logo.replace(/^\/+/, "")}` : null;
 };
 
-const getSummaryCards = (tabKey, items, summary) => {
+// Maps an API list (sources, status, bifurcation, priority or designation) to table rows
+const mapItems = (list, prefix) =>
+  (Array.isArray(list) ? list : []).map((item) => ({
+    id: item.id,
+    code: makeCode(prefix, item.id),
+    name: item.name || "",
+    description: item.description || "",
+    department: item.department || "",
+    employeeCount: item.employee_count ?? 0,
+    logo: getLogoUrl(item.logo_url),
+    status: item.status || "inactive",
+    leads: item.leads ?? null,
+    createdOn: item.created_at,
+  }));
+
+const getSummaryCards = (tabKey, summary, items) => {
   if (tabKey === "lead-sources") {
     return [
       {
@@ -204,116 +199,144 @@ const getSummaryCards = (tabKey, items, summary) => {
   }
 
   if (tabKey === "designation") {
+    const managementCount = items.filter(
+      (item) => item.department === "Management",
+    ).length;
+
     return [
       {
         label: "Total Designations",
-        value: items.length,
+        value: summary?.total ?? items.length,
         icon: FiBriefcase,
         tone: "toneSky",
+      },
+      {
+        label: "Total Employees",
+        value: summary?.employees ?? 0,
+        icon: FiUsers,
+        tone: "tonePurple",
+      },
+      {
+        label: "Most Common Designation",
+        value: summary?.most_common || "-",
+        icon: FiTrendingUp,
+        tone: "toneGreen",
+      },
+      {
+        label: "Management Designations",
+        value: summary?.management ?? managementCount,
+        icon: FiUserCheck,
+        tone: "toneAmber",
       },
     ];
   }
 
   return [];
 };
+
 export default function LeadSourcesPage() {
   const router = useRouter();
+  const { showToast } = useToast();
 
-  const activeTab =
-    VISIBLE_TABS.find((tab) => tab.key === router.query.tab) || VISIBLE_TABS[0];
-
+  const activeTab = TABS.find((tab) => tab.key === router.query.tab) || TABS[0];
   const activeKey = activeTab.key;
   const isLeadSources = activeKey === "lead-sources";
+  const isLeadStatus = activeKey === "lead-status";
+  const isBifurcation = activeKey === "lead-bifurcation";
+  const isPriority = activeKey === "lead-priority";
+  const isDesignation = activeKey === "designation";
 
-  const [data, setData] = useState(INITIAL_DATA);
   const [search, setSearch] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [logoFileName, setLogoFileName] = useState("");
   const [logoFile, setLogoFile] = useState(null);
-  const [sourceChanges, setSourceChanges] = useState({
-    added: [],
-    edited: {},
-    deleted: [],
+
+  const sources = useLeadsSourceQuery(undefined, { skip: !isLeadSources });
+  const statuses = useLeadsStatusQuery(undefined, { skip: !isLeadStatus });
+  const bifurcations = useLeadsBifurcationQuery(undefined, {
+    skip: !isBifurcation,
+  });
+  const priorities = useLeadsPriorityQuery(undefined, { skip: !isPriority });
+  const designations = useLeadsDesignationQuery(undefined, {
+    skip: !isDesignation,
   });
 
-  const {
-    data: leadsSourceResponse,
-    isLoading,
-    isFetching,
-    isError,
-    refetch,
-  } = useLeadsSourceQuery(undefined, {
-    skip: !isLeadSources,
-  });
+  let query = null;
+  if (isLeadSources) query = sources;
+  else if (isLeadStatus) query = statuses;
+  else if (isBifurcation) query = bifurcations;
+  else if (isPriority) query = priorities;
+  else if (isDesignation) query = designations;
 
-  const [createLead, { isLoading: isCreating }] = useCreateLeadsMutation();
+  const [createLead] = useCreateLeadsMutation();
+  const [updateLead] = useUpdateLeadsMutation();
+  const [deleteLead] = useDeleteLeadsMutation();
+  const [createStatus] = useCreateStatusMutation();
+  const [updateStatus] = useUpdateStatusMutation();
+  const [deleteStatus] = useDeleteLeadsStatusMutation();
+  const [createBifurcation] = useCreateBifurcationMutation();
+  const [updateBifurcation] = useUpdateBifurcationMutation();
+  const [deleteBifurcation] = useDeleteLeadsBifurcationMutation();
+  const [createPriority] = useCreatePriorityMutation();
+  const [updatePriority] = useUpdatePriorityMutation();
+  const [deletePriority] = useDeleteLeadsPriorityMutation();
+  const [createDesignation] = useCreateDesignationMutation();
+  const [updateDesignation] = useUpdateDesignationMutation();
+  const [deleteDesignation] = useDeleteLeadsDesignationMutation();
 
-  const apiItems = useMemo(() => {
-    const responseItems = leadsSourceResponse?.data?.items;
+  let api = null;
+  if (isLeadSources) {
+    api = { create: createLead, update: updateLead, remove: deleteLead };
+  } else if (isLeadStatus) {
+    api = { create: createStatus, update: updateStatus, remove: deleteStatus };
+  } else if (isBifurcation) {
+    api = {
+      create: createBifurcation,
+      update: updateBifurcation,
+      remove: deleteBifurcation,
+    };
+  } else if (isPriority) {
+    api = {
+      create: createPriority,
+      update: updatePriority,
+      remove: deletePriority,
+    };
+  } else if (isDesignation) {
+    api = {
+      create: createDesignation,
+      update: updateDesignation,
+      remove: deleteDesignation,
+    };
+  }
 
-    if (!Array.isArray(responseItems)) return [];
+  const listData = query?.data?.data;
 
-    return responseItems.map((item) => ({
-      id: item.id,
-      code: makeCode("LS", item?.id),
-      name: item.name || "",
-      logo: getLogoUrl(item?.logo_url),
-      rawLogo: item?.logo,
-      status: item?.status || "inactive",
-      createdOn: item?.created_at,
-      updatedOn: item?.updated_at,
-      leads: item?.leads ?? null,
-    }));
-  }, [leadsSourceResponse]);
-
-  const sourceItems = useMemo(
-    () =>
-      [...apiItems, ...sourceChanges.added]
-        .filter((item) => !sourceChanges.deleted.includes(item.id))
-        .map((item) =>
-          sourceChanges.edited[item.id]
-            ? { ...item, ...sourceChanges.edited[item.id] }
-            : item,
-        ),
-    [apiItems, sourceChanges],
+  const items = mapItems(
+    listData?.items ?? listData?.designations,
+    activeTab.prefix,
   );
 
-  const { showToast } = useToast();
-  const items = isLeadSources ? sourceItems : data[activeKey] || [];
-
-  const summary = leadsSourceResponse?.data?.summary;
-
-  const summaryCards = useMemo(
-    () => getSummaryCards(activeKey, items, summary),
-    [activeKey, items, summary],
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(search.trim().toLowerCase()),
   );
 
-  const filteredItems = useMemo(() => {
-    const query = search.trim().toLowerCase();
+  const summaryCards = getSummaryCards(activeKey, listData?.summary, items);
 
-    if (!query) return items;
+  const showLoading = Boolean(query?.isLoading || query?.isFetching);
+  const showError = Boolean(query?.isError);
 
-    return items.filter((item) =>
-      String(item.name || "")
-        .toLowerCase()
-        .includes(query),
-    );
-  }, [items, search]);
+  const columnCount =
+    4 + (activeTab.hasLeads ? 1 : 0) + (activeTab.showDescription ? 1 : 0);
 
-  const updateActiveList = (updater) => {
-    if (isLeadSources) return;
-
-    setData((prev) => ({
-      ...prev,
-      [activeKey]: updater(prev[activeKey] || []),
-    }));
+  const openPopup = (item = null) => {
+    setEditingItem(item);
+    setLogoFile(null);
+    setPopupOpen(true);
   };
 
   const closePopup = () => {
     setPopupOpen(false);
     setEditingItem(null);
-    setLogoFileName("");
     setLogoFile(null);
   };
 
@@ -324,127 +347,71 @@ export default function LeadSourcesPage() {
     closePopup();
 
     router.replace(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          tab: key,
-        },
-      },
+      { pathname: router.pathname, query: { ...router.query, tab: key } },
       undefined,
       { shallow: true },
     );
   };
 
-  const handleAdd = () => {
-    setEditingItem(null);
-    setLogoFileName("");
-    setLogoFile(null);
-    setPopupOpen(true);
-  };
-
-  const handleEdit = (item) => {
-    setEditingItem(item);
-    setLogoFileName("");
-    setLogoFile(null);
-    setPopupOpen(true);
-  };
-
-  const handleDelete = (id) => {
-    const message = `Are you sure you want to delete this ${activeTab.singular.toLowerCase()}?`;
-
-    if (!window.confirm(message)) return;
-
-    if (isLeadSources) {
-      setSourceChanges((prev) => ({
-        ...prev,
-        deleted: [...prev.deleted, id],
-      }));
-      return;
+  const handleDelete = async (id) => {
+    try {
+      await api.remove({ id }).unwrap();
+      showToast(`${activeTab.singular} deleted successfully`, "success");
+    } catch (error) {
+      showToast(error?.data?.message || "Unable to delete", "error");
     }
-
-    updateActiveList((list) => list.filter((item) => item.id !== id));
   };
 
   const handleSave = async (event) => {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const form = new FormData(event.currentTarget);
 
     const values = {
-      name: String(formData.get("name") || "").trim(),
-      status: String(formData.get("status") || editingItem?.status || "active"),
-      description: String(formData.get("description") || "").trim(),
-      department: String(formData.get("department") || "").trim(),
-      employeeCount: Number(formData.get("employee_count") || 0),
+      name: String(form.get("name") || "").trim(),
+      status: String(form.get("status") || editingItem?.status || "active"),
+      description: String(form.get("description") || "").trim(),
+      department: String(form.get("department") || "").trim(),
+      employeeCount: Number(form.get("employee_count") || 0),
     };
 
     if (!values.name) return;
 
+    let body = { name: values?.name, description: values?.description };
+
     if (isLeadSources) {
-      const logo = logoFile
-        ? URL.createObjectURL(logoFile)
-        : editingItem?.logo || null;
-
-      if (editingItem) {
-        setSourceChanges((prev) => ({
-          ...prev,
-          edited: {
-            ...prev.edited,
-            [editingItem.id]: {
-              name: values.name,
-              status: values.status,
-              logo,
-            },
-          },
-        }));
-      } else {
-        const body = new FormData();
-        body.append("name", values.name);
-        body.append("status", values.status);
-        if (logoFile) body.append("logo", logoFile);
-
-        try {
-          await createLead({ body }).unwrap();
-        } catch (error) {
-          showToast(error?.data?.message, "error");
-
-          return;
-        }
-      }
-
-      closePopup();
-      return;
+      body = new FormData();
+      body.append("name", values.name);
+      body.append("status", values.status);
+      if (logoFile) body.append("logo", logoFile);
     }
 
-    if (editingItem) {
-      updateActiveList((list) =>
-        list.map((item) =>
-          item.id === editingItem.id ? { ...item, ...values } : item,
-        ),
-      );
-    } else {
-      const nextId = Math.max(0, ...items.map((item) => item.id)) + 1;
-
-      const newItem = {
-        id: nextId,
-        code: makeCode(activeTab.prefix, nextId),
-        leads: 0,
-        createdOn: new Date().toISOString(),
-        ...values,
+    if (isDesignation) {
+      body = {
+        ...body,
+        department: values.department,
+        employee_count: values.employeeCount,
       };
+    }
 
-      updateActiveList((list) => [...list, newItem]);
+    try {
+      if (editingItem) {
+        await api.update({ id: editingItem.id, body }).unwrap();
+      } else {
+        await api.create({ body }).unwrap();
+      }
+
+      showToast(
+        `${activeTab.singular} ${editingItem ? "updated" : "added"} successfully`,
+        "success",
+      );
+    } catch (error) {
+      showToast(error?.data?.message || "Something went wrong", "error");
+      return;
     }
 
     closePopup();
   };
-
-  const showLoading = isLeadSources && (isLoading || isFetching);
-
-  const showError = isLeadSources && isError;
-
-  const columnCount = activeTab.hasLeads ? 5 : 4;
 
   return (
     <div className={styles.shell}>
@@ -452,7 +419,7 @@ export default function LeadSourcesPage() {
         <p className={styles.sideTitle}>Configure lead workflow</p>
 
         <ul className={styles.navList}>
-          {VISIBLE_TABS.map(({ key, label, icon: Icon }) => {
+          {TABS.map(({ key, label, icon: Icon }) => {
             const isActive = key === activeKey;
 
             return (
@@ -489,7 +456,7 @@ export default function LeadSourcesPage() {
 
           <button
             type="button"
-            onClick={handleAdd}
+            onClick={() => openPopup()}
             className={styles.primaryBtn}
           >
             <FiPlus size={15} />
@@ -547,8 +514,13 @@ export default function LeadSourcesPage() {
                 <th className={styles.th}>Id</th>
 
                 <th className={styles.th}>
-                  {activeTab.hasLogo ? "Sources" : "Name"}
+                  {activeTab.columnLabel ||
+                    (activeTab.hasLogo ? "Sources" : "Name")}
                 </th>
+
+                {activeTab.showDescription && (
+                  <th className={styles.th}>Description</th>
+                )}
 
                 {activeTab.hasLeads && <th className={styles.th}>Leads</th>}
 
@@ -568,8 +540,8 @@ export default function LeadSourcesPage() {
               ) : showError ? (
                 <tr>
                   <td colSpan={columnCount} className={styles.empty}>
-                    <p>Unable to fetch lead sources.</p>
-                    <button type="button" onClick={() => refetch()}>
+                    <p>Unable to fetch {activeTab.label.toLowerCase()}.</p>
+                    <button type="button" onClick={() => query.refetch()}>
                       Try Again
                     </button>
                   </td>
@@ -604,6 +576,10 @@ export default function LeadSourcesPage() {
                       </div>
                     </td>
 
+                    {activeTab.showDescription && (
+                      <td className={styles.td}>{item.description || "-"}</td>
+                    )}
+
                     {activeTab.hasLeads && (
                       <td className={`${styles.td} ${styles.tdLeads}`}>
                         {item.leads ?? "-"}
@@ -619,7 +595,7 @@ export default function LeadSourcesPage() {
                         <button
                           type="button"
                           title="Edit"
-                          onClick={() => handleEdit(item)}
+                          onClick={() => openPopup(item)}
                           className={`${styles.actionBtn} ${styles.actionEdit}`}
                         >
                           <FiEdit size={16} />
@@ -678,7 +654,7 @@ export default function LeadSourcesPage() {
 
                 <div className={styles.filePicker}>
                   <span className={styles.fileName}>
-                    {logoFileName || "Choose File"}
+                    {logoFile?.name || "Choose File"}
                   </span>
 
                   <label htmlFor="logoInput" className={styles.fileButton}>
@@ -692,12 +668,9 @@ export default function LeadSourcesPage() {
                     accept="image/*"
                     required={!editingItem}
                     className={styles.fileInput}
-                    onChange={(event) => {
-                      const file = event.target.files?.[0] || null;
-
-                      setLogoFile(file);
-                      setLogoFileName(file?.name || "");
-                    }}
+                    onChange={(event) =>
+                      setLogoFile(event.target.files?.[0] || null)
+                    }
                   />
                 </div>
               </div>
@@ -806,12 +779,8 @@ export default function LeadSourcesPage() {
                 </button>
               )}
 
-              <button
-                type="submit"
-                disabled={isCreating}
-                className={styles.popupSaveBtn}
-              >
-                {isCreating ? "Saving..." : "Save"}
+              <button type="submit" className={styles.popupSaveBtn}>
+                Saving
               </button>
             </div>
           </form>

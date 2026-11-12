@@ -1,5 +1,5 @@
 import Layout from "@/components/layout/Layout";
-import LeadSourcesPage from "@/components/manage/crm-setting/crmSetting";
+import LeadSourcesPage from "@/components/manage/crm-setting/CrmSetting";
 import React from "react";
 
 const crmSettingPage = () => {
