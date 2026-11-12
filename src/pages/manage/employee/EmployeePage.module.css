@@ -1,0 +1,154 @@
+.pageShell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+}
+
+.sidePanel {
+  position: sticky;
+  top: 112px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+}
+
+.sideTitle {
+  margin: 0 0 14px 4px;
+  color: #94a3b8;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.sideNavItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.sideNavItem:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.sideNavItemActive {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.navIconWrap {
+  display: inline-flex;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.sideNavItemActive .navIconWrap {
+  color: #64748b;
+}
+
+.page {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.breadcrumbs {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.breadcrumbs strong {
+  color: #475569;
+  font-weight: 500;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  color: #1e293b;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #0056b3;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.addButton:hover {
+  background: #004a99;
+}
+
+@media (max-width: 980px) {
+  .pageShell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidePanel {
+    position: static;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .headerRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .addButton {
+    width: 100%;
+  }
+}
