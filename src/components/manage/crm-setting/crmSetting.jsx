@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
+
 import {
   FiGlobe,
   FiCheckSquare,
@@ -15,13 +17,15 @@ import {
   FiUsers,
   FiTrendingUp,
   FiUserPlus,
-  FiUserCheck,
 } from "react-icons/fi";
+
 import styles from "@/components/manage/crm-setting/crmSetting.module.css";
 import CustomPopup from "@/common-components/custom-popup/CustomPopup";
-import amazon from "@/assets/images/amazon.jpg";
-import tizzyMail from "@/assets/images/logo.png";
-import Image from "next/image";
+import {
+  useLeadsSourceQuery,
+  useCreateLeadsMutation,
+} from "@/redux/apis/crmSettingsApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const TABS = [
   {
@@ -91,9 +95,11 @@ const TABS = [
   },
 ];
 
+const VISIBLE_TABS = TABS;
+
 const makeCode = (prefix, id) => `${prefix}${String(id).padStart(3, "0")}`;
 
-const makeRows = (prefix, names, createdOn = "2026-10-06") =>
+const makeRows = (prefix, names) =>
   names.map((name, index) => ({
     id: index + 1,
     code: makeCode(prefix, index + 1),
@@ -103,23 +109,10 @@ const makeRows = (prefix, names, createdOn = "2026-10-06") =>
     department: "",
     employeeCount: 0,
     leads: 0,
-    createdOn,
+    createdOn: "2026-10-06",
   }));
 
 const INITIAL_DATA = {
-  "lead-sources": makeRows("LS", [
-    "Website",
-    "Tele Caller",
-    "Referral",
-    "Instagram",
-    "Google Ads",
-    "JD",
-    "Exhibition",
-    "LinkedIn",
-    "Email",
-    "Workindia",
-    "Tizzy Mail",
-  ]),
   "lead-status": makeRows("LST", [
     "New",
     "Contacted",
@@ -138,32 +131,72 @@ const INITIAL_DATA = {
   ]),
 };
 
-const getSummaryCards = (tabKey, data) => {
+const formatDate = (value) => {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const getLogoUrl = (logo) => {
+  if (!logo || typeof logo !== "string") return null;
+
+  if (
+    logo.startsWith("http://") ||
+    logo.startsWith("https://") ||
+    logo.startsWith("blob:") ||
+    logo.startsWith("data:")
+  ) {
+    return logo;
+  }
+
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "").replace(
+    /\/+$/,
+    "",
+  );
+
+  if (!base) return null;
+
+  return `${base}/${logo.replace(/^\/+/, "")}`;
+};
+
+const getSummaryCards = (tabKey, items, summary) => {
   if (tabKey === "lead-sources") {
     return [
       {
         label: "Total Sources",
-        value: data["lead-sources"].length,
+        value: summary?.total_sources ?? items.length,
         icon: FiLayers,
         tone: "toneSky",
       },
-      { label: "Total Leads", value: 788, icon: FiUsers, tone: "toneCyan" },
+      {
+        label: "Total Leads",
+        value: summary?.total_leads ?? 0,
+        icon: FiUsers,
+        tone: "toneCyan",
+      },
       {
         label: "Top Lead Source",
-        value: "Website",
+        value: summary?.top_lead_source || "-",
         icon: FiGlobe,
         tone: "toneGreen",
-        small: true,
       },
       {
         label: "Conversion Rate",
-        value: "24.6%",
+        value: summary?.conversion_rate ?? "0%",
         icon: FiTrendingUp,
         tone: "tonePurple",
       },
       {
         label: "New Leads This Month",
-        value: 126,
+        value: summary?.new_leads_this_month ?? 0,
         icon: FiUserPlus,
         tone: "toneAmber",
       },
@@ -174,75 +207,130 @@ const getSummaryCards = (tabKey, data) => {
     return [
       {
         label: "Total Designations",
-        value: data.designation.length,
+        value: items.length,
         icon: FiBriefcase,
         tone: "toneSky",
-      },
-      {
-        label: "Total Employees",
-        value: 48,
-        icon: FiUsers,
-        tone: "tonePurple",
-      },
-      {
-        label: "Most Common Designation",
-        value: "Director",
-        icon: FiTrendingUp,
-        tone: "toneGreen",
-        small: true,
-      },
-      {
-        label: "Management Designations",
-        value: 4,
-        icon: FiUserCheck,
-        tone: "toneAmber",
       },
     ];
   }
 
   return [];
 };
-
-const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
 export default function LeadSourcesPage() {
   const router = useRouter();
 
-  const activeTab = TABS.find((t) => t.key === router.query.tab) || TABS[0];
+  const activeTab =
+    VISIBLE_TABS.find((tab) => tab.key === router.query.tab) || VISIBLE_TABS[0];
+
   const activeKey = activeTab.key;
+  const isLeadSources = activeKey === "lead-sources";
 
   const [data, setData] = useState(INITIAL_DATA);
   const [search, setSearch] = useState("");
   const [popupOpen, setPopupOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [logoFileName, setLogoFileName] = useState("");
+  const [logoFile, setLogoFile] = useState(null);
+  const [sourceChanges, setSourceChanges] = useState({
+    added: [],
+    edited: {},
+    deleted: [],
+  });
 
-  const items = data[activeKey];
-  const summaryCards = getSummaryCards(activeKey, data);
+  const {
+    data: leadsSourceResponse,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+  } = useLeadsSourceQuery(undefined, {
+    skip: !isLeadSources,
+  });
+
+  const [createLead, { isLoading: isCreating }] = useCreateLeadsMutation();
+
+  const apiItems = useMemo(() => {
+    const responseItems = leadsSourceResponse?.data?.items;
+
+    if (!Array.isArray(responseItems)) return [];
+
+    return responseItems.map((item) => ({
+      id: item.id,
+      code: makeCode("LS", item?.id),
+      name: item.name || "",
+      logo: getLogoUrl(item?.logo_url),
+      rawLogo: item?.logo,
+      status: item?.status || "inactive",
+      createdOn: item?.created_at,
+      updatedOn: item?.updated_at,
+      leads: item?.leads ?? null,
+    }));
+  }, [leadsSourceResponse]);
+
+  const sourceItems = useMemo(
+    () =>
+      [...apiItems, ...sourceChanges.added]
+        .filter((item) => !sourceChanges.deleted.includes(item.id))
+        .map((item) =>
+          sourceChanges.edited[item.id]
+            ? { ...item, ...sourceChanges.edited[item.id] }
+            : item,
+        ),
+    [apiItems, sourceChanges],
+  );
+
+  const { showToast } = useToast();
+  const items = isLeadSources ? sourceItems : data[activeKey] || [];
+
+  const summary = leadsSourceResponse?.data?.summary;
+
+  const summaryCards = useMemo(
+    () => getSummaryCards(activeKey, items, summary),
+    [activeKey, items, summary],
+  );
 
   const filteredItems = useMemo(() => {
     const query = search.trim().toLowerCase();
+
     if (!query) return items;
-    return items.filter((item) => item.name.toLowerCase().includes(query));
+
+    return items.filter((item) =>
+      String(item.name || "")
+        .toLowerCase()
+        .includes(query),
+    );
   }, [items, search]);
 
-  const updateActiveList = (updater) =>
-    setData((prev) => ({ ...prev, [activeKey]: updater(prev[activeKey]) }));
+  const updateActiveList = (updater) => {
+    if (isLeadSources) return;
 
-  const closePopup = () => setPopupOpen(false);
+    setData((prev) => ({
+      ...prev,
+      [activeKey]: updater(prev[activeKey] || []),
+    }));
+  };
+
+  const closePopup = () => {
+    setPopupOpen(false);
+    setEditingItem(null);
+    setLogoFileName("");
+    setLogoFile(null);
+  };
 
   const handleTabChange = (key) => {
     if (key === activeKey) return;
+
     setSearch("");
-    setPopupOpen(false);
-    setEditingItem(null);
+    closePopup();
+
     router.replace(
-      { pathname: router.pathname, query: { ...router.query, tab: key } },
+      {
+        pathname: router.pathname,
+        query: {
+          ...router.query,
+          tab: key,
+        },
+      },
       undefined,
       { shallow: true },
     );
@@ -251,27 +339,37 @@ export default function LeadSourcesPage() {
   const handleAdd = () => {
     setEditingItem(null);
     setLogoFileName("");
+    setLogoFile(null);
     setPopupOpen(true);
   };
 
   const handleEdit = (item) => {
     setEditingItem(item);
     setLogoFileName("");
+    setLogoFile(null);
     setPopupOpen(true);
   };
 
   const handleDelete = (id) => {
     const message = `Are you sure you want to delete this ${activeTab.singular.toLowerCase()}?`;
-    if (!confirm(message)) return;
+
+    if (!window.confirm(message)) return;
+
+    if (isLeadSources) {
+      setSourceChanges((prev) => ({
+        ...prev,
+        deleted: [...prev.deleted, id],
+      }));
+      return;
+    }
+
     updateActiveList((list) => list.filter((item) => item.id !== id));
   };
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const handleSave = async (event) => {
+    event.preventDefault();
 
-    const file = formData.get("logo");
-    const newLogo = file && file.size > 0 ? URL.createObjectURL(file) : null;
+    const formData = new FormData(event.currentTarget);
 
     const values = {
       name: String(formData.get("name") || "").trim(),
@@ -279,8 +377,45 @@ export default function LeadSourcesPage() {
       description: String(formData.get("description") || "").trim(),
       department: String(formData.get("department") || "").trim(),
       employeeCount: Number(formData.get("employee_count") || 0),
-      logo: newLogo || editingItem?.logo || null,
     };
+
+    if (!values.name) return;
+
+    if (isLeadSources) {
+      const logo = logoFile
+        ? URL.createObjectURL(logoFile)
+        : editingItem?.logo || null;
+
+      if (editingItem) {
+        setSourceChanges((prev) => ({
+          ...prev,
+          edited: {
+            ...prev.edited,
+            [editingItem.id]: {
+              name: values.name,
+              status: values.status,
+              logo,
+            },
+          },
+        }));
+      } else {
+        const body = new FormData();
+        body.append("name", values.name);
+        body.append("status", values.status);
+        if (logoFile) body.append("logo", logoFile);
+
+        try {
+          await createLead({ body }).unwrap();
+        } catch (error) {
+          showToast(error?.data?.message, "error");
+
+          return;
+        }
+      }
+
+      closePopup();
+      return;
+    }
 
     if (editingItem) {
       updateActiveList((list) =>
@@ -290,34 +425,44 @@ export default function LeadSourcesPage() {
       );
     } else {
       const nextId = Math.max(0, ...items.map((item) => item.id)) + 1;
+
       const newItem = {
         id: nextId,
         code: makeCode(activeTab.prefix, nextId),
         leads: 0,
-        createdOn: new Date().toISOString().slice(0, 10),
+        createdOn: new Date().toISOString(),
         ...values,
       };
+
       updateActiveList((list) => [...list, newItem]);
     }
 
     closePopup();
   };
 
+  const showLoading = isLeadSources && (isLoading || isFetching);
+
+  const showError = isLeadSources && isError;
+
   const columnCount = activeTab.hasLeads ? 5 : 4;
 
   return (
-    <div className={`${styles.shell}`}>
-      <aside className={`${styles.card}`}>
-        <p className={`${styles.sideTitle}`}>Configure lead workflow</p>
-        <ul className={`${styles.navList}`}>
-          {TABS.map(({ key, label, icon: Icon }) => {
+    <div className={styles.shell}>
+      <aside className={styles.card}>
+        <p className={styles.sideTitle}>Configure lead workflow</p>
+
+        <ul className={styles.navList}>
+          {VISIBLE_TABS.map(({ key, label, icon: Icon }) => {
             const isActive = key === activeKey;
+
             return (
               <li key={key}>
                 <button
                   type="button"
                   onClick={() => handleTabChange(key)}
-                  className={`${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
+                  className={`${styles.navLink} ${
+                    isActive ? styles.navLinkActive : ""
+                  }`}
                 >
                   <Icon size={16} color={isActive ? "#0284c7" : "#94a3b8"} />
                   <span>{label}</span>
@@ -328,30 +473,24 @@ export default function LeadSourcesPage() {
         </ul>
       </aside>
 
-      {/* Main content */}
       <div>
-        <div className={`${styles.header}`}>
+        <div className={styles.header}>
           <div>
-            <p className={`${styles.breadcrumb}`}>
-              <Link href="  /dashboard" className={`${styles.crumbLink}`}>
+            <p className={styles.breadcrumb}>
+              <Link href="/dashboard" className={styles.crumbLink}>
                 Dashboard
               </Link>{" "}
-              <span>/</span>{" "}
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className={`${styles.crumbLink}`}
-              >
-                Manage
-              </a>{" "}
+              <span>/</span> <span className={styles.crumbLink}>Manage</span>{" "}
               <span>/</span> CRM Setting <span>/</span>
             </p>
-            <h2 className={`${styles.title}`}>{activeTab.label}</h2>
+
+            <h2 className={styles.title}>{activeTab.label}</h2>
           </div>
+
           <button
             type="button"
             onClick={handleAdd}
-            className={`${styles.primaryBtn}`}
+            className={styles.primaryBtn}
           >
             <FiPlus size={15} />
             <span>{activeTab.addLabel}</span>
@@ -359,129 +498,148 @@ export default function LeadSourcesPage() {
         </div>
 
         {summaryCards.length > 0 && (
-          <div
-            className={`${styles.summaryGrid}`}
-            data-cards={summaryCards.length}
-          >
-            {summaryCards.map(({ label, value, icon: Icon, tone, small }) => (
-              <div key={label} className={`${styles.summaryCard}`}>
+          <div className={styles.summaryGrid} data-cards={summaryCards.length}>
+            {summaryCards.map(({ label, value, icon: Icon, tone }) => (
+              <div key={label} className={styles.summaryCard}>
                 <div className={`${styles.summaryIcon} ${styles[tone]}`}>
                   <Icon size={18} />
                 </div>
-                <small className={`${styles.summaryLabel}`}>{label}</small>
-                <h3
-                  className={`${styles.summaryValue} ${small ? styles.summaryValueSmall : ""}`}
-                >
-                  {value}
+
+                <small className={styles.summaryLabel}>{label}</small>
+
+                <h3 className={styles.summaryValue}>
+                  {showLoading ? "..." : value}
                 </h3>
               </div>
             ))}
           </div>
         )}
 
-        <div className={`${styles.tableCard}`}>
-          <div className={`${styles.tableTop}`}>
-            <p className={`${styles.showing}`}>
+        <div className={styles.tableCard}>
+          <div className={styles.tableTop}>
+            <p className={styles.showing}>
               Showing{" "}
               <strong>
                 {filteredItems.length ? `1 - ${filteredItems.length}` : "0"}
               </strong>{" "}
-              from <strong>{filteredItems.length}</strong> {activeTab.label}
+              from <strong>{items.length}</strong> {activeTab.label}
             </p>
+
             <form
-              onSubmit={(e) => e.preventDefault()}
-              className={`${styles.searchWrap}`}
+              onSubmit={(event) => event.preventDefault()}
+              className={styles.searchWrap}
             >
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder={`Search ${activeTab.label.toLowerCase()}`}
-                className={`${styles.searchInput}`}
+                className={styles.searchInput}
               />
-              <FiSearch size={15} className={`${styles.searchIcon}`} />
+
+              <FiSearch size={15} className={styles.searchIcon} />
             </form>
           </div>
 
-          <table className={`${styles.table}`}>
+          <table className={styles.table}>
             <thead>
               <tr>
-                <th className={`${styles.th}`}>Id</th>
-                <th className={`${styles.th}`}>
+                <th className={styles.th}>Id</th>
+
+                <th className={styles.th}>
                   {activeTab.hasLogo ? "Sources" : "Name"}
                 </th>
-                {activeTab.hasLeads && (
-                  <th className={`${styles.th}`}>Leads</th>
-                )}
-                <th className={`${styles.th}`}>Created on</th>
+
+                {activeTab.hasLeads && <th className={styles.th}>Leads</th>}
+
+                <th className={styles.th}>Created on</th>
+
                 <th className={`${styles.th} ${styles.center}`}>Action</th>
               </tr>
             </thead>
+
             <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id}>
-                  <td className={`${styles.td}`}>
-                    <span className={`${styles.badge}`}>{item.code}</span>
-                  </td>
-                  <td className={`${styles.td}`}>
-                    <div className={`${styles.sourceCell}`}>
-                      {activeTab.hasLogo && (
-                        <div className={styles.avatar}>
-                          {item.logo ? (
-                            <Image
-                              src={item.logo}
-                              alt={`${item.name} logo`}
-                              width={32}
-                              height={32}
-                              unoptimized={
-                                typeof item.logo === "string" &&
-                                item.logo.startsWith("blob:")
-                              }
-                              className={styles.avatarImg}
-                            />
-                          ) : (
-                            <FiGlobe size={18} color="#0284c7" />
-                          )}
-                        </div>
-                      )}
-                      <span className={`${styles.sourceName}`}>
-                        {item.name}
-                      </span>
-                    </div>
-                  </td>
-                  {activeTab.hasLeads && (
-                    <td className={`${styles.td} ${styles.tdLeads}`}>
-                      {item.leads}
-                    </td>
-                  )}
-                  <td className={`${styles.td} ${styles.tdDate}`}>
-                    {formatDate(item.createdOn)}
-                  </td>
-                  <td className={`${styles.td} ${styles.center}`}>
-                    <div className={`${styles.actions}`}>
-                      <button
-                        type="button"
-                        title="Edit"
-                        onClick={() => handleEdit(item)}
-                        className={`${styles.actionBtn} ${styles.actionEdit}`}
-                      >
-                        <FiEdit size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        title="Delete"
-                        onClick={() => handleDelete(item.id)}
-                        className={`${styles.actionBtn} ${styles.actionDelete}`}
-                      >
-                        <FiTrash2 size={16} />
-                      </button>
-                    </div>
+              {showLoading ? (
+                <tr>
+                  <td colSpan={columnCount} className={styles.empty}>
+                    Loading {activeTab.label.toLowerCase()}...
                   </td>
                 </tr>
-              ))}
-              {filteredItems.length === 0 && (
+              ) : showError ? (
                 <tr>
-                  <td colSpan={columnCount} className={`${styles.empty}`}>
+                  <td colSpan={columnCount} className={styles.empty}>
+                    <p>Unable to fetch lead sources.</p>
+                    <button type="button" onClick={() => refetch()}>
+                      Try Again
+                    </button>
+                  </td>
+                </tr>
+              ) : filteredItems.length > 0 ? (
+                filteredItems.map((item) => (
+                  <tr key={item.id}>
+                    <td className={styles.td}>
+                      <span className={styles.badge}>{item.code}</span>
+                    </td>
+
+                    <td className={styles.td}>
+                      <div className={styles.sourceCell}>
+                        {activeTab.hasLogo && (
+                          <div className={styles.avatar}>
+                            {item.logo ? (
+                              <Image
+                                src={item.logo}
+                                alt={`${item.name} logo`}
+                                width={32}
+                                height={32}
+                                unoptimized
+                                className={styles.avatarImg}
+                              />
+                            ) : (
+                              <FiGlobe size={18} color="#0284c7" />
+                            )}
+                          </div>
+                        )}
+
+                        <span className={styles.sourceName}>{item.name}</span>
+                      </div>
+                    </td>
+
+                    {activeTab.hasLeads && (
+                      <td className={`${styles.td} ${styles.tdLeads}`}>
+                        {item.leads ?? "-"}
+                      </td>
+                    )}
+
+                    <td className={`${styles.td} ${styles.tdDate}`}>
+                      {formatDate(item.createdOn)}
+                    </td>
+
+                    <td className={`${styles.td} ${styles.center}`}>
+                      <div className={styles.actions}>
+                        <button
+                          type="button"
+                          title="Edit"
+                          onClick={() => handleEdit(item)}
+                          className={`${styles.actionBtn} ${styles.actionEdit}`}
+                        >
+                          <FiEdit size={16} />
+                        </button>
+
+                        <button
+                          type="button"
+                          title="Delete"
+                          onClick={() => handleDelete(item.id)}
+                          className={`${styles.actionBtn} ${styles.actionDelete}`}
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columnCount} className={styles.empty}>
                     No {activeTab.label.toLowerCase()} found.
                   </td>
                 </tr>
@@ -497,9 +655,11 @@ export default function LeadSourcesPage() {
         maxWidth={activeTab.popupWidth}
       >
         <div
-          className={`${styles.popupCard} ${activeTab.isCompact ? styles.popupCardCompact : ""}`}
+          className={`${styles.popupCard} ${
+            activeTab.isCompact ? styles.popupCardCompact : ""
+          }`}
         >
-          <h3 className={`${styles.popupTitle}`}>
+          <h3 className={styles.popupTitle}>
             {editingItem ? "Edit" : "Add"} {activeTab.singular}
           </h3>
 
@@ -508,91 +668,97 @@ export default function LeadSourcesPage() {
             onSubmit={handleSave}
           >
             {activeTab.hasLogo && (
-              <div className={`${styles.popupGroup}`}>
-                <label className={`${styles.popupLabel}`}>
-                  Logo{" "}
+              <div className={styles.popupGroup}>
+                <label className={styles.popupLabel}>
+                  Logo
                   {!editingItem && (
-                    <span className={`${styles.popupRequired}`}>*</span>
+                    <span className={styles.popupRequired}>*</span>
                   )}
                 </label>
-                <div className={`${styles.filePicker}`}>
-                  <span className={`${styles.fileName}`}>
+
+                <div className={styles.filePicker}>
+                  <span className={styles.fileName}>
                     {logoFileName || "Choose File"}
                   </span>
-                  <label htmlFor="logoInput" className={`${styles.fileButton}`}>
+
+                  <label htmlFor="logoInput" className={styles.fileButton}>
                     Choose File
                   </label>
+
                   <input
                     type="file"
                     id="logoInput"
                     name="logo"
                     accept="image/*"
                     required={!editingItem}
-                    className={`${styles.fileInput}`}
-                    onChange={(e) =>
-                      setLogoFileName(e.target.files[0]?.name || "")
-                    }
+                    className={styles.fileInput}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] || null;
+
+                      setLogoFile(file);
+                      setLogoFileName(file?.name || "");
+                    }}
                   />
                 </div>
               </div>
             )}
 
-            {/* Name (every tab) */}
-            <div className={`${styles.popupGroup}`}>
-              <label className={`${styles.popupLabel}`}>
+            <div className={styles.popupGroup}>
+              <label className={styles.popupLabel}>
                 {activeTab.nameLabel}{" "}
-                <span className={`${styles.popupRequired}`}>*</span>
+                <span className={styles.popupRequired}>*</span>
               </label>
+
               <input
                 type="text"
                 name="name"
                 required
                 placeholder={activeTab.namePlaceholder}
                 defaultValue={editingItem?.name || ""}
-                className={`${styles.popupInput}`}
+                className={styles.popupInput}
               />
             </div>
 
-            {/* Department (designation only) */}
             {activeTab.hasDepartment && (
-              <div className={`${styles.popupGroup}`}>
-                <label className={`${styles.popupLabel}`}>Department</label>
+              <div className={styles.popupGroup}>
+                <label className={styles.popupLabel}>Department</label>
+
                 <input
                   type="text"
                   name="department"
                   placeholder="e.g. Sales, Accounts, Management"
                   defaultValue={editingItem?.department || ""}
-                  className={`${styles.popupInput}`}
+                  className={styles.popupInput}
                 />
               </div>
             )}
 
-            {/* Employee count (designation only) */}
             {activeTab.hasEmployeeCount && (
-              <div className={`${styles.popupGroup}`}>
-                <label className={`${styles.popupLabel}`}>Employee Count</label>
+              <div className={styles.popupGroup}>
+                <label className={styles.popupLabel}>Employee Count</label>
+
                 <input
                   type="number"
                   name="employee_count"
                   placeholder="0"
                   min="0"
-                  defaultValue={editingItem?.employeeCount || 0}
-                  className={`${styles.popupInput}`}
+                  defaultValue={editingItem?.employeeCount ?? 0}
+                  className={styles.popupInput}
                 />
               </div>
             )}
 
-            {/* Status (lead sources only) */}
             {activeTab.hasStatus && (
               <div className={`${styles.popupGroup} ${styles.popupGroupLast}`}>
-                <label className={`${styles.popupLabel}`}>
-                  Status <span className={`${styles.popupRequired}`}>*</span>
+                <label className={styles.popupLabel}>
+                  Status <span className={styles.popupRequired}>*</span>
                 </label>
+
                 <select
                   name="status"
                   required
                   defaultValue={editingItem?.status || "active"}
-                  className={`${styles.popupInput}`}
+                  className={styles.popupInput}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -600,19 +766,19 @@ export default function LeadSourcesPage() {
               </div>
             )}
 
-            {/* Description (every tab except lead sources) */}
             {activeTab.hasDescription && (
               <div className={`${styles.popupGroup} ${styles.popupGroupLast}`}>
-                <label className={`${styles.popupLabel}`}>
-                  Description{" "}
+                <label className={styles.popupLabel}>
+                  Description
                   {!activeTab.isCompact && (
-                    <span className={`${styles.popupRequired}`}>*</span>
+                    <span className={styles.popupRequired}>*</span>
                   )}
                 </label>
+
                 {activeTab.isCompact ? (
                   <textarea
                     name="description"
-                    rows="2"
+                    rows={2}
                     placeholder="Optional description..."
                     defaultValue={editingItem?.description || ""}
                     className={`${styles.popupInput} ${styles.popupTextarea}`}
@@ -623,24 +789,29 @@ export default function LeadSourcesPage() {
                     name="description"
                     placeholder="Enter description"
                     defaultValue={editingItem?.description || ""}
-                    className={`${styles.popupInput}`}
+                    className={styles.popupInput}
                   />
                 )}
               </div>
             )}
 
-            <div className={`${styles.popupFooter}`}>
+            <div className={styles.popupFooter}>
               {activeTab.isCompact && (
                 <button
                   type="button"
                   onClick={closePopup}
-                  className={`${styles.popupCancelBtn}`}
+                  className={styles.popupCancelBtn}
                 >
                   Cancel
                 </button>
               )}
-              <button type="submit" className={`${styles.popupSaveBtn}`}>
-                Save
+
+              <button
+                type="submit"
+                disabled={isCreating}
+                className={styles.popupSaveBtn}
+              >
+                {isCreating ? "Saving..." : "Save"}
               </button>
             </div>
           </form>
