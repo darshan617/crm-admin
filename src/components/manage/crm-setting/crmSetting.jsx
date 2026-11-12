@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 import {
-  FiGlobe,
   FiCheckSquare,
+  FiGlobe,
   FiShare2,
   FiFlag,
   FiBriefcase,
