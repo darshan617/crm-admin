@@ -234,7 +234,7 @@ const getSummaryCards = (tabKey, summary, items) => {
   return [];
 };
 
-export default function LeadSourcesPage() {
+export default function CrmSetting() {
   const router = useRouter();
   const { showToast } = useToast();
 
