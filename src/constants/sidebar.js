@@ -64,7 +64,7 @@ export const SIDEBAR_SECTIONS = [
           {
             key: "employee-management",
             name: "Employee Management",
-            url: "/manage/employees",
+            url: "/manage/employee",
           },
           {
             key: "crm-settings",
