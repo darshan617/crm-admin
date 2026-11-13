@@ -1,14 +1,48 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./CreateEmployeeForm.module.css";
 import { FiEye, FiEyeOff, FiUpload, FiUser } from "react-icons/fi";
-import { useCreateEmployeeMutation } from "@/redux/apis/employeeApi";
+import {
+  useCreateEmployeeMutation,
+  useGetEmployeeQuery,
+  useUpdateEmployeeMutation,
+} from "@/redux/apis/employeeApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 
-const CreateEmployeeForm = () => {
+const ROLE_OPTIONS = [
+  { value: "admin", label: "Admin (Admin)" },
+  { value: "sales_executive", label: "Sales Executive" },
+];
+
+const MANAGER_OPTIONS = ["Pratik Vardekar", "Janvi Singh", "Rahul Sharma"];
+
+const getAvatarUrl = (avatar) => {
+  if (!avatar || typeof avatar !== "string") return "";
+
+  if (
+    avatar.startsWith("http://") ||
+    avatar.startsWith("https://") ||
+    avatar.startsWith("blob:") ||
+    avatar.startsWith("data:")
+  ) {
+    return avatar;
+  }
+
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "").replace(
+    /\/+$/,
+    "",
+  );
+
+  if (!base) return "";
+
+  return `${base}/${avatar.replace(/^\/+/, "")}`;
+};
+
+const CreateEmployeeForm = ({ employeeId }) => {
   const router = useRouter();
   const { showToast } = useToast();
   const imageInputRef = useRef(null);
+  const isEdit = Boolean(employeeId);
   const [showPassword, setShowPassword] = useState(false);
   const [imagePreview, setImagePreview] = useState("");
   const [avatar, setAvatar] = useState(null);
@@ -24,15 +58,75 @@ const CreateEmployeeForm = () => {
     jd_lead_assign: "no",
   });
   const [error, setError] = useState(null);
-  const [createEmployee, { isLoading }] = useCreateEmployeeMutation();
+  const {
+    data,
+    isLoading: isFetching,
+    isUninitialized,
+    isError,
+  } = useGetEmployeeQuery({ id: employeeId }, { skip: !employeeId });
+  const [createEmployee, { isLoading: isCreating }] =
+    useCreateEmployeeMutation();
+  const [updateEmployee, { isLoading: isUpdating }] =
+    useUpdateEmployeeMutation();
+  const isSaving = isCreating || isUpdating;
+
+  const employee = useMemo(() => {
+    const payload = data?.data?.employee || data?.employee || data?.data;
+
+    if (!payload || Array.isArray(payload) || payload.id == null) return null;
+
+    return payload;
+  }, [data]);
+
+  useEffect(() => {
+    if (!employee) return;
+
+    setFormState({
+      name: employee?.name || "",
+      mobile: String(employee?.mobile || "")
+        .replace(/\D/g, "")
+        .slice(0, 10),
+      email: employee?.email || "",
+      password: "",
+      role: employee?.role || "",
+      manager: employee?.manager || "",
+      max_quot_discount:
+        employee?.max_quot_discount == null
+          ? ""
+          : String(employee.max_quot_discount),
+      status: employee?.status || "active",
+      jd_lead_assign: employee?.jd_lead_assign || "no",
+    });
+    setAvatar(null);
+    setImagePreview(getAvatarUrl(employee?.avatar));
+    setError(null);
+  }, [employee]);
+
+  const roleOptions = useMemo(() => {
+    if (
+      formState?.role &&
+      !ROLE_OPTIONS.some((option) => option.value === formState.role)
+    ) {
+      return [{ value: formState.role, label: formState.role }, ...ROLE_OPTIONS];
+    }
+
+    return ROLE_OPTIONS;
+  }, [formState?.role]);
+
+  const managerOptions = useMemo(() => {
+    if (formState?.manager && !MANAGER_OPTIONS.includes(formState.manager)) {
+      return [formState.manager, ...MANAGER_OPTIONS];
+    }
+
+    return MANAGER_OPTIONS;
+  }, [formState?.manager]);
 
   const handleChange = (e) => {
     const { name, value } = e?.target;
 
     setFormState((prev) => ({
       ...prev,
-      [name]:
-        name === "mobile" ? value.replace(/\D/g, "").slice(0, 10) : value,
+      [name]: name === "mobile" ? value.replace(/\D/g, "").slice(0, 10) : value,
     }));
     setError((current) => ({
       ...current,
@@ -97,9 +191,9 @@ const CreateEmployeeForm = () => {
       newError.email = "Please enter a valid email.";
     }
 
-    if (!formState?.password) {
+    if (!isEdit && !formState?.password) {
       newError.password = "Please enter password.";
-    } else if (formState?.password?.length < 6) {
+    } else if (formState?.password && formState?.password?.length < 6) {
       newError.password = "Password must be at least 6 characters.";
     }
 
@@ -134,11 +228,10 @@ const CreateEmployeeForm = () => {
     if (!validateForm()) return;
 
     try {
-      let body = {
+      const fields = {
         name: formState?.name,
         email: formState?.email,
         mobile: formState?.mobile,
-        password: formState?.password,
         role: formState?.role,
         manager: formState?.manager,
         max_quot_discount: formState?.max_quot_discount,
@@ -146,24 +239,24 @@ const CreateEmployeeForm = () => {
         jd_lead_assign: formState?.jd_lead_assign,
       };
 
+      if (!isEdit || formState?.password) {
+        fields.password = formState?.password;
+      }
+
+      let body = fields;
+
       if (avatar) {
         const formData = new FormData();
-        formData.append("name", formState?.name);
-        formData.append("email", formState?.email);
-        formData.append("mobile", formState?.mobile);
-        formData.append("password", formState?.password);
-        formData.append("role", formState?.role);
-        formData.append("manager", formState?.manager);
-        formData.append("max_quot_discount", formState?.max_quot_discount);
-        formData.append("status", formState?.status || "active");
-        formData.append("jd_lead_assign", formState?.jd_lead_assign);
+        Object.entries(fields).forEach(([key, value]) => {
+          formData.append(key, value ?? "");
+        });
         formData.append("avatar", avatar);
         body = formData;
       }
 
-      const res = await createEmployee({
-        body: body,
-      }).unwrap();
+      const res = isEdit
+        ? await updateEmployee({ id: employeeId, body }).unwrap()
+        : await createEmployee({ body }).unwrap();
 
       if (res?.success) {
         showToast(res?.message, "success");
@@ -171,10 +264,10 @@ const CreateEmployeeForm = () => {
       } else {
         showToast(res?.message || res?.error?.message, "error");
       }
-    } catch (error) {
-      console.log(error, "Error in handleSubmit");
+    } catch (submitError) {
+      console.log(submitError, "Error in handleSubmit");
 
-      const fieldErrors = error?.data?.errors;
+      const fieldErrors = submitError?.data?.errors;
       if (fieldErrors) {
         const newError = {};
         Object.keys(fieldErrors).forEach((key) => {
@@ -185,9 +278,25 @@ const CreateEmployeeForm = () => {
         setError(newError);
       }
 
-      showToast(error?.data?.message, "error");
+      showToast(submitError?.data?.message, "error");
     }
   };
+
+  if (isEdit && !employee) {
+    return (
+      <div className={styles.card}>
+        {isFetching || isUninitialized ? (
+          <p className={styles.imageHint}>Loading employee...</p>
+        ) : (
+          <p className={styles.errorMessage}>
+            {isError
+              ? "Unable to load employee."
+              : "Employee details were not found."}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <form
@@ -248,9 +357,7 @@ const CreateEmployeeForm = () => {
               value={formState?.name}
               onChange={handleChange}
             />
-            {error?.name && (
-              <p className={styles.errorMessage}>{error.name}</p>
-            )}
+            {error?.name && <p className={styles.errorMessage}>{error.name}</p>}
           </label>
 
           <label className={styles.field}>
@@ -290,7 +397,8 @@ const CreateEmployeeForm = () => {
 
           <label className={styles.field}>
             <span className={styles.label}>
-              Password <span className={styles.required}>*</span>
+              Password{" "}
+              {!isEdit && <span className={styles.required}>*</span>}
             </span>
             <div className={styles.passwordWrap}>
               <input
@@ -300,6 +408,9 @@ const CreateEmployeeForm = () => {
                 value={formState?.password}
                 onChange={handleChange}
                 autoComplete="new-password"
+                placeholder={
+                  isEdit ? "Leave blank to keep current password" : ""
+                }
               />
               <button
                 type="button"
@@ -310,6 +421,11 @@ const CreateEmployeeForm = () => {
                 {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
               </button>
             </div>
+            {isEdit && (
+              <p className={styles.imageHint}>
+                Leave blank to keep the current password.
+              </p>
+            )}
             {error?.password && (
               <p className={styles.errorMessage}>{error.password}</p>
             )}
@@ -326,12 +442,13 @@ const CreateEmployeeForm = () => {
               onChange={handleChange}
             >
               <option value="">Select Role</option>
-              <option value="admin">Admin (Admin)</option>
-              <option value="sales_executive">Sales Executive</option>
+              {roleOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
-            {error?.role && (
-              <p className={styles.errorMessage}>{error.role}</p>
-            )}
+            {error?.role && <p className={styles.errorMessage}>{error.role}</p>}
           </label>
 
           <label className={styles.field}>
@@ -345,9 +462,11 @@ const CreateEmployeeForm = () => {
               onChange={handleChange}
             >
               <option value="">Select Manager</option>
-              <option value="Pratik Vardekar">Pratik Vardekar</option>
-              <option value="Janvi Singh">Janvi Singh</option>
-              <option value="Rahul Sharma">Rahul Sharma</option>
+              {managerOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
             </select>
             {error?.manager && (
               <p className={styles.errorMessage}>{error.manager}</p>
@@ -389,7 +508,7 @@ const CreateEmployeeForm = () => {
           </label>
 
           <label className={styles.field}>
-            <span className={styles.label}>ID Lead Assign</span>
+            <span className={styles.label}>JD Lead Assign</span>
             <select
               className={styles.select}
               name="jd_lead_assign"
@@ -410,9 +529,9 @@ const CreateEmployeeForm = () => {
         <button
           type="submit"
           className={styles.saveButton}
-          disabled={isLoading}
+          disabled={isSaving}
         >
-          {isLoading ? "Saving..." : "Save"}
+          {isSaving ? "Saving..." : "Save"}
         </button>
       </div>
     </form>

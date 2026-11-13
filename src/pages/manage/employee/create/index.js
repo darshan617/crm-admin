@@ -1,9 +1,8 @@
 import React from "react";
 import Layout from "@/components/layout/Layout";
-
 import { FiArrowLeft, FiBell, FiShield, FiUser } from "react-icons/fi";
 import { useRouter } from "next/router";
-import styles from "./EmployeePage.module.css";
+import styles from "../EmployeePage.module.css";
 import CreateEmployeeForm from "@/components/manage/employee/create-employee/CreateEmployeeForm";
 
 const sidePanelItems = [

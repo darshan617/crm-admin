@@ -27,6 +27,13 @@ const employeeApi = apiSlice.injectEndpoints({
       },
       providesTags: ["employees"],
     }),
+    getEmployee: builder.query({
+      query: ({ id }) => ({
+        url: `/employees/${id}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { id }) => [{ type: "employees", id }],
+    }),
     createEmployee: builder.mutation({
       query: ({ body }) => ({
         url: "/employees/create",
@@ -35,7 +42,20 @@ const employeeApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["employees"],
     }),
+    updateEmployee: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/employees/${id}/update`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["employees"],
+    }),
   }),
 });
 
-export const { useGetEmployeesQuery, useCreateEmployeeMutation } = employeeApi;
+export const {
+  useGetEmployeesQuery,
+  useGetEmployeeQuery,
+  useCreateEmployeeMutation,
+  useUpdateEmployeeMutation,
+} = employeeApi;

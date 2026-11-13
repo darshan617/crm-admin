@@ -192,7 +192,7 @@ function EmployeeTableRow({ employee }) {
       <td className={`${styles.td} ${styles.center}`}>
         <div className={styles.actions}>
           <Link
-            href={`/employee/${employee.id}/edit`}
+            href={`/manage/employee/edit/${employee?.id}`}
             title="Edit Employee"
             className={styles.actionBtn}
           >
@@ -227,7 +227,7 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
   const { page, setPage, isReady } = usePageQuery("page");
   const datesReady = useRef(false);
 
-  const { data, isLoading, isError } = useGetEmployeesQuery(
+  const { data, isLoading, isUninitialized, isError } = useGetEmployeesQuery(
     {
       search: filters.search?.trim(),
       status: filters.status,
@@ -319,7 +319,7 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
           </thead>
 
           <tbody>
-            {isLoading ? (
+            {!isReady || isUninitialized || isLoading ? (
               <tr>
                 <td colSpan={6} className={styles.empty}>
                   Loading employees...
