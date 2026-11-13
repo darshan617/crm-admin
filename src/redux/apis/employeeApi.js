@@ -1,6 +1,7 @@
 import { apiSlice } from "../apiSlice";
 
 const employeeApi = apiSlice.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getEmployees: builder.query({
       query: ({
@@ -10,6 +11,7 @@ const employeeApi = apiSlice.injectEndpoints({
         from = "",
         to = "",
         page = 1,
+        perPage = "",
       }) => {
         const params = new URLSearchParams();
 
@@ -18,6 +20,7 @@ const employeeApi = apiSlice.injectEndpoints({
         if (role) params.set("role", role);
         if (from) params.set("from", from);
         if (to) params.set("to", to);
+        if (perPage) params.set("per_page", String(perPage));
         params.set("page", String(page));
 
         return {
@@ -50,6 +53,29 @@ const employeeApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["employees"],
     }),
+    getEmployeePermissions: builder.query({
+      query: ({ type = "role", role = "", employeeId = "" }) => {
+        const params = new URLSearchParams();
+
+        params.set("type", type);
+        params.set("role", role || "");
+        params.set("employee_id", employeeId ? String(employeeId) : "");
+
+        return {
+          url: `/employees/permissions?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["employees"],
+    }),
+    saveEmployeePermissions: builder.mutation({
+      query: ({ body }) => ({
+        url: "/employees/permissions",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["employees"],
+    }),
   }),
 });
 
@@ -58,4 +84,6 @@ export const {
   useGetEmployeeQuery,
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
+  useGetEmployeePermissionsQuery,
+  useSaveEmployeePermissionsMutation,
 } = employeeApi;

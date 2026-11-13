@@ -31,6 +31,12 @@ const CreateEmployee = () => {
                 type="button"
                 key={label}
                 className={`${styles.sideNavItem} ${active ? styles.sideNavItemActive : ""}`}
+                onClick={() => {
+                  if (label === "Employee") router.push("/manage/employee");
+                  if (label === "Employee Permissions") {
+                    router.push("/manage/employee-permission");
+                  }
+                }}
               >
                 <span className={styles.navIconWrap}>
                   <Icon size={18} />

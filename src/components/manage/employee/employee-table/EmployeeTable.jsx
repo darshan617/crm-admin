@@ -201,8 +201,11 @@ function EmployeeTableRow({ employee }) {
           </Link>
           <Link
             href={{
-              pathname: "/employee/permissions",
-              query: { employee_id: employee.id },
+              pathname: "/manage/employee-permission",
+              query: {
+                employee_id: employee.id,
+                ...(employee?.role ? { role: employee.role } : {}),
+              },
             }}
             title="Employee Permissions"
             className={styles.actionBtn}
