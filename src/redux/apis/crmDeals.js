@@ -7,9 +7,17 @@ const crmDeals = apiSlice.injectEndpoints({
         url: "/deals",
         method: "GET",
       }),
-      invalidatesTags: ["crmDeals"],
+      providesTags: ["crmDeals"],
+    }),
+
+    crmDealsDetails: builder.query({
+      query: ({ id }) => ({
+        url: `/deals/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["crmDeals"],
     }),
   }),
 });
 
-export const { useCrmDealsQuery } = crmDeals;
+export const { useCrmDealsQuery, useCrmDealsDetailsQuery } = crmDeals;
