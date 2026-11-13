@@ -32,7 +32,7 @@ export default function EmployeeSummary({
     },
     {
       label: "Total Leads Assigned",
-      value: summary?.total_leads_assigned ?? 0,
+      value: summary?.leads_assigned ?? summary?.total_leads_assigned ?? 0,
       icon: BsFillCalendarCheckFill,
       tone: "tonePurple",
     },
