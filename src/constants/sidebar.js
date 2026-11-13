@@ -74,7 +74,7 @@ export const SIDEBAR_SECTIONS = [
           {
             key: "services-providers",
             name: "Services & Providers",
-            url: "/manage/services-providers",
+            url: "/manage/service-providers",
           },
         ],
       },

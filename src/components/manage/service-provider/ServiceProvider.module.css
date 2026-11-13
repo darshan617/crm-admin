@@ -1,0 +1,83 @@
+.providerCard {
+  position: relative;
+  min-height: 244px;
+  padding: 28px 28px 18px;
+  background: #ffffff;
+  border: 1px solid #e1e5ea;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 60, 120, 0.08);
+  overflow: hidden;
+}
+
+.providerSection {
+  width: 100%;
+}
+.providerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.providerStatus {
+  position: absolute;
+  top: 19px;
+  right: 20px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  background: #00b89c;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.providerLogo {
+  height: 55px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.providerCard h3 {
+  margin: 0 0 7px;
+  color: #4c5060;
+  font-size: 18px;
+  font-weight: 600;
+}
+.providerCard p {
+  max-width: 360px;
+  margin: 0 auto;
+  color: #55596a;
+  font-size: var(--font-size-14px);
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+.providerActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.viewPlanBtn {
+  min-width: 104px;
+  background: #c6e1fb;
+  color: #293b50;
+}
+
+.edit-provider-btn,
+.viewPlanBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 25px;
+  border-radius: 22px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.25s ease;
+}

@@ -1,0 +1,183 @@
+.planSection {
+  width: 100%;
+  padding: 20px 0 40px;
+}
+
+.planHeading {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.planHeading h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #444444;
+}
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.planCard {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 55, 100, 0.12);
+  transform: translateY(0);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+  will-change: transform;
+}
+
+.planCardHeader {
+  background: #bcdaf9;
+  padding: 16px 10px;
+  text-align: center;
+  transition:
+    background 0.35s ease,
+    color 0.35s ease;
+}
+
+.planCardHeader h3 {
+  color: var(--color-grey-500-dark-text, #2c3139);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 32px;
+  text-transform: capitalize;
+  transition: color 0.35s ease;
+}
+
+.planCardBody {
+  padding: 20px 18px 16px;
+}
+
+.planPrice {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.planPrice strong {
+  transition:
+    transform 0.35s ease,
+    color 0.35s ease;
+  color: var(--primary);
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 600;
+  display: block;
+  line-height: 1;
+}
+.planPrice span {
+  color: var(--color-grey-400-body-text, #4c4c5c);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+}
+.planPrice small {
+  color: var(--color-grey-300-subtext, #9ba6b7);
+  text-align: center;
+  font-family: "Baloo Bhai 2";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  text-transform: capitalize;
+  display: block;
+}
+
+.planFeatures {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.planFeatures li {
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
+  color: var(--color-grey-400-body-text, #4c4c5c);
+  font-family: "Baloo Bhai 2";
+  font-size: var(--font-size-14px);
+  font-style: normal;
+  font-weight: 400;
+  position: relative;
+  padding: 0 0 6px 20px;
+}
+
+.planFeatures li::before {
+    content: "\2713";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #00bfa5;
+    font-size: var(--font-size-14px);
+    font-weight: 700;
+}
+
+.planCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 35px rgba(0, 55, 100, 0.20);
+}
+
+.planCard:hover .planCardHeader {
+    background: linear-gradient(135deg, #147bdc, #07519c);
+}
+
+.partnerTabsWrap {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0 18px;
+}
+.partnerTabs {
+    display: inline-flex;
+    align-items: center;
+    background: #E6F1FD;
+    border-radius: 999px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.crmLeadTabs, .partnerTabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.partnerTab.active {
+    background: #FFFFFF;
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+}
+
+.partnerTab {
+    border: none;
+    background: transparent;
+    color: #5B6472;
+    font-size: var(--font-size-14px);
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+
+@media (max-width: 1680px) {
+  .planCardHeader {
+    padding: 10px 10px;
+  }
+  .planCardHeader h3 {
+    font-size: 20px;
+  }
+  .planPrice strong {
+    font-size: 30px;
+  }
+  .planFeatures li {
+    font-size: 12px;
+  }
+}
