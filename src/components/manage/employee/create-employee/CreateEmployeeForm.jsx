@@ -98,7 +98,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
       jd_lead_assign: employee?.jd_lead_assign || "no",
     });
     setAvatar(null);
-    setImagePreview(getAvatarUrl(employee?.avatar));
+    setImagePreview(getAvatarUrl(employee?.avatar_url));
     setError(null);
   }, [employee]);
 
@@ -107,7 +107,10 @@ const CreateEmployeeForm = ({ employeeId }) => {
       formState?.role &&
       !ROLE_OPTIONS.some((option) => option.value === formState.role)
     ) {
-      return [{ value: formState.role, label: formState.role }, ...ROLE_OPTIONS];
+      return [
+        { value: formState.role, label: formState.role },
+        ...ROLE_OPTIONS,
+      ];
     }
 
     return ROLE_OPTIONS;
@@ -397,8 +400,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
 
           <label className={styles.field}>
             <span className={styles.label}>
-              Password{" "}
-              {!isEdit && <span className={styles.required}>*</span>}
+              Password {!isEdit && <span className={styles.required}>*</span>}
             </span>
             <div className={styles.passwordWrap}>
               <input
@@ -526,11 +528,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
       </section>
 
       <div className={styles.actions}>
-        <button
-          type="submit"
-          className={styles.saveButton}
-          disabled={isSaving}
-        >
+        <button type="submit" className={styles.saveButton} disabled={isSaving}>
           {isSaving ? "Saving..." : "Save"}
         </button>
       </div>

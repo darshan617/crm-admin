@@ -2,13 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetEmployeesQuery } from "@/redux/apis/employeeApi";
-import {
-  FiSearch,
-  FiSliders,
-  FiEdit,
-  FiEye,
-  FiShield,
-} from "react-icons/fi";
+import { FiSearch, FiSliders, FiEdit, FiEye, FiShield } from "react-icons/fi";
 import Pagination, {
   usePageQuery,
 } from "@/common-components/pagination/Pagination";
@@ -140,7 +134,7 @@ function EmployeeFilters({ status, role, onChange, onClear }) {
 /* ---------- Row ---------- */
 function EmployeeTableRow({ employee }) {
   const isActive = employee?.status === "active";
-  const photo = getAvatarUrl(employee?.avatar);
+  const photo = getAvatarUrl(employee?.avatar_url);
 
   return (
     <tr className={styles.row}>
@@ -199,7 +193,7 @@ function EmployeeTableRow({ employee }) {
             <FiEdit size={16} />
           </Link>
           <Link
-            href={`/employee/${employee.id}/view`}
+            href={`/manage/employee/employee-details/${employee.id}`}
             title="View Employee Details"
             className={styles.actionBtn}
           >
