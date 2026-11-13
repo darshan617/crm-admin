@@ -275,36 +275,6 @@
   border-color: #0056b3;
 }
 
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.pageBtn {
-  min-width: 32px;
-  height: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #fff;
-  color: #475569;
-  font-size: 13px;
-  cursor: pointer;
-}
-.pageBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.pageBtnActive {
-  background: #0056b3;
-  border-color: #0056b3;
-  color: #fff;
-}
-
 @media (max-width: 992px) {
   .table {
     display: block;

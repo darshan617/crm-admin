@@ -1,22 +1,45 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  FiSearch,
-  FiSliders,
-  FiEdit,
-  FiEye,
-  FiShield,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { useGetEmployeesQuery } from "@/redux/apis/employeeApi";
+import { FiSearch, FiSliders, FiEdit, FiEye, FiShield } from "react-icons/fi";
+import Pagination, {
+  usePageQuery,
+} from "@/common-components/pagination/Pagination";
 
 import styles from "./EmployeeTable.module.css";
 const ROLE_OPTIONS = [
   { label: "All Roles", value: "" },
-  { label: "Admin", value: "admin" },
+  { label: "Super Admin", value: "super_admin" },
+  { label: "Admin (Admin)", value: "admin" },
+  { label: "Manager", value: "manager" },
   { label: "Sales Executive", value: "sales_executive" },
+  { label: "Marketing Manager", value: "marketing_manager" },
+  { label: "Product Designer", value: "product_designer" },
+  { label: "Customer Support", value: "customer_support" },
 ];
+
+const getAvatarUrl = (avatar) => {
+  if (!avatar || typeof avatar !== "string") return "";
+
+  if (
+    avatar.startsWith("http://") ||
+    avatar.startsWith("https://") ||
+    avatar.startsWith("blob:") ||
+    avatar.startsWith("data:")
+  ) {
+    return avatar;
+  }
+
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "").replace(
+    /\/+$/,
+    "",
+  );
+
+  if (!base) return "";
+
+  return `${base}/${avatar.replace(/^\/+/, "")}`;
+};
 
 const STATUS_OPTIONS = [
   { label: "All Status", value: "" },
@@ -110,49 +133,47 @@ function EmployeeFilters({ status, role, onChange, onClear }) {
 
 /* ---------- Row ---------- */
 function EmployeeTableRow({ employee }) {
-  const isActive = employee.status === "active";
+  const isActive = employee?.status === "active";
+  const photo = getAvatarUrl(employee?.avatar_url);
 
   return (
     <tr className={styles.row}>
       <td className={styles.td}>
-        <span className={styles.badgeId}>{employee.code}</span>
+        <span className={styles.badgeId}>{employee?.id}</span>
       </td>
 
       <td className={styles.td}>
         <div className={styles.customer}>
-          <EmployeeAvatar
-            name={employee.name}
-            photo={employee.photo}
-            tone={employee.tone}
-          />
+          <EmployeeAvatar name={employee?.name} photo={photo} />
           <div>
             <h5 className={styles.customerName}>
-              <Link href={`/employee/${employee.id}/view`}>
-                {employee.name}
+              <Link href={`/employee/${employee?.id}/view`}>
+                {employee?.name}
               </Link>
             </h5>
             <p className={styles.customerMeta}>
-              {employee.roleLabel}
-              {employee.leads !== null && employee.leads !== undefined && (
-                <>
-                  {" · "}
-                  <Link
-                    href={{
-                      pathname: "/leads",
-                      query: { assigned_to: employee.name },
-                    }}
-                  >
-                    {employee.leads} Leads
-                  </Link>
-                </>
-              )}
+              {employee?.role}
+              {employee?.leads_count !== null &&
+                employee?.leads_count !== undefined && (
+                  <>
+                    {" · "}
+                    <Link
+                      href={{
+                        pathname: "/leads",
+                        query: { assigned_to: employee?.name },
+                      }}
+                    >
+                      {employee?.leads_count} Leads
+                    </Link>
+                  </>
+                )}
             </p>
           </div>
         </div>
       </td>
 
-      <td className={styles.td}>{employee.email}</td>
-      <td className={styles.td}>{employee.phone}</td>
+      <td className={styles.td}>{employee?.email}</td>
+      <td className={styles.td}>{employee?.mobile}</td>
 
       <td className={styles.td}>
         <span
@@ -165,14 +186,14 @@ function EmployeeTableRow({ employee }) {
       <td className={`${styles.td} ${styles.center}`}>
         <div className={styles.actions}>
           <Link
-            href={`/employee/${employee.id}/edit`}
+            href={`/manage/employee/edit/${employee?.id}`}
             title="Edit Employee"
             className={styles.actionBtn}
           >
             <FiEdit size={16} />
           </Link>
           <Link
-            href={`/employee/${employee.id}/view`}
+            href={`/manage/employee/employee-details/${employee.id}`}
             title="View Employee Details"
             className={styles.actionBtn}
           >
@@ -180,8 +201,11 @@ function EmployeeTableRow({ employee }) {
           </Link>
           <Link
             href={{
-              pathname: "/employee/permissions",
-              query: { employee_id: employee.id },
+              pathname: "/manage/employee-permission",
+              query: {
+                employee_id: employee.id,
+                ...(employee?.role ? { role: employee.role } : {}),
+              },
             }}
             title="Employee Permissions"
             className={styles.actionBtn}
@@ -194,65 +218,65 @@ function EmployeeTableRow({ employee }) {
   );
 }
 
-/* ---------- Pagination ---------- */
-function EmployeePagination({ page, totalPages, onChange }) {
-  if (totalPages <= 1) return null;
-
-  return (
-    <div className={styles.pagination}>
-      <button
-        type="button"
-        className={styles.pageBtn}
-        disabled={page === 1}
-        onClick={() => onChange(page - 1)}
-        aria-label="Previous page"
-      >
-        <FiChevronLeft size={16} />
-      </button>
-
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
-        <button
-          key={n}
-          type="button"
-          className={`${styles.pageBtn} ${n === page ? styles.pageBtnActive : ""}`}
-          onClick={() => onChange(n)}
-        >
-          {n}
-        </button>
-      ))}
-
-      <button
-        type="button"
-        className={styles.pageBtn}
-        disabled={page === totalPages}
-        onClick={() => onChange(page + 1)}
-        aria-label="Next page"
-      >
-        <FiChevronRight size={16} />
-      </button>
-    </div>
-  );
-}
-
 /* ---------- Table (main component) ---------- */
-export default function EmployeeTable({
-  employees = [],
-  showingRange = "0 - 0",
-  totalCount = 0,
-  filters = { search: "", status: "", role: "" },
-  onFilterChange = () => {},
-  onClearFilters = () => {},
-  page = 1,
-  totalPages = 1,
-  onPageChange = () => {},
-}) {
-  const safeFilters = filters ?? { search: "", status: "", role: "" };
+export default function EmployeeTable({ from = "", to = "", onSummary }) {
+  const [filters, setFilters] = useState({ search: "", status: "", role: "" });
+  const { page, setPage, isReady } = usePageQuery("page");
+  const datesReady = useRef(false);
+
+  const { data, isLoading, isUninitialized, isError } = useGetEmployeesQuery(
+    {
+      search: filters.search?.trim(),
+      status: filters.status,
+      role: filters.role,
+      from,
+      to,
+      page,
+    },
+    { skip: !isReady },
+  );
+
+  const employees = data?.data?.employees || [];
+  const pagination = data?.data?.pagination;
+  const totalCount = pagination?.total || 0;
+  const totalPages = pagination?.last_page || 1;
+  const currentPage = pagination?.current_page || page;
+  const perPage = pagination?.per_page || 10;
+  const startIndex = totalCount ? (currentPage - 1) * perPage + 1 : 0;
+  const endIndex = totalCount ? Math.min(currentPage * perPage, totalCount) : 0;
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    if (!datesReady.current) {
+      datesReady.current = true;
+      return;
+    }
+
+    setPage(1, { replace: true });
+  }, [from, to, isReady]);
+
+  useEffect(() => {
+    if (data?.data?.summary && onSummary) {
+      onSummary(data.data.summary);
+    }
+  }, [data, onSummary]);
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1, { replace: true });
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ search: "", status: "", role: "" });
+    setPage(1, { replace: true });
+  };
 
   return (
     <section className={styles.tableCard}>
       <div className={styles.tableTop}>
         <p className={styles.showing}>
-          Showing <strong>{showingRange}</strong> from{" "}
+          Showing <strong>{`${startIndex} - ${endIndex}`}</strong> from{" "}
           <strong>{totalCount}</strong> Employee
         </p>
 
@@ -262,8 +286,8 @@ export default function EmployeeTable({
         >
           <input
             type="text"
-            value={safeFilters.search ?? ""}
-            onChange={(e) => onFilterChange("search", e.target.value)}
+            value={filters.search}
+            onChange={(e) => handleFilterChange("search", e.target.value)}
             placeholder="Search Employee..."
             className={styles.searchInput}
           />
@@ -272,10 +296,10 @@ export default function EmployeeTable({
       </div>
 
       <EmployeeFilters
-        status={safeFilters.status ?? ""}
-        role={safeFilters.role ?? ""}
-        onChange={onFilterChange}
-        onClear={onClearFilters}
+        status={filters.status}
+        role={filters.role}
+        onChange={handleFilterChange}
+        onClear={handleClearFilters}
       />
 
       <div className="overflow-auto">
@@ -292,9 +316,21 @@ export default function EmployeeTable({
           </thead>
 
           <tbody>
-            {employees.length > 0 ? (
+            {!isReady || isUninitialized || isLoading ? (
+              <tr>
+                <td colSpan={6} className={styles.empty}>
+                  Loading employees...
+                </td>
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td colSpan={6} className={styles.empty}>
+                  Unable to fetch employees.
+                </td>
+              </tr>
+            ) : employees.length > 0 ? (
               employees.map((employee) => (
-                <EmployeeTableRow key={employee.id} employee={employee} />
+                <EmployeeTableRow key={employee?.id} employee={employee} />
               ))
             ) : (
               <tr>
@@ -307,10 +343,11 @@ export default function EmployeeTable({
         </table>
       </div>
 
-      <EmployeePagination
-        page={page}
+      <Pagination
+        page={currentPage}
         totalPages={totalPages}
-        onChange={onPageChange}
+        onChange={setPage}
+        align="end"
       />
     </section>
   );

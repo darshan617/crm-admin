@@ -186,11 +186,6 @@ export default function AllLeads({ allLeadsListData }) {
   const paginationData = allLeadsListData?.data?.pagination || {};
   console.log(currentPage, itemPerPage);
 
-  const pageNumbersArray = Array.from(
-    { length: Math.ceil(paginationData?.total / itemPerPage) },
-    (_, i) => i + 1,
-  );
-
   const toggleOne = (id) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
@@ -475,14 +470,12 @@ export default function AllLeads({ allLeadsListData }) {
         </table>
 
         {/* Pagination */}
-        <div className={styles.tablePagination}>
-          <Pagination
-            pageNumbersArray={pageNumbersArray}
-            setCurrentPage={setCurrentPage}
-            currentPage={currentPage}
-            itemPerPage={itemPerPage}
-          />
-        </div>
+        <Pagination
+          page={currentPage}
+          total={paginationData?.total || 0}
+          perPage={itemPerPage}
+          onChange={setCurrentPage}
+        />
       </div>
     </section>
   );

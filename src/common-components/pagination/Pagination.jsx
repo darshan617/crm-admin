@@ -1,93 +1,164 @@
-import React, { useEffect } from "react";
-import styles from "./Pagination.module.css";
-import { BiChevronLeft, BiChevronRight } from "react-icons/bi";
+import { useCallback } from "react";
 import { useRouter } from "next/router";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import styles from "./Pagination.module.css";
 
-const Pagination = ({
-  pageNumbersArray,
-  setCurrentPage,
-  currentPage,
-  itemPerPage,
-  lastPage = pageNumbersArray?.length,
-}) => {
+export function usePageQuery(queryKey = "page") {
   const router = useRouter();
+  const page = Math.max(1, Number(router.query?.[queryKey]) || 1);
 
-  useEffect(() => {
-    if (!router.isReady) return;
+  const setPage = useCallback(
+    (nextPage, options) => {
+      if (!router.isReady) return;
 
-    const pageNo = Number(router.query.page_no) || 1;
+      const pageNumber = Math.max(1, Number(nextPage) || 1);
+      const current = Math.max(1, Number(router.query?.[queryKey]) || 1);
 
-    if (pageNo !== currentPage) {
-      setCurrentPage(pageNo);
-    }
-  }, [router.isReady, router.query.page_no]);
+      if (pageNumber === current) return;
 
-  useEffect(() => {
-    if (!router.isReady) return;
+      const query = { ...router.query };
 
-    const pageNo = String(currentPage);
-    const itemsPerPage = String(itemPerPage);
+      if (pageNumber <= 1) {
+        delete query[queryKey];
+      } else {
+        query[queryKey] = String(pageNumber);
+      }
 
-    if (
-      router.query.page_no === pageNo &&
-      router.query.items_per_page === itemsPerPage
-    ) {
-      return;
-    }
+      const navigate = options?.replace ? router.replace : router.push;
 
-    router.push(
-      {
-        pathname: router.pathname,
-        query: {
-          ...router.query,
-          page_no: pageNo,
-          items_per_page: itemsPerPage,
-        },
-      },
-      undefined,
-      { shallow: true, scroll: false },
+      navigate(
+        { pathname: router.pathname, query },
+        undefined,
+        { shallow: true, scroll: false },
+      );
+    },
+    [router, queryKey],
+  );
+
+  return { page, setPage, isReady: router.isReady };
+}
+
+const range = (start, end) =>
+  Array.from({ length: end - start + 1 }, (_, index) => start + index);
+
+export function getPaginationItems(currentPage, totalPages, siblingCount = 1) {
+  const total = Math.max(1, Number(totalPages) || 1);
+  const current = Math.min(Math.max(1, Number(currentPage) || 1), total);
+  const siblings = Math.max(0, Number(siblingCount) || 0);
+  const totalPageNumbers = siblings * 2 + 5;
+
+  if (total <= totalPageNumbers) {
+    return range(1, total);
+  }
+
+  const left = Math.max(current - siblings, 1);
+  const right = Math.min(current + siblings, total);
+  const showLeftEllipsis = left > 2;
+  const showRightEllipsis = right < total - 1;
+
+  if (!showLeftEllipsis && showRightEllipsis) {
+    return [...range(1, 3 + siblings * 2), "end-ellipsis", total];
+  }
+
+  if (showLeftEllipsis && !showRightEllipsis) {
+    return [1, "start-ellipsis", ...range(total - (3 + siblings * 2) + 1, total)];
+  }
+
+  return [1, "start-ellipsis", ...range(left, right), "end-ellipsis", total];
+}
+
+export default function Pagination({
+  page,
+  currentPage,
+  totalPages,
+  total,
+  perPage = 10,
+  lastPage,
+  onChange,
+  setCurrentPage,
+  disabled = false,
+  align = "center",
+  siblingCount = 1,
+  className = "",
+  hideOnSinglePage = true,
+}) {
+  const activePage = Number(page ?? currentPage) || 1;
+  const pageSize = Number(perPage) || 10;
+  const resolvedTotalPages = Math.max(
+    1,
+    Number(
+      totalPages ??
+        lastPage ??
+        (total != null ? Math.ceil(Number(total) / pageSize) : 1),
+    ) || 1,
+  );
+
+  const changePage = (nextPage) => {
+    const pageNumber = Math.min(
+      Math.max(1, nextPage),
+      resolvedTotalPages,
     );
-  }, [router.isReady, currentPage, itemPerPage]);
+
+    if (disabled || pageNumber === activePage) return;
+
+    if (onChange) onChange(pageNumber);
+    else setCurrentPage?.(pageNumber);
+  };
+
+  if (hideOnSinglePage && resolvedTotalPages <= 1) return null;
+
+  const items = getPaginationItems(
+    activePage,
+    resolvedTotalPages,
+    siblingCount,
+  );
 
   return (
-    <div>
-      {pageNumbersArray?.length > 0 && (
-        <div className={styles.paginationContainer}>
-          <button
-            className={styles.paginationButton}
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            disabled={currentPage <= 1}
-          >
-            <BiChevronLeft size={16} />
-          </button>
+    <nav
+      className={`${styles.pagination} ${styles[align] || styles.center} ${className}`.trim()}
+      aria-label="Pagination"
+    >
+      <button
+        type="button"
+        className={styles.pageBtn}
+        onClick={() => changePage(activePage - 1)}
+        disabled={disabled || activePage <= 1}
+        aria-label="Previous page"
+      >
+        <FiChevronLeft size={16} aria-hidden="true" />
+      </button>
 
-          {pageNumbersArray?.map((page) => (
-            <button
-              className={styles.paginationButton}
-              key={page}
-              onClick={() => setCurrentPage(page)}
-              style={{
-                backgroundColor: currentPage === page ? "var(--primary)" : "",
-                color: currentPage === page ? "var(--white)" : "var(--dark)",
-              }}
-            >
-              {page}
-            </button>
-          ))}
-
+      {items.map((item) =>
+        typeof item === "string" ? (
+          <span key={item} className={styles.ellipsis} aria-hidden="true">
+            …
+          </span>
+        ) : (
           <button
-            className={styles.paginationButton}
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(lastPage, prev + 1))
-            }
-            disabled={currentPage >= lastPage}
+            key={item}
+            type="button"
+            className={`${styles.pageBtn} ${
+              item === activePage ? styles.active : ""
+            }`}
+            onClick={() => changePage(item)}
+            disabled={disabled}
+            aria-label={`Page ${item}`}
+            aria-current={item === activePage ? "page" : undefined}
           >
-            <BiChevronRight size={16} />
+            {item}
           </button>
-        </div>
+        ),
       )}
-    </div>
-  );
-};
 
-export default Pagination;
+      <button
+        type="button"
+        className={styles.pageBtn}
+        onClick={() => changePage(activePage + 1)}
+        disabled={disabled || activePage >= resolvedTotalPages}
+        aria-label="Next page"
+      >
+        <FiChevronRight size={16} aria-hidden="true" />
+      </button>
+    </nav>
+  );
+}

@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { LuSearch, LuChevronRight, LuChevronLeft } from "react-icons/lu";
+import { LuSearch, LuChevronRight } from "react-icons/lu";
 import { useRouter } from "next/router";
 import styles from "@/components/follow-up/FollowUp.module.css";
+import Pagination from "@/common-components/pagination/Pagination";
 import { useDashboardQuery, useGetFollowUpsQuery } from "@/redux/apis/followUpApi";
 
 const TABS = [
@@ -605,50 +606,12 @@ const Followup = () => {
               </tbody>
             </table>
 
-            {/* Pagination */}
-            <div className="table-pagination">
-              <button
-                type="button"
-                className="page-btn"
-                disabled={page <= 1 || isFetching}
-                onClick={() => handlePageChange(page - 1)}
-              >
-                <LuChevronLeft
-                  size={24}
-                  aria-hidden="true"
-                  className="lucide lucide-chevron-left"
-                />
-              </button>
-
-              {Array.from({ length: lastPage }, (_, index) => index + 1).map(
-                (pageNumber) => (
-                  <button
-                    key={pageNumber}
-                    type="button"
-                    className={`page-btn ${
-                      currentPage === pageNumber ? "active" : ""
-                    }`}
-                    onClick={() => handlePageChange(pageNumber)}
-                    disabled={isFetching}
-                  >
-                    {pageNumber}
-                  </button>
-                ),
-              )}
-
-              <button
-                type="button"
-                className="page-btn"
-                disabled={page >= lastPage || isFetching}
-                onClick={() => handlePageChange(page + 1)}
-              >
-                <LuChevronRight
-                  size={24}
-                  aria-hidden="true"
-                  className="lucide lucide-chevron-right"
-                />
-              </button>
-            </div>
+            <Pagination
+              page={currentPage}
+              totalPages={lastPage}
+              onChange={handlePageChange}
+              disabled={isFetching}
+            />
           </div>
         </section>
       </div>

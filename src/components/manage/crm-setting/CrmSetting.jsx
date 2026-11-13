@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
-
 import {
   FiCheckSquare,
   FiGlobe,
@@ -21,7 +20,9 @@ import {
 } from "react-icons/fi";
 
 import styles from "@/components/manage/crm-setting/crmSetting.module.css";
+
 import CustomPopup from "@/common-components/custom-popup/CustomPopup";
+
 import {
   useLeadsSourceQuery,
   useCreateLeadsMutation,
@@ -39,83 +40,144 @@ import {
   useCreatePriorityMutation,
   useUpdatePriorityMutation,
   useDeleteLeadsPriorityMutation,
-  useLeadsDesignationQuery,
+  useLeadsDesignationSearchQuery,
   useCreateDesignationMutation,
   useUpdateDesignationMutation,
   useDeleteLeadsDesignationMutation,
 } from "@/redux/apis/crmSettingsApi";
+
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const TABS = [
   {
     key: "lead-sources",
+
     label: "Lead Sources",
+
     singular: "Lead Source",
+
     addLabel: "Add Lead Source",
+
     icon: FiGlobe,
+
     prefix: "LS",
+
     hasLogo: true,
+
     hasLeads: true,
+
     popupWidth: "390px",
+
     nameLabel: "Source Name",
+
     namePlaceholder: "Enter lead source name",
+
     hasStatus: true,
   },
+
   {
     key: "lead-status",
+
     label: "Lead Status",
+
     singular: "Lead Status",
+
     addLabel: "Add Lead Status",
+
     icon: FiCheckSquare,
+
     prefix: "ST",
+
     columnLabel: "Status",
+
     showDescription: true,
+
     popupWidth: "380px",
+
     nameLabel: "Status Name",
+
     namePlaceholder: "Enter lead status name",
+
     hasDescription: true,
   },
+
   {
     key: "lead-bifurcation",
+
     label: "Lead Bifurcation",
+
     singular: "Lead Bifurcation",
+
     addLabel: "Add Lead Bifurcation",
+
     icon: FiShare2,
+
     prefix: "LB",
+
     columnLabel: "Bifurcation",
+
     showDescription: true,
+
     popupWidth: "380px",
+
     nameLabel: "Bifurcation Name",
+
     namePlaceholder: "e.g. B2B, B2C",
+
     hasDescription: true,
   },
+
   {
     key: "lead-priority",
+
     label: "Lead Priority",
+
     singular: "Lead Priority",
+
     addLabel: "Add Lead Priority",
+
     icon: FiFlag,
+
     prefix: "LP",
+
     columnLabel: "Priority",
+
     showDescription: true,
+
     popupWidth: "380px",
+
     nameLabel: "Priority Name",
+
     namePlaceholder: "e.g. Hot, Normal, Cold",
+
     hasDescription: true,
   },
+
   {
     key: "designation",
+
     label: "Designation",
+
     singular: "Designation",
+
     addLabel: "Add Designation",
+
     icon: FiBriefcase,
+
     prefix: "DS",
+
     popupWidth: "420px",
+
     nameLabel: "Designation Name",
+
     namePlaceholder: "e.g. Sales Executive",
+
     hasDepartment: true,
+
     hasEmployeeCount: true,
+
     hasDescription: true,
+
     isCompact: true,
   },
 ];
@@ -129,7 +191,9 @@ const formatDate = (value) => {
 
   return date.toLocaleDateString("en-GB", {
     day: "2-digit",
+
     month: "short",
+
     year: "numeric",
   });
 };
@@ -141,6 +205,7 @@ const getLogoUrl = (logo) => {
 
   const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "").replace(
     /\/+$/,
+
     "",
   );
 
@@ -148,17 +213,27 @@ const getLogoUrl = (logo) => {
 };
 
 // Maps an API list (sources, status, bifurcation, priority or designation) to table rows
+
 const mapItems = (list, prefix) =>
   (Array.isArray(list) ? list : []).map((item) => ({
     id: item.id,
+
     code: makeCode(prefix, item.id),
+
     name: item.name || "",
+
     description: item.description || "",
+
     department: item.department || "",
+
     employeeCount: item.employee_count ?? 0,
+
     logo: getLogoUrl(item.logo_url),
+
     status: item.status || "inactive",
+
     leads: item.leads ?? null,
+
     createdOn: item.created_at,
   }));
 
@@ -167,32 +242,51 @@ const getSummaryCards = (tabKey, summary, items) => {
     return [
       {
         label: "Total Sources",
+
         value: summary?.total_sources ?? items.length,
+
         icon: FiLayers,
+
         tone: "toneSky",
       },
+
       {
         label: "Total Leads",
+
         value: summary?.total_leads ?? 0,
+
         icon: FiUsers,
+
         tone: "toneCyan",
       },
+
       {
         label: "Top Lead Source",
+
         value: summary?.top_lead_source || "-",
+
         icon: FiGlobe,
+
         tone: "toneGreen",
       },
+
       {
         label: "Conversion Rate",
+
         value: summary?.conversion_rate ?? "0%",
+
         icon: FiTrendingUp,
+
         tone: "tonePurple",
       },
+
       {
         label: "New Leads This Month",
+
         value: summary?.new_leads_this_month ?? 0,
+
         icon: FiUserPlus,
+
         tone: "toneAmber",
       },
     ];
@@ -206,26 +300,41 @@ const getSummaryCards = (tabKey, summary, items) => {
     return [
       {
         label: "Total Designations",
+
         value: summary?.total ?? items.length,
+
         icon: FiBriefcase,
+
         tone: "toneSky",
       },
+
       {
         label: "Total Employees",
+
         value: summary?.employees ?? 0,
+
         icon: FiUsers,
+
         tone: "tonePurple",
       },
+
       {
         label: "Most Common Designation",
+
         value: summary?.most_common || "-",
+
         icon: FiTrendingUp,
+
         tone: "toneGreen",
       },
+
       {
         label: "Management Designations",
+
         value: summary?.management ?? managementCount,
+
         icon: FiUserCheck,
+
         tone: "toneAmber",
       },
     ];
@@ -236,32 +345,53 @@ const getSummaryCards = (tabKey, summary, items) => {
 
 export default function CrmSetting() {
   const router = useRouter();
+
   const { showToast } = useToast();
 
   const activeTab = TABS.find((tab) => tab.key === router.query.tab) || TABS[0];
+
   const activeKey = activeTab.key;
+
   const isLeadSources = activeKey === "lead-sources";
+
   const isLeadStatus = activeKey === "lead-status";
+
   const isBifurcation = activeKey === "lead-bifurcation";
+
   const isPriority = activeKey === "lead-priority";
+
   const isDesignation = activeKey === "designation";
 
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search.trim()), 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const [popupOpen, setPopupOpen] = useState(false);
+
   const [editingItem, setEditingItem] = useState(null);
+
   const [logoFile, setLogoFile] = useState(null);
 
   const sources = useLeadsSourceQuery(undefined, { skip: !isLeadSources });
+
   const statuses = useLeadsStatusQuery(undefined, { skip: !isLeadStatus });
+
   const bifurcations = useLeadsBifurcationQuery(undefined, {
     skip: !isBifurcation,
   });
+
   const priorities = useLeadsPriorityQuery(undefined, { skip: !isPriority });
-  const designations = useLeadsDesignationQuery(undefined, {
+
+  const designations = useLeadsDesignationSearchQuery(debouncedSearch, {
     skip: !isDesignation,
   });
 
   let query = null;
+
   if (isLeadSources) query = sources;
   else if (isLeadStatus) query = statuses;
   else if (isBifurcation) query = bifurcations;
@@ -269,22 +399,37 @@ export default function CrmSetting() {
   else if (isDesignation) query = designations;
 
   const [createLead] = useCreateLeadsMutation();
+
   const [updateLead] = useUpdateLeadsMutation();
+
   const [deleteLead] = useDeleteLeadsMutation();
+
   const [createStatus] = useCreateStatusMutation();
+
   const [updateStatus] = useUpdateStatusMutation();
+
   const [deleteStatus] = useDeleteLeadsStatusMutation();
+
   const [createBifurcation] = useCreateBifurcationMutation();
+
   const [updateBifurcation] = useUpdateBifurcationMutation();
+
   const [deleteBifurcation] = useDeleteLeadsBifurcationMutation();
+
   const [createPriority] = useCreatePriorityMutation();
+
   const [updatePriority] = useUpdatePriorityMutation();
+
   const [deletePriority] = useDeleteLeadsPriorityMutation();
+
   const [createDesignation] = useCreateDesignationMutation();
+
   const [updateDesignation] = useUpdateDesignationMutation();
+
   const [deleteDesignation] = useDeleteLeadsDesignationMutation();
 
   let api = null;
+
   if (isLeadSources) {
     api = { create: createLead, update: updateLead, remove: deleteLead };
   } else if (isLeadStatus) {
@@ -292,19 +437,25 @@ export default function CrmSetting() {
   } else if (isBifurcation) {
     api = {
       create: createBifurcation,
+
       update: updateBifurcation,
+
       remove: deleteBifurcation,
     };
   } else if (isPriority) {
     api = {
       create: createPriority,
+
       update: updatePriority,
+
       remove: deletePriority,
     };
   } else if (isDesignation) {
     api = {
       create: createDesignation,
+
       update: updateDesignation,
+
       remove: deleteDesignation,
     };
   }
@@ -313,16 +464,20 @@ export default function CrmSetting() {
 
   const items = mapItems(
     listData?.items ?? listData?.designations,
+
     activeTab.prefix,
   );
 
-  const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(search.trim().toLowerCase()),
-  );
+  const filteredItems = isDesignation
+    ? items
+    : items.filter((item) =>
+        item.name.toLowerCase().includes(search.trim().toLowerCase()),
+      );
 
   const summaryCards = getSummaryCards(activeKey, listData?.summary, items);
 
   const showLoading = Boolean(query?.isLoading || query?.isFetching);
+
   const showError = Boolean(query?.isError);
 
   const columnCount =
@@ -330,13 +485,17 @@ export default function CrmSetting() {
 
   const openPopup = (item = null) => {
     setEditingItem(item);
+
     setLogoFile(null);
+
     setPopupOpen(true);
   };
 
   const closePopup = () => {
     setPopupOpen(false);
+
     setEditingItem(null);
+
     setLogoFile(null);
   };
 
@@ -344,11 +503,14 @@ export default function CrmSetting() {
     if (key === activeKey) return;
 
     setSearch("");
+
     closePopup();
 
     router.replace(
       { pathname: router.pathname, query: { ...router.query, tab: key } },
+
       undefined,
+
       { shallow: true },
     );
   };
@@ -356,6 +518,7 @@ export default function CrmSetting() {
   const handleDelete = async (id) => {
     try {
       await api.remove({ id }).unwrap();
+
       showToast(`${activeTab.singular} deleted successfully`, "success");
     } catch (error) {
       showToast(error?.data?.message || "Unable to delete", "error");
@@ -369,9 +532,13 @@ export default function CrmSetting() {
 
     const values = {
       name: String(form.get("name") || "").trim(),
+
       status: String(form.get("status") || editingItem?.status || "active"),
+
       description: String(form.get("description") || "").trim(),
+
       department: String(form.get("department") || "").trim(),
+
       employeeCount: Number(form.get("employee_count") || 0),
     };
 
@@ -381,15 +548,20 @@ export default function CrmSetting() {
 
     if (isLeadSources) {
       body = new FormData();
+
       body.append("name", values.name);
+
       body.append("status", values.status);
+
       if (logoFile) body.append("logo", logoFile);
     }
 
     if (isDesignation) {
       body = {
         ...body,
+
         department: values.department,
+
         employee_count: values.employeeCount,
       };
     }
@@ -403,10 +575,12 @@ export default function CrmSetting() {
 
       showToast(
         `${activeTab.singular} ${editingItem ? "updated" : "added"} successfully`,
+
         "success",
       );
     } catch (error) {
       showToast(error?.data?.message || "Something went wrong", "error");
+
       return;
     }
 
@@ -432,6 +606,7 @@ export default function CrmSetting() {
                   }`}
                 >
                   <Icon size={16} color={isActive ? "#0284c7" : "#94a3b8"} />
+
                   <span>{label}</span>
                 </button>
               </li>
@@ -460,6 +635,7 @@ export default function CrmSetting() {
             className={styles.primaryBtn}
           >
             <FiPlus size={15} />
+
             <span>{activeTab.addLabel}</span>
           </button>
         </div>
@@ -541,6 +717,7 @@ export default function CrmSetting() {
                 <tr>
                   <td colSpan={columnCount} className={styles.empty}>
                     <p>Unable to fetch {activeTab.label.toLowerCase()}.</p>
+
                     <button type="button" onClick={() => query.refetch()}>
                       Try Again
                     </button>
@@ -734,6 +911,7 @@ export default function CrmSetting() {
                   className={styles.popupInput}
                 >
                   <option value="active">Active</option>
+
                   <option value="inactive">Inactive</option>
                 </select>
               </div>

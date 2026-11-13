@@ -137,12 +137,14 @@ const crmSettingsApi = apiSlice.injectEndpoints({
     }),
 
     leadsDesignationSearch: builder.query({
-      query: () => ({
-        url: "/settings/designation?search=sales",
+      query: (search = "") => ({
+        url: "/settings/designation",
         method: "GET",
+        params: { search },
       }),
       providesTags: ["crmLeads"],
     }),
+
     createDesignation: builder.mutation({
       query: ({ body }) => ({
         url: "/settings/designation/create",
