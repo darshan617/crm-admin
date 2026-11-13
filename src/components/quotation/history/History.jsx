@@ -20,7 +20,6 @@ const History = () => {
     quotation: "not_shared",
     invoice: null,
   });
-  console.log(status, "status");
 
   const {
     data: quotationHistory,
@@ -35,34 +34,35 @@ const History = () => {
   );
 
   const historyData = quotationHistory?.data;
-  console.log(historyData, "😘😘");
 
   const timeline = historyData?.activity_timeline ?? [];
   const summary = historyData?.quotation ?? {};
+  const invoice = historyData?.invoice ?? {};
+
   const lastSent = timeline.find((item) => item.type === "sent");
 
   const [updateStatus, { isLoading: isUpdating }] = useStatusMutation();
 
   useEffect(() => {
     if (!historyData) return;
-    if (historyData.quotation)
-      setStatus((prev) => ({
-        ...prev,
-        quotation: historyData?.quotation?.status,
-      }));
-    if (historyData.invoice)
-      setStatus((prev) => ({
-        ...prev,
-        invoice: historyData.invoice?.status,
-      }));
+
+    setStatus({
+      quotation: historyData?.quotation?.status || "not_shared",
+      invoice: historyData?.invoice?.status || "not_sent",
+    });
   }, [historyData]);
 
   const handleUpdate = async (body, rollback) => {
     try {
-      const res = await updateStatus({ quotation_id: slug, body }).unwrap();
+      const res = await updateStatus({
+        quotation_id: slug,
+        body,
+      }).unwrap();
+
       showToast(res?.message || "Status updated successfully", "success");
     } catch (err) {
       rollback();
+
       showToast(
         err?.data?.message || err?.error || "Failed to update status",
         "error",
@@ -71,49 +71,55 @@ const History = () => {
   };
 
   const onQuotationChange = (event) => {
-    const prevStatus = status?.quotation;
-    const prevInvoice = status?.invoice;
+    const prevStatus = status.quotation;
+    const prevInvoice = status.invoice;
+
     const next = event.target.value;
-    const nextInvoice = next === "approved" ? status?.invoice : "not_sent";
+
+    const nextInvoice =
+      next === "approved" ? status.invoice || "not_sent" : "not_sent";
 
     setStatus((prev) => ({
       ...prev,
       quotation: next,
-    }));
-    setStatus((prev) => ({
-      ...prev,
       invoice: nextInvoice,
     }));
 
     handleUpdate(
-      { quotation_status: next, invoice_status: nextInvoice },
+      {
+        quotation_status: next,
+        invoice_status: nextInvoice,
+      },
       () => {
         setStatus((prev) => ({
           ...prev,
           quotation: prevStatus,
-        }));
-        setStatus((prev) => ({
-          ...prev,
-          invoice: nextInvoice,
+          invoice: prevInvoice,
         }));
       },
     );
   };
 
   const onInvoiceChange = (event) => {
-    const prev = status?.invoice;
+    const prevInvoice = status.invoice;
     const next = event.target.value;
+
     setStatus((prev) => ({
       ...prev,
       invoice: next,
     }));
+
     handleUpdate(
-      { quotation_status: status?.quotation, invoice_status: next },
-      () =>
+      {
+        quotation_status: status.quotation,
+        invoice_status: next,
+      },
+      () => {
         setStatus((prev) => ({
           ...prev,
-          invoice: nextInvoice,
-        })),
+          invoice: prevInvoice,
+        }));
+      },
     );
   };
 
@@ -150,34 +156,38 @@ const History = () => {
         <div className={styles.statsGrid}>
           <div className={`${styles.summaryCard} rpt-kpi tone-teal`}>
             <p>Quotation sent to</p>
+
             <h3>{summary?.send_count ?? 0}</h3>
+
             <small>{lastSent?.emails?.join(", ") || "-"}</small>
           </div>
 
           <div className={`${styles.summaryCard} rpt-kpi tone-green`}>
             <p>Quotation first approval</p>
-            <h3>{status?.quotation}</h3>
-            <small>
-              {status?.quotation === "approved"
-                ? "Approved by customer"
-                : "Waiting for customer"}
-            </small>
+
+            <h3 className="text-capitalize">
+              {summary?.status || summary?.responded_by?.email || "-"}
+            </h3>
+
+            <small>{summary?.responded_by?.email || "-"}</small>
           </div>
 
           <div className={`${styles.summaryCard} rpt-kpi tone-purple`}>
             <p>Invoice sent to</p>
-            <h3>{summary?.send_count ?? 0}</h3>
-            <small>{historyData?.invoice?.status}</small>
+
+            <h3>{invoice?.send_count ?? 0}</h3>
+
+            <small>{invoice?.responded_by?.email || "-"}</small>
           </div>
 
           <div className={`${styles.summaryCard} rpt-kpi tone-orange`}>
             <p>Invoice approved by</p>
-            <h3>{historyData?.invoice?.responded_by?.name || "-"}</h3>
-            <small>
-              {status?.invoice === "approved"
-                ? "Approved by customer"
-                : "Waiting for invoice response"}
-            </small>
+
+            <h3 className="text-capitalize">
+              {invoice?.status || invoice?.responded_by?.email || "-"}
+            </h3>
+
+            <small>{invoice?.responded_by?.email || "-"}</small>
           </div>
         </div>
 
@@ -187,6 +197,7 @@ const History = () => {
             <div className="common-table-header">
               <div>
                 <h3>Timeline</h3>
+
                 <p className="rpt-sub">
                   Who received the mail and who responded, in order
                 </p>
@@ -202,13 +213,14 @@ const History = () => {
                 <li className={styles["tone-blue"]}>
                   <p>Unable to load quotation history. Please try again.</p>
                 </li>
-              ) : timeline?.length ? (
+              ) : timeline.length ? (
                 timeline.map((item, index) => (
                   <li
                     key={`${item.type}-${item.when}-${index}`}
                     className={styles[`tone-${item.tone}`] || ""}
                   >
                     <h4>{item.title}</h4>
+
                     <p>{item.text}</p>
 
                     {item.quotation_number && (
@@ -237,6 +249,7 @@ const History = () => {
             <div className="common-table-header">
               <div>
                 <h3>Update status</h3>
+
                 <p className="rpt-sub">Manual override if needed</p>
               </div>
             </div>
@@ -250,31 +263,38 @@ const History = () => {
 
                 <select
                   name="quotation_status"
-                  className={`quotation-status-select is-${status?.quotation}`}
-                  value={status?.quotation}
+                  className={`quotation-status-select is-${status.quotation}`}
+                  value={status.quotation}
                   onChange={onQuotationChange}
                   disabled={isUpdating}
                 >
                   <option value="not_shared">Not shared</option>
+
                   <option value="shared">Shared, approval pending</option>
+
                   <option value="approved">Approved</option>
+
                   <option value="rejected">Rejected</option>
                 </select>
               </div>
 
               <div className={styles.qmetaField}>
                 <span>Invoice</span>
-                {status?.quotation === "approved" ? (
+
+                {status.quotation === "approved" ? (
                   <select
                     name="invoice_status"
-                    className={`quotation-status-select is-${status?.invoice}`}
-                    value={status?.invoice}
+                    className={`quotation-status-select is-${status.invoice}`}
+                    value={status.invoice || "not_sent"}
                     onChange={onInvoiceChange}
                     disabled={isUpdating}
                   >
                     <option value="not_sent">Not sent</option>
+
                     <option value="sent">Sent</option>
+
                     <option value="approved">Approved</option>
+
                     <option value="rejected">Rejected</option>
                   </select>
                 ) : (
