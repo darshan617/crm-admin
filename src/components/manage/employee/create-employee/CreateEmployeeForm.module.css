@@ -1,0 +1,232 @@
+.card {
+  background: #fff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 28px 32px 32px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.sectionTitle {
+  margin: 0 0 16px;
+  color: #1e293b;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.card section + section .sectionTitle {
+  margin-top: 28px;
+}
+
+.imageRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  display: flex;
+  flex: 0 0 72px;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chooseImage {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #334155;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chooseImage:hover {
+  color: #0056b3;
+}
+
+.imageHint {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.fileInput {
+  display: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 28px;
+  row-gap: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.input,
+.select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.input::placeholder {
+  color: #cbd5e1;
+}
+
+.input:focus,
+.select:focus,
+.phoneField:focus-within {
+  border-color: #0056b3;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.08);
+}
+
+.phoneField {
+  display: flex;
+  align-items: center;
+  height: 42px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.phoneCode {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.phoneInput {
+  height: 100%;
+  padding-left: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+.phoneInput:focus {
+  box-shadow: none;
+}
+
+.passwordWrap {
+  position: relative;
+}
+
+.passwordInput {
+  padding-right: 40px;
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: flex;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.select {
+  padding-right: 36px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.placeholder {
+  color: #94a3b8;
+}
+
+.select option {
+  color: #1e293b;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.saveButton {
+  min-width: 112px;
+  height: 40px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: #0056b3;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveButton:hover {
+  background: #004a99;
+}
+
+.saveButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  margin: 4px 0 0;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+@media (max-width: 800px) {
+  .card {
+    padding: 20px 16px 24px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
