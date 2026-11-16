@@ -37,6 +37,13 @@ const employeeApi = apiSlice.injectEndpoints({
       }),
       providesTags: (result, error, { id }) => [{ type: "employees", id }],
     }),
+    getEmployeeCreateForm: builder.query({
+      query: () => ({
+        url: "/employees/create",
+        method: "GET",
+      }),
+      providesTags: ["employees"],
+    }),
     createEmployee: builder.mutation({
       query: ({ body }) => ({
         url: "/employees/create",
@@ -109,6 +116,7 @@ const employeeApi = apiSlice.injectEndpoints({
 export const {
   useGetEmployeesQuery,
   useGetEmployeeQuery,
+  useGetEmployeeCreateFormQuery,
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useGetEmployeePermissionsQuery,

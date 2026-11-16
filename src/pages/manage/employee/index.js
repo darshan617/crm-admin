@@ -14,8 +14,8 @@ const sidePanelItems = [
 
 const Employee = () => {
   const router = useRouter();
-  const [from, setFrom] = useState("2026-01-01");
-  const [to, setTo] = useState("2026-11-13");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [summary, setSummary] = useState({});
 
   return (
