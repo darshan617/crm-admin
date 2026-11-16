@@ -5,16 +5,47 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiCheck, FiFile, FiFilePlus, FiFileText } from "react-icons/fi";
 import styles from "@/components/crm-deals/crm-order-view/CrmOrderView.module.css";
-import { useCrmDealsDetailsQuery } from "@/redux/apis/crmDeals";
+import {
+  useCrmDealsDetailsQuery,
+  useDealsActivateMutation,
+  useDealsPoSourceMutation,
+} from "@/redux/apis/crmDeals";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+
+const formatDate = (value) => {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatAmount = (value) =>
+  `₹${Number(value ?? 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 
 const CrmOrderView = () => {
   const router = useRouter();
   const { slug } = router.query;
+  const { showToast } = useToast();
 
   const [poMode, setPoMode] = useState("generated");
 
-  const { data, isLoading, isFetching, isError, refetch } =
-    useCrmDealsDetailsQuery({ id: slug }, { skip: !router.isReady || !slug });
+  const { data, isLoading, isError, refetch } = useCrmDealsDetailsQuery(
+    { id: slug },
+    { skip: !router.isReady || !slug },
+  );
+
+  const [DealsPoSource, { isLoading: isPoSubmitting }] =
+    useDealsPoSourceMutation();
+
+  const [DealsActivate, { isLoading: isActivating }] =
+    useDealsActivateMutation();
 
   const details = data?.data;
   const deal = details?.deal ?? {};
@@ -32,23 +63,90 @@ const CrmOrderView = () => {
   const defaultCycle = details?.default_cycle || "";
   const defaultStart = details?.default_start || "";
 
-  const handleActivate = (e) => {
-    e.preventDefault();
+  const hasPo = Boolean(po?.id || po?.po_number || po?.po_mode || po?.mode);
+  const savedPoMode = po?.po_mode || po?.mode || "";
+  const poDocumentUrl = po?.po_url || "/";
 
-    if (!confirm("Activate this order?")) return;
-
-    const formData = new FormData(e.currentTarget);
-    console.log(Object.fromEntries(formData));
-  };
-
-  const handlePoSubmit = (e) => {
+  const handleActivate = async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    console.log(Object.fromEntries(formData));
+
+    const body = {
+      start_date: formData.get("start_date"),
+      billing_cycle: formData.get("billing_cycle"),
+    };
+
+    try {
+      const response = await DealsActivate({ id: slug, body }).unwrap();
+
+      showToast(response?.message);
+      refetch();
+    } catch (error) {
+      showToast(error?.data?.message);
+    }
   };
 
-  if (!router.isReady || isLoading || isFetching) {
+  const handlePoSubmit = async (e) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+    const formValues = new FormData(form);
+
+    const poNumber = String(formValues.get("po_number") || "").trim();
+    const poDate = formValues.get("po_date");
+    const poDocument = formValues.get("po_document");
+
+    if (!poDate) {
+      showToast("Please select PO date");
+      return;
+    }
+
+    if (poMode === "uploaded") {
+      if (!(poDocument instanceof File) || !poDocument.size) {
+        showToast("Please upload PO PDF");
+        return;
+      }
+
+      if (
+        poDocument.type !== "application/pdf" &&
+        !poDocument.name.toLowerCase().endsWith(".pdf")
+      ) {
+        showToast("Only PDF files are allowed");
+        return;
+      }
+    }
+
+    const body = new FormData();
+    body.append("po_mode", poMode);
+    body.append("po_number", poNumber);
+    body.append("po_date", poDate);
+
+    if (poMode === "uploaded") {
+      body.append("po_document", poDocument);
+    }
+
+    try {
+      const response = await DealsPoSource({
+        id: slug,
+        body,
+      }).unwrap();
+
+      // Message comes from the API only
+      showToast(response?.message);
+
+      form.reset();
+      setPoMode("generated");
+      refetch();
+    } catch (error) {
+      // Message comes from the API only
+      showToast(error?.data?.message);
+    }
+  };
+
+  // isFetching is intentionally not used here, so the page doesn't
+  // unmount while refetch() runs after a successful PO submit.
+  if (!router.isReady || isLoading) {
     return <div className="content">Loading deal details...</div>;
   }
 
@@ -102,21 +200,22 @@ const CrmOrderView = () => {
       {/* Order Summary */}
       <section className={styles.card}>
         <div className={styles.orderTitle}>
-          <h2>Order #{order.order_no || "Preview"}</h2>
+          <div className="d-flex gap-2">
+            <h2>Order #{order.order_no || "Preview"}</h2>
 
-          {!converted && (
-            <span className={styles.badgeWarn}>
-              {order.status_label || "Not activated"}
-            </span>
-          )}
+            {converted && (
+              <span className={styles.badgeWarn}>
+                {order?.status_label || "Not activated"}
+              </span>
+            )}
 
-          <span className={styles.badgeMuted}>CRM</span>
-        </div>
-
-        <div className={styles.meta}>
-          Created {deal.created_at || "-"}
-          <span> · </span>
-          Quote {deal.quotation_no || "-"}
+            <span className={styles.badgeMuted}>CRM</span>
+          </div>
+          <div className={styles.meta}>
+            Created {deal?.created_at || "-"}
+            <span> · </span>
+            Quote {deal?.quotation_no || "-"}
+          </div>
         </div>
 
         <form onSubmit={handleActivate} className={styles.actions}>
@@ -154,35 +253,43 @@ const CrmOrderView = () => {
 
               <button
                 type="submit"
+                disabled={isActivating}
                 className={`${styles.btn} ${styles.btnGreen}`}
               >
                 <FiCheck />
-                {actionLabel}
+                {isActivating ? "Activating..." : actionLabel}
               </button>
             </>
           )}
 
-          <Link
-            href={`/quotations/${deal.id}`}
-            className={`${styles.btn} ${styles.btnOutline}`}
-          >
-            <FiFileText />
-            View Quotation
-          </Link>
+          {details?.links?.view_quotation && (
+            <Link
+              href={details.links.view_quotation}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.btn} ${styles.btnOutline}`}
+            >
+              <FiFileText />
+              View Quotation
+            </Link>
+          )}
 
-          <Link
-            href={`/quotations/${deal.id}`}
-            target="_blank"
-            className={`${styles.btn} ${styles.btnPrimary}`}
-          >
-            <FiFile />
-            View Invoice
-          </Link>
+          {details?.links?.view_invoice && (
+            <Link
+              href={details.links.view_invoice}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.btn} ${styles.btnPrimary}`}
+            >
+              <FiFile />
+              View Invoice
+            </Link>
+          )}
         </form>
       </section>
 
       {/* Order Details */}
-      <section className={styles.card}>
+      <section className={styles.card1}>
         <div className={styles.details}>
           {[
             ["Order Type", deal.deal_type_label || "-"],
@@ -209,7 +316,7 @@ const CrmOrderView = () => {
 
       <div className={styles.split}>
         {/* Customer */}
-        <section className={styles.card}>
+        <section className={styles.card1}>
           <h3 className={styles.sectionTitle}>Customer</h3>
 
           <div className={styles.customerName}>
@@ -253,7 +360,7 @@ const CrmOrderView = () => {
         </section>
 
         {/* Order Items */}
-        <section className={styles.card}>
+        <section className={styles.card1}>
           <h3 className={styles.sectionTitle}>Order Items</h3>
 
           <div className={styles.tableWrap}>
@@ -297,104 +404,210 @@ const CrmOrderView = () => {
       </div>
 
       {/* PO Journey */}
-      <section className={styles.card}>
-        <h3 className={styles.sectionTitle}>PO Journey</h3>
+      <section className={styles.card1}>
+        <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <h6 className="mb-0">PO Journey</h6>
 
-        <div className={styles.stepper}>
-          <div className={styles.stepperLine} />
+          {hasPo && (
+            <a
+              href={poDocumentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-sm btn-outline-primary d-flex"
+            >
+              <FiFileText className="me-1 " /> View PO Document
+            </a>
+          )}
+        </div>
 
-          <div className={styles.steps}>
-            {poJourney.map((step, index) => (
-              <div className={styles.step} key={index}>
-                <span className={styles.dot} />
-                <div className={styles.stepLabel}>{step.label}</div>
-              </div>
-            ))}
+        <div className="d-flex justify-content-center mb-4">
+          <div className="position-relative w-100" style={{ maxWidth: 320 }}>
+            <div
+              className="position-absolute start-0 end-0"
+              style={{ top: 12, height: 2, background: "#dee2e6" }}
+            />
+
+            <div className="d-flex justify-content-between position-relative">
+              {poJourney.map((step, index) => {
+                const isDone = Boolean(step?.done ?? step?.completed);
+
+                return (
+                  <div
+                    className="text-center"
+                    style={{ width: 90 }}
+                    key={index}
+                  >
+                    <span
+                      className={`${styles.odStepDot} ${
+                        isDone ? styles.done : ""
+                      }`}
+                    >
+                      {isDone ? "✓" : ""}
+                    </span>
+                    <div
+                      className={`small mt-2 ${
+                        isDone ? "fw-semibold" : "text-muted"
+                      }`}
+                    >
+                      {step.label}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <form onSubmit={handlePoSubmit}>
-          <label className={styles.sourceLabel}>PO Source</label>
-
-          <div className={styles.radios}>
-            <label className={styles.radio} htmlFor="po_mode_generated">
-              <input
-                type="radio"
-                name="po_mode"
-                id="po_mode_generated"
-                value="generated"
-                checked={poMode === "generated"}
-                onChange={(e) => setPoMode(e.target.value)}
-              />
-              Generate PO
-            </label>
-
-            <label className={styles.radio} htmlFor="po_mode_uploaded">
-              <input
-                type="radio"
-                name="po_mode"
-                id="po_mode_uploaded"
-                value="uploaded"
-                checked={poMode === "uploaded"}
-                onChange={(e) => setPoMode(e.target.value)}
-              />
-              Upload PO (CRM / SAP)
-            </label>
-          </div>
-
-          <small className={styles.hint}>
-            Companies using their own CRM/SAP PO can upload a PDF instead of our
-            format.
-          </small>
-
-          {poMode === "uploaded" && (
-            <div className={styles.uploadGrid}>
-              <div>
-                <label htmlFor="po_number">External PO Number</label>
-                <input
-                  id="po_number"
-                  type="text"
-                  name="po_number"
-                  className={styles.control}
-                  placeholder="From CRM / SAP"
-                  defaultValue={po.po_number || ""}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="po_date">PO Date</label>
-                <input
-                  id="po_date"
-                  type="date"
-                  name="po_date"
-                  className={styles.control}
-                  defaultValue={po.po_date || ""}
-                />
-              </div>
-
-              <div>
-                <label htmlFor="po_document">Upload PO PDF</label>
-                <input
-                  id="po_document"
-                  type="file"
-                  name="po_document"
-                  className={`${styles.control} ${styles.fileInput}`}
-                  accept="application/pdf,.pdf"
-                />
+        {hasPo ? (
+          <div className="row g-3">
+            <div className="col-6 col-md-3">
+              <div className={styles.label}>PO Mode</div>
+              <div className={styles.value}>
+                <span className="badge bg-secondary">
+                  {savedPoMode === "uploaded" ? "Uploaded" : "Generated"}
+                </span>
               </div>
             </div>
-          )}
 
-          <div className={styles.submitRow}>
-            <button
-              type="submit"
-              className={`${styles.btn} ${styles.btnPrimary}`}
-            >
-              <FiFilePlus />
-              {poMode === "generated" ? "Generate PO" : "Upload PO"}
-            </button>
+            <div className="col-6 col-md-3">
+              <div className={styles.label}>PO Number</div>
+              <div className={styles.value}>{po.po_number || "-"}</div>
+            </div>
+
+            <div className="col-6 col-md-3">
+              <div className={styles.label}>PO Date</div>
+              <div className={styles.value}>{formatDate(po.po_date)}</div>
+            </div>
+
+            <div className="col-6 col-md-3">
+              <div className={styles.label}>PO Amount</div>
+              <div className={styles.value}>
+                {formatAmount(
+                  po.amount ?? order.total_amount ?? deal.total_amount,
+                )}
+              </div>
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handlePoSubmit}>
+            <label className={styles.sourceLabel}>PO Source</label>
+
+            <div className={styles.radios}>
+              <label className={styles.radio} htmlFor="po_mode_generated">
+                <input
+                  type="radio"
+                  name="po_mode"
+                  id="po_mode_generated"
+                  value="generated"
+                  checked={poMode === "generated"}
+                  onChange={(e) => setPoMode(e.target.value)}
+                />
+                Generate PO
+              </label>
+
+              <label className={styles.radio} htmlFor="po_mode_uploaded">
+                <input
+                  type="radio"
+                  name="po_mode"
+                  id="po_mode_uploaded"
+                  value="uploaded"
+                  checked={poMode === "uploaded"}
+                  onChange={(e) => setPoMode(e.target.value)}
+                />
+                Upload PO (CRM / SAP)
+              </label>
+            </div>
+
+            <small className={styles.hint}>
+              Companies using their own CRM/SAP PO can upload a PDF instead of
+              our format.
+            </small>
+
+            {poMode === "generated" && (
+              <div className={styles.generateGrid}>
+                <div className="row g-2 mb-2">
+                  <div className="col-md-4">
+                    <label className="form-label" htmlFor="gen_po_number">
+                      PO Number <span className="text-muted">(optional)</span>
+                    </label>
+                    <input
+                      id="gen_po_number"
+                      type="text"
+                      name="po_number"
+                      className="form-control form-control-sm"
+                      placeholder="Leave blank if not available"
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label" htmlFor="gen_po_date">
+                      PO Date
+                    </label>
+                    <input
+                      id="gen_po_date"
+                      type="date"
+                      name="po_date"
+                      className="form-control form-control-sm"
+                      defaultValue={po.po_date || ""}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {poMode === "uploaded" && (
+              <div className={styles.uploadGrid}>
+                <div>
+                  <label htmlFor="po_number">External PO Number</label>
+                  <input
+                    id="po_number"
+                    type="text"
+                    name="po_number"
+                    className={styles.control}
+                    placeholder="From CRM / SAP"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="po_date">PO Date</label>
+                  <input
+                    id="po_date"
+                    type="date"
+                    name="po_date"
+                    className={styles.control}
+                    defaultValue={po.po_date || ""}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="po_document">Upload PO PDF</label>
+                  <input
+                    id="po_document"
+                    type="file"
+                    name="po_document"
+                    className={`${styles.control} ${styles.fileInput}`}
+                    accept="application/pdf,.pdf"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className={styles.submitRow}>
+              <button
+                type="submit"
+                disabled={isPoSubmitting}
+                className={`${styles.btn} ${styles.btnPrimary}`}
+              >
+                <FiFilePlus />
+                {isPoSganeratedubmitting
+                  ? "Submitting..."
+                  : poMode === "generated"
+                    ? "Generate PO"
+                    : "Upload PO"}
+              </button>
+            </div>
+          </form>
+        )}
       </section>
     </div>
   );

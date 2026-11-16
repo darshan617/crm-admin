@@ -5,6 +5,8 @@ import { LuCalendarDays, LuUserRoundPlus } from "react-icons/lu";
 
 // Prop name now matches what Dashboard passes: recentActivities
 const PendingApproval = ({ recentActivities, summary }) => {
+  console.log(recentActivities);
+  
   const approvals = [
     {
       title: "Discount Approval",
@@ -32,7 +34,7 @@ const PendingApproval = ({ recentActivities, summary }) => {
     },
   ];
 
-  const activityList = (recentActivities || []).map((a) => ({
+  const activityList = (recentActivities?.items || [])?.map((a) => ({
     text: a.message,
     timeAgo: a.time,
     icon: <LuUserRoundPlus />,
@@ -44,7 +46,7 @@ const PendingApproval = ({ recentActivities, summary }) => {
       <div className="approval-column">
         <div className={styles.commonTableHeader}>
           <h3>Pending Approvals</h3>
-          <a href="#" className={styles.viewAll}>
+          <a href="/follow-up" className={styles.viewAll}>
             View All Tasks
           </a>
         </div>
@@ -65,7 +67,7 @@ const PendingApproval = ({ recentActivities, summary }) => {
       <div className="activity-column">
         <div className={styles.commonTableHeader}>
           <h3>Recent Activities</h3>
-          <a href="#" className={styles.viewAll}>
+          <a href="/leads" className={styles.viewAll}>
             View All
           </a>
         </div>

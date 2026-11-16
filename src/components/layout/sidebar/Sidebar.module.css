@@ -110,7 +110,6 @@
   color: #0759ad;
 }
 
-/* Dropdown arrow */
 .chevron {
   flex: 0 0 13px;
   width: 13px;
@@ -123,7 +122,6 @@
   transform: rotate(180deg);
 }
 
-/* Animated submenu */
 .subnav {
   display: flex;
   flex-direction: column;
@@ -192,6 +190,9 @@
   margin-bottom: 6px;
   border: 1px solid #e1e6ec;
 }
+.collapsed {
+  overflow: visible;
+}
 
 .collapsed .brandLogo {
   width: 46px;
@@ -200,10 +201,6 @@
 
 .collapsed .sectionLabel,
 .collapsed .navLabel,
-.collapsed .subnav {
-  display: none;
-}
-
 .collapsed .chevron {
   display: none;
 }
@@ -215,7 +212,59 @@
   border-radius: 99px;
 }
 
-/* Tablet and mobile sidebar */
+.collapsed .subnav {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  min-width: 220px;
+  max-height: none;
+  height: auto;
+  margin: 0;
+  padding: 8px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+  overflow: visible;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease,
+    visibility 0.15s;
+  z-index: 1000;
+}
+
+.collapsed .subnavOpen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.collapsed .subnav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -12px;
+  width: 12px;
+}
+
+.collapsed .subnav a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.collapsed .subnav a:hover {
+  padding-left: 12px;
+  background: #e4f2ff;
+}
+
 @media (max-width: 992px) {
   .sidebar {
     position: fixed;
@@ -261,18 +310,5 @@
   .sidebar {
     top: 79px;
     height: calc(100dvh - 79px);
-  }
-}
-
-/* Accessibility: reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .navItem,
-  .chat,
-  .manageButton,
-  .chevron,
-  .subnav,
-  .subnav a,
-  .sidebar {
-    transition: none;
   }
 }
