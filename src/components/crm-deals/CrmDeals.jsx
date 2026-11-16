@@ -7,6 +7,7 @@ import styles from "@/components/crm-deals/CrmDeals.module.css";
 import { IoEyeOutline, IoSearch } from "react-icons/io5";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { useCrmDealsQuery } from "@/redux/apis/crmDeals";
+import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
 
 export default function CrmDeals() {
   const router = useRouter();
@@ -119,10 +120,11 @@ export default function CrmDeals() {
 
                     <td className="plan-info" data-label="Plan">
                       <div className="plan-icon">
-                        <img
-                          src="https://img.icons8.com/color/48/microsoft.png"
-                          alt="Plan"
-                        />
+                        {SIDEBAR_SERVICES_CONSTANTS?.find(
+                          (menu) =>
+                            menu?.id ===
+                            Number(deal?.provider_id?.[0] || deal?.provider_id),
+                        )?.image || "-"}
                       </div>
 
                       <div>

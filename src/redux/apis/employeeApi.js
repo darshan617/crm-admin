@@ -37,6 +37,13 @@ const employeeApi = apiSlice.injectEndpoints({
       }),
       providesTags: (result, error, { id }) => [{ type: "employees", id }],
     }),
+    getEmployeeCreateForm: builder.query({
+      query: () => ({
+        url: "/employees/create",
+        method: "GET",
+      }),
+      providesTags: ["employees"],
+    }),
     createEmployee: builder.mutation({
       query: ({ body }) => ({
         url: "/employees/create",
@@ -76,14 +83,43 @@ const employeeApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["employees"],
     }),
+    getEmployeeAttendance: builder.query({
+      query: ({
+        search = "",
+        role = "",
+        employeeId = "",
+        status = "",
+        from = "",
+        to = "",
+        page = 1,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.set("search", search);
+        if (role) params.set("role", role);
+        if (employeeId) params.set("employee_id", String(employeeId));
+        if (status) params.set("status", status);
+        if (from) params.set("from", from);
+        if (to) params.set("to", to);
+        params.set("page", String(page));
+
+        return {
+          url: `/employees/attendance?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["employees"],
+    }),
   }),
 });
 
 export const {
   useGetEmployeesQuery,
   useGetEmployeeQuery,
+  useGetEmployeeCreateFormQuery,
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useGetEmployeePermissionsQuery,
   useSaveEmployeePermissionsMutation,
+  useGetEmployeeAttendanceQuery,
 } = employeeApi;

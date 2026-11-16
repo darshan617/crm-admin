@@ -283,7 +283,7 @@ const EmployeeDetails = ({ employeeId }) => {
       label: "View Leads",
       icon: FiUsers,
       href: employee?.name
-        ? { pathname: "/leads", query: { assigned_to: employee.name } }
+        ? { pathname: "/leads", query: { assigned_to: employee?.name } }
         : "/leads",
     },
     { label: "View Follow-up", icon: FiClock, href: "/follow-up" },
@@ -295,10 +295,10 @@ const EmployeeDetails = ({ employeeId }) => {
       <div className={styles.layout}>
         <section className={styles.profileCard}>
           <div className={styles.identity}>
-            <EmployeeAvatar name={employee.name} src={avatarSrc} />
+            <EmployeeAvatar name={employee?.name} src={avatarSrc} />
             <div>
-              <h2>{displayValue(employee.name)}</h2>
-              <p className={styles.role}>{formatRole(employee.role)}</p>
+              <h2>{displayValue(employee?.name)}</h2>
+              <p className={styles.role}>{formatRole(employee?.role)}</p>
             </div>
           </div>
 

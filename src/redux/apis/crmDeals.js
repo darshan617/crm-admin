@@ -17,7 +17,29 @@ const crmDeals = apiSlice.injectEndpoints({
       }),
       providesTags: ["crmDeals"],
     }),
+
+    DealsPoSource: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/deals/${id}/po`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["crmDeals"],
+    }),
+    DealsActivate: builder.mutation({
+      query: ({ body, id }) => ({
+        url: `/deals/${id}/activate`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["crmDeals"],
+    }),
   }),
 });
 
-export const { useCrmDealsQuery, useCrmDealsDetailsQuery } = crmDeals;
+export const {
+  useCrmDealsQuery,
+  useCrmDealsDetailsQuery,
+  useDealsPoSourceMutation,
+  useDealsActivateMutation,
+} = crmDeals;

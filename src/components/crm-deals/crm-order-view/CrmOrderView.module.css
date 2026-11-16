@@ -42,12 +42,21 @@
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
   padding: 20px 22px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.card1 {
+  background: #fff;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  padding: 20px 22px;
 }
 
 .orderTitle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  /* display: flex;
+  align-items: center; */
   gap: 8px;
 }
 
@@ -62,8 +71,8 @@
   align-items: center;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f5a524;
-  color: #3f2e05;
+  background: rgb(57 195 125);
+  color: #fff;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;
@@ -376,6 +385,25 @@
 
 .submitRow {
   margin-top: 16px;
+}
+
+.odStepDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #dee2e6;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.odStepDot.done {
+  background: #1e58b4;
+  border: none;
+  color: #fff;
 }
 
 @media (max-width: 1100px) {

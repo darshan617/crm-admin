@@ -99,8 +99,13 @@ a {
   color: inherit;
 }
 
-button, input, select, optgroup, textarea, ::file-selector-button {
-outline: none;
+button,
+input,
+select,
+optgroup,
+textarea,
+::file-selector-button {
+  outline: none;
 }
 
 .content {
@@ -125,6 +130,11 @@ outline: none;
     --font-size-20px: 18px;
     --font-size-24px: 20px;
   }
+}
+
+.bg-secondary {
+  --theme-bg-opacity: 1;
+  background-color: rgb(155 31 140) !important;
 }
 
 .page-header {

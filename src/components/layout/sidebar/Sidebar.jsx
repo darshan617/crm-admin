@@ -11,12 +11,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
 
   const router = useRouter();
   const currentPath = router.asPath.split(/[?#]/)[0];
-
   const handleManageMouseEnter = () => {
-    if (collapsed) {
-      onExpandSidebar?.();
-    }
-
     setManageOpen(true);
   };
 
