@@ -98,7 +98,11 @@ const readActions = (source) => ({
 });
 
 const toModules = (modulesMap) => {
-  if (!modulesMap || typeof modulesMap !== "object" || Array.isArray(modulesMap)) {
+  if (
+    !modulesMap ||
+    typeof modulesMap !== "object" ||
+    Array.isArray(modulesMap)
+  ) {
     return FALLBACK_MODULES;
   }
 
@@ -121,7 +125,9 @@ const buildPermissions = (source = {}, modules = FALLBACK_MODULES) => {
     next[module.key] = {};
 
     module.items.forEach((item) => {
-      next[module.key][item.key] = readActions(source?.[module.key]?.[item.key]);
+      next[module.key][item.key] = readActions(
+        source?.[module.key]?.[item.key],
+      );
     });
 
     Object.keys(source?.[module.key] || {}).forEach((itemKey) => {
@@ -159,7 +165,9 @@ const moduleItems = (module, permissions) => {
 
 const selectionState = (permissions, moduleKey, items) => {
   const values = items.flatMap((item) =>
-    ACTIONS.map((action) => Boolean(permissions?.[moduleKey]?.[item.key]?.[action])),
+    ACTIONS.map((action) =>
+      Boolean(permissions?.[moduleKey]?.[item.key]?.[action]),
+    ),
   );
   const selected = values.filter(Boolean).length;
 
@@ -433,7 +441,9 @@ const EmployeePermission = () => {
         <p className={styles.status}>Loading permissions...</p>
       ) : null}
 
-      <div className={`${styles.tableWrap} ${isFetching ? styles.tableBusy : ""}`}>
+      <div
+        className={`${styles.tableWrap} ${isFetching ? styles.tableBusy : ""}`}
+      >
         <div className={`${styles.grid} ${styles.head}`}>
           <span>Module</span>
           {ACTIONS.map((action) => (
