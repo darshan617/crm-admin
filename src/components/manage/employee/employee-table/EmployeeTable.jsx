@@ -347,7 +347,7 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
         page={currentPage}
         totalPages={totalPages}
         onChange={setPage}
-        align="end"
+        align="center"
       />
     </section>
   );

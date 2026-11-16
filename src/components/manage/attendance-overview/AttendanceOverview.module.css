@@ -1,0 +1,312 @@
+.card {
+  background: #fff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 22px 24px 18px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+.tableTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.showing {
+  margin: 0;
+  padding-right: 12px;
+  border-right: 1px solid #e2e8f0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.showing strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.searchWrap {
+  position: relative;
+}
+
+.searchInput {
+  width: 240px;
+  max-width: 100%;
+  height: 38px;
+  padding: 7px 38px 7px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: #fff;
+  font-size: 13px;
+  color: #1e293b;
+  outline: none;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+}
+
+.searchInput:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 32px;
+  padding: 6px 2px 18px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 8px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.select,
+.dateInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font-size: 13px;
+  outline: none;
+}
+
+.select:focus,
+.dateInput:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.08);
+}
+
+.filled {
+  color: #1e293b;
+}
+
+.dateRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dateInput {
+  width: 160px;
+}
+
+.filterBar {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 2px 0 16px;
+}
+
+.borderLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: #edf2f7;
+}
+
+.filterBtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #0056b3;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.th {
+  padding: 12px 18px;
+  background: #eaf3ff;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.th:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.th:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.row > td {
+  background: #fff;
+  border-top: 1px solid #eef2f7;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.row > td:first-child {
+  border-left: 1px solid #eef2f7;
+  border-radius: 10px 0 0 10px;
+}
+
+.row > td:last-child {
+  border-right: 1px solid #eef2f7;
+  border-radius: 0 10px 10px 0;
+}
+
+.td {
+  padding: 14px 18px;
+  font-size: 13px;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.employee {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.name {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.avatarImg {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.avatar_purple {
+  background: #7c3aed;
+}
+
+.avatar_blue {
+  background: #2563eb;
+}
+
+.avatar_pink {
+  background: #db2777;
+}
+
+.avatar_teal {
+  background: #0d9488;
+}
+
+.avatar_orange {
+  background: #ea580c;
+}
+
+.avatar_indigo {
+  background: #4f46e5;
+}
+
+.timePrimary {
+  display: block;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.timeAgo,
+.muted {
+  color: #94a3b8;
+}
+
+.timeAgo {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+
+.badgeActive {
+  background: #10b981;
+}
+
+.badgeInactive {
+  background: #f43f5e;
+}
+
+.badgeSuspended {
+  background: #f59e0b;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+@media (max-width: 980px) {
+  .filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 16px;
+  }
+
+  .showing {
+    border-right: 0;
+    padding-right: 0;
+  }
+}

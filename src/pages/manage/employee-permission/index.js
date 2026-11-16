@@ -13,7 +13,11 @@ const sidePanelItems = [
     href: "/manage/employee-permission",
     active: true,
   },
-  { label: "Attendance Overview", icon: FiBell },
+  {
+    label: "Attendance Overview",
+    icon: FiBell,
+    href: "/manage/attendance-overview",
+  },
 ];
 
 const EmployeePermissionPage = () => {

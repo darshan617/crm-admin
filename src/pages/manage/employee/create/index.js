@@ -36,6 +36,9 @@ const CreateEmployee = () => {
                   if (label === "Employee Permissions") {
                     router.push("/manage/employee-permission");
                   }
+                  if (label === "Attendance Overview") {
+                    router.push("/manage/attendance-overview");
+                  }
                 }}
               >
                 <span className={styles.navIconWrap}>
