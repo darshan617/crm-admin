@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
-import { FiSearch, FiSliders } from "react-icons/fi";
+import { FiChevronDown, FiSearch, FiSliders } from "react-icons/fi";
 import Pagination, {
   usePageQuery,
 } from "@/common-components/pagination/Pagination";
@@ -244,6 +244,7 @@ function EmployeeAvatar({ name, photo }) {
 }
 
 export default function AttendanceOverview() {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     role: "",
@@ -330,9 +331,14 @@ export default function AttendanceOverview() {
         </form>
       </div>
 
-      <div className={styles.filters}>
-        <div className={styles.field}>
-          <label htmlFor="attendance-role">Role:</label>
+      <div
+        id="attendance-filters"
+        className={`${styles.filtersWrap} ${filtersOpen ? styles.filtersOpen : ""}`}
+        inert={filtersOpen ? undefined : true}
+      >
+        <div className={styles.filters}>
+          <div className={styles.field}>
+            <label htmlFor="attendance-role">Role:</label>
           <select
             id="attendance-role"
             className={`${styles.select} ${filters.role ? styles.filled : ""}`}
@@ -404,13 +410,25 @@ export default function AttendanceOverview() {
             />
           </div>
         </div>
+        </div>
       </div>
 
       <div className={styles.filterBar}>
         <div className={styles.borderLine} />
-        <button type="button" className={styles.filterBtn}>
+        <button
+          type="button"
+          className={styles.filterBtn}
+          aria-expanded={filtersOpen}
+          aria-controls="attendance-filters"
+          onClick={() => setFiltersOpen((open) => !open)}
+        >
           <FiSliders size={14} />
           Filters
+          <FiChevronDown
+            size={16}
+            className={`${styles.chevron} ${filtersOpen ? styles.chevronUp : ""}`}
+            aria-hidden="true"
+          />
         </button>
       </div>
 
@@ -527,3 +545,4 @@ export default function AttendanceOverview() {
     </section>
   );
 }
+
