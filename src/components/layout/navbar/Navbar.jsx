@@ -174,11 +174,11 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
               </div>
 
               <div className={styles.profileMenu}>
-                <a href="/">
+                <a href="/my-profile">
                   <FaUser />
                   <span>My Profile</span>
                 </a>
-                <a href="/">
+                <a href="/account-settings">
                   <CiSettings />
                   <span>Settings</span>
                 </a>
