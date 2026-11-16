@@ -8,27 +8,35 @@ import { FiUserPlus } from "react-icons/fi";
 
 import styles from "@/components/dashboard/team-performance/TeamPerformance.module.css";
 
-const TeamPerformance = ({ team }) => {
+// Used only if the API doesn't send period_options
+const FALLBACK_PERIODS = [
+  { id: "today", name: "Today" },
+  { id: "7d", name: "Last 7 days" },
+  { id: "month", name: "Last Month" },
+];
+
+const TeamPerformance = ({
+  team,
+  filters = {},
+  periodOptions = [],
+  onPeriodChange,
+}) => {
   const quickActions = [
     { href: "/leads/add-new-leads", icon: IoIosAdd, label: "Add Leads" },
     {
-      href: "/upload-leads",
+      href: "leads/upload-leads",
       icon: BsFileEarmarkArrowUp,
       label: "Upload Leads",
     },
     {
-      href: "/quotations",
+      href: "/quotations/add-quotation",
       icon: LuFilePlus2,
       label: "Add Quotation",
     },
-    { href: "/", icon: FiUserPlus, label: "Add Employee" },
+    { href: "/manage/employee/create", icon: FiUserPlus, label: "Add Employee" },
   ];
 
-  const filters = [
-    { label: "Today", active: false },
-    { label: "Last 7 days", active: true },
-    { label: "Last Month", active: false },
-  ];
+  const periods = periodOptions.length ? periodOptions : FALLBACK_PERIODS;
 
   const teamMembers = (Array.isArray(team) ? team : []).map((m) => ({
     name: m?.name ?? "Unknown",
@@ -50,11 +58,7 @@ const TeamPerformance = ({ team }) => {
     <>
       <div className={styles.newQuickActions}>
         {quickActions.map(({ href, icon: Icon, label }) => (
-          <Link
-            key={label}
-            href={href}
-            className={styles.quickBtn}
-          >
+          <Link key={label} href={href} className={styles.quickBtn}>
             <Icon />
             <span>{label}</span>
           </Link>
@@ -69,12 +73,16 @@ const TeamPerformance = ({ team }) => {
             </div>
 
             <div className={styles.salesFilter}>
-              {filters.map((f) => (
+              {periods?.slice(0, 3)?.map((p) => (
                 <button
-                  key={f.label}
-                  className={f.active ? styles.active : undefined}
+                  key={p.id}
+                  type="button"
+                  className={
+                    filters.period === p.id ? styles.active : undefined
+                  }
+                  onClick={() => onPeriodChange?.(p.id)}
                 >
-                  {f.label}
+                  {p.name}
                 </button>
               ))}
             </div>
@@ -83,19 +91,19 @@ const TeamPerformance = ({ team }) => {
           <div>
             <table className={styles.teamTable}>
               <tbody className={styles.tableBody}>
-                {teamMembers.slice(0, 5).map((member, index) => (
+                {teamMembers?.slice(0, 5)?.map((member, index) => (
                   <tr
                     key={`${member.name}-${index}`}
                     className={`${styles.teamPrRow} ${styles.tableRow}`}
                   >
                     <td className={styles.customer}>
                       <div className={styles.avatar}>
-                        {member.name?.[0] || "U"}
+                        {member?.name?.[0] || "U"}
                       </div>
 
                       <div>
-                        <h5>{member.name}</h5>
-                        <p>{member.role}</p>
+                        <h5>{member?.name}</h5>
+                        <p>{member?.role}</p>
                       </div>
                     </td>
 

@@ -6,7 +6,13 @@ import { LuCalendarClock, LuClipboardCheck } from "react-icons/lu";
 import { CiClock2 } from "react-icons/ci";
 import { AiOutlineExclamationCircle } from "react-icons/ai";
 
-const AccountSummary = ({ summary, user }) => {
+const AccountSummary = ({
+  summary,
+  user,
+  filters = {},
+  defaultRange = {},
+  onRangeChange,
+}) => {
   const summaryCards = [
     {
       title: "Total Leads",
@@ -40,6 +46,17 @@ const AccountSummary = ({ summary, user }) => {
     },
   ];
 
+  const fromValue = filters.from || defaultRange.from || "";
+  const toValue = filters.to || defaultRange.to || "";
+
+  const handleFromChange = (e) => {
+    onRangeChange?.({ from: e.target.value, to: toValue });
+  };
+
+  const handleToChange = (e) => {
+    onRangeChange?.({ from: fromValue, to: e.target.value });
+  };
+
   return (
     <section>
       <div className={styles.pageHeader}>
@@ -56,11 +73,25 @@ const AccountSummary = ({ summary, user }) => {
 
             <div className={styles.dateRange}>
               <div className={styles.dateInput}>
-                <input type="date" />
+                <input
+                  type="date"
+                  name="from"
+                  value={fromValue}
+                  max={toValue || undefined}
+                  onChange={handleFromChange}
+                  aria-label="From date"
+                />
               </div>
 
               <div className={styles.dateInput}>
-                <input type="date" />
+                <input
+                  type="date"
+                  name="to"
+                  value={toValue}
+                  min={fromValue || undefined}
+                  onChange={handleToChange}
+                  aria-label="To date"
+                />
               </div>
             </div>
           </div>
