@@ -5,7 +5,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import { FiBell, FiSearch, FiChevronDown } from "react-icons/fi";
+import { FiBell, FiSearch, FiChevronDown, FiX } from "react-icons/fi";
 import styles from "./Navbar.module.css";
 import {
   TbLayoutSidebarLeftExpand,
@@ -18,6 +18,7 @@ import Cookies from "js-cookie";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import Link from "next/link";
 import Sidebar from "../sidebar/Sidebar";
 
 const subscribeToUserCookie = () => () => {};
@@ -28,6 +29,44 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { showToast } = useToast();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "New Support Ticket",
+      message: "A new support ticket has been created.",
+      time: "5 minutes ago",
+      unread: true,
+    },
+    {
+      id: 2,
+      title: "Payment Received",
+      message: "Payment of ₹12,500 received successfully.",
+      time: "20 minutes ago",
+      unread: true,
+    },
+    {
+      id: 3,
+      title: "Invoice Pending",
+      message: "Invoice #INV1025 is pending payment.",
+      time: "1 hour ago",
+      unread: true,
+    },
+    {
+      id: 4,
+      title: "New Customer",
+      message: "A new customer has been registered.",
+      time: "2 hours ago",
+      unread: false,
+    },
+    {
+      id: 5,
+      title: "Ticket Escalated",
+      message: "Support ticket SUP0011 has been escalated.",
+      time: "3 hours ago",
+      unread: false,
+    },
+  ]);
   const userCookie = useSyncExternalStore(
     subscribeToUserCookie,
     getUserCookieSnapshot,
@@ -44,6 +83,13 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     }
   }, [userCookie]);
   const profileRef = useRef(null);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const markOneRead = (id) =>
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, unread: false } : n)),
+    );
 
   const handleLogout = () => {
     try {
@@ -64,7 +110,10 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
       }
     };
     const handleEscape = (e) => {
-      if (e.key === "Escape") setProfileOpen(false);
+      if (e.key === "Escape") {
+        setProfileOpen(false);
+        setNotificationOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
@@ -126,9 +175,12 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
             type="button"
             aria-label="Notifications"
             title="Notifications"
+            onClick={() => setNotificationOpen(true)}
           >
             <FiBell />
-            <span className={styles.notificationDot}>5</span>
+            {unreadCount > 0 && (
+              <span className={styles.notificationDot}>{unreadCount}</span>
+            )}
           </button>
 
           <div className={styles.profileWrapper} ref={profileRef}>
@@ -143,7 +195,7 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
                 {userData?.name?.charAt(0) || "-"}
               </div>
               <div className={styles.profileInfo}>
-                <h5>{userData?.name || "-"}</h5>
+                <h5 className="text-capitalize">{userData?.name || "-"}</h5>
                 <small>{userData?.role || "-"}</small>
               </div>
               <FiChevronDown
@@ -192,8 +244,58 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
             </div>
           </div>
         </div>
-        {/* </div> */}
       </header>
+
+      {/* Notification sidebar */}
+      <div
+        className={`${styles.notifOverlay} ${
+          notificationOpen ? styles.notifOpen : ""
+        }`}
+        onClick={() => setNotificationOpen(false)}
+      />
+
+      <aside
+        className={`${styles.notifSidebar} ${
+          notificationOpen ? styles.notifOpen : ""
+        }`}
+        aria-hidden={!notificationOpen}
+      >
+        <div className={styles.notifHeader}>
+          <div>
+            <h3>Notifications</h3>
+            <p>{unreadCount} new notifications</p>
+          </div>
+
+          <button
+            type="button"
+            className={styles.notifClose}
+            aria-label="Close notifications"
+            onClick={() => setNotificationOpen(false)}
+          >
+            <FiX size={22} />
+          </button>
+        </div>
+
+        <div className={styles.notifBody}>
+          {notifications.map((item) => (
+            <button
+              type="button"
+              key={item.id}
+              className={`${styles.sideNotification} ${
+                item.unread ? styles.unread : ""
+              }`}
+              onClick={() => markOneRead(item.id)}
+            >
+              <div className={styles.sideNotificationTop}>
+                <h4>{item.title}</h4>
+                {item.unread && <span className={styles.sideDot} />}
+              </div>
+              <p>{item.message}</p>
+              <small>{item.time}</small>
+            </button>
+          ))}
+        </div>
+      </aside>
     </>
   );
 };

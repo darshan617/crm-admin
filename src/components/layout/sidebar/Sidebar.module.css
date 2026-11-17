@@ -1,7 +1,7 @@
 .sidebar {
   position: fixed;
   z-index: 6;
-  inset: 98px auto 0 0;
+  inset: 78px auto 0 0;
   display: flex;
   flex-direction: column;
   width: var(--sidebar-width);
@@ -265,17 +265,17 @@
   background: #e4f2ff;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1300px) {
   .sidebar {
     position: fixed;
-    inset: 97px auto 0 0;
+    /* inset: 97px auto 0 0;  */
     width: 255px;
     height: calc(100dvh - 97px);
     z-index: 1100;
     overflow-x: hidden;
     overflow-y: auto;
     background: #fff;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.12);
+    /* box-shadow: 4px 0 20px rgba(0, 0, 0, 0.12); */
     transform: translateX(-100%);
     visibility: hidden;
     transition:
@@ -296,13 +296,6 @@
 @media (max-width: 560px) {
   .sidebar {
     width: min(280px, 85vw);
-  }
-}
-
-@media (max-width: 375px) {
-  .sidebar {
-    top: 98px;
-    height: calc(100dvh - 98px);
   }
 }
 

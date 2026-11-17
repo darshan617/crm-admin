@@ -118,3 +118,10 @@
   background: #0b4c95;
   color: #fff;
 }
+
+@media (max-width: 575px){
+  .followupDetail {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

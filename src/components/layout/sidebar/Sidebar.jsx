@@ -39,16 +39,16 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
     >
       <nav className={styles.navigation}>
         {SIDEBAR_SECTIONS?.map((section) => (
-          <React.Fragment key={section.key}>
+          <React.Fragment key={section?.key}>
             <span
               className={`${styles.sectionLabel} ${
                 section.key !== "menu" ? styles.settingsLabel : ""
               }`}
             >
-              {section.name}
+              {section?.name}
             </span>
 
-            {section.items.map((item) => {
+            {section?.items?.map((item) => {
               const Icon = item.icon;
 
               if (item.children) {
@@ -60,7 +60,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
 
                 return (
                   <div
-                    key={item.key}
+                    key={item?.key}
                     className={styles.manageWrapper}
                     onMouseEnter={handleManageMouseEnter}
                     onMouseLeave={handleManageMouseLeave}
@@ -81,7 +81,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                         <Icon aria-hidden="true" />
                       </span>
 
-                      <span className={styles.navLabel}>{item.name}</span>
+                      <span className={styles.navLabel}>{item?.name}</span>
 
                       <FiChevronDown
                         className={`${styles.chevron} ${
@@ -104,13 +104,13 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
 
                         return (
                           <Link
-                            key={child.key}
-                            href={child.url}
+                            key={child?.key}
+                            href={child?.url}
                             aria-current={childActive ? "page" : undefined}
                             tabIndex={manageOpen ? 0 : -1}
                             className={childActive ? styles.subnavActive : ""}
                           >
-                            {child.name}
+                            {child?.name}
                           </Link>
                         );
                       })}
