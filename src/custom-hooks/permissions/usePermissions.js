@@ -37,7 +37,7 @@ const readLoginAs = () => {
 
   try {
     const parsedUserData = JSON.parse(userData);
-    return parsedUserData?.login_as ?? null;
+    return parsedUserData?.role_label ?? null;
   } catch (error) {
     console.error("Invalid userData:", error);
     return null;
@@ -62,7 +62,8 @@ const usePermissions = () => {
 
   // Full access only when the account is explicitly not a partner user.
   // This login payload often has no login_as, so those accounts follow can_*.
-  const hasFullAccess = loginAs != null && loginAs !== "partner_user";
+  const hasFullAccess =
+    loginAs != null && (loginAs === "Admin" || loginAs === "super_admin");
 
   const allows = useCallback(
     (moduleKey, action) => {
@@ -85,10 +86,7 @@ const usePermissions = () => {
     [allows],
   );
 
-  const canAdd = useCallback(
-    (moduleKey) => allows(moduleKey, "add"),
-    [allows],
-  );
+  const canAdd = useCallback((moduleKey) => allows(moduleKey, "add"), [allows]);
 
   const canEdit = useCallback(
     (moduleKey) => allows(moduleKey, "edit"),

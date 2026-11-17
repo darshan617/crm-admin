@@ -27,8 +27,28 @@ import {
   useUpdateLeadMutation,
 } from "@/redux/apis/leadsApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import { ImAttachment } from "react-icons/im";
 import { BiTrash } from "react-icons/bi";
+
+const leadModuleKeyFromSource = (lead) => {
+  const source = String(
+    lead?.lead_source || lead?.source || lead?.type || "",
+  ).toLowerCase();
+
+  if (
+    source.includes("justdial") ||
+    source.includes("just dial") ||
+    source === "jd" ||
+    source.includes("jd lead") ||
+    source.includes("jd_lead")
+  ) {
+    return "jd_leads";
+  }
+
+  if (source.includes("exhibit")) return "exhibition_leads";
+  return "leads";
+};
 
 const displayValue = (value) =>
   value === null || value === undefined || value === "" ? "-" : value;
@@ -192,6 +212,7 @@ export default function LeadDetail() {
   const { showToast } = useToast();
   const dispatch = useDispatch();
   const router = useRouter();
+  const { canView, canAdd, canEdit, canDelete } = usePermissions();
   const isPopupVisible = useSelector(selectIsPopupVisble);
   const [editingItem, setEditingItem] = useState(null);
   const selectedDocumentFilesRef = useRef(new Map());
@@ -294,6 +315,13 @@ export default function LeadDetail() {
     useLeadDocumentDeleteMutation();
 
   const leadData = getLeadDeatils?.data?.lead || {};
+  const leadModuleKey = leadModuleKeyFromSource(leadData);
+  const canSeeLead = leadData?.id
+    ? canView("leads") || canView(leadModuleKey)
+    : canView("leads") || canView("jd_leads") || canView("exhibition_leads");
+  const canEditLead = canEdit("leads") || canEdit(leadModuleKey);
+  const canDeleteLead = canDelete("leads") || canDelete(leadModuleKey);
+  const canCreateQuotation = canAdd("create_quotations");
   const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
   const services = Array.isArray(leadData.services) ? leadData.services : [];
 
@@ -433,6 +461,8 @@ export default function LeadDetail() {
   };
 
   const openPopup = (popup, item = null) => {
+    if (!canEditLead) return;
+
     let popupItem = item ? { ...item } : null;
 
     if (leadData.id) {
@@ -551,6 +581,7 @@ export default function LeadDetail() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (!canEditLead) return;
     try {
       const formBody = new FormData();
       formBody.append(
@@ -612,6 +643,8 @@ export default function LeadDetail() {
   };
 
   const handleDeleteContactService = async (lead_id, id, type) => {
+    if (!canDeleteLead) return;
+
     try {
       const res = await deleteContactService({
         body: {},
@@ -629,6 +662,8 @@ export default function LeadDetail() {
     }
   };
   const handleDeleteDocument = async (lead_id, idx) => {
+    if (!canDeleteLead) return;
+
     try {
       const res = await deleteDocument({
         body: {
@@ -662,6 +697,8 @@ export default function LeadDetail() {
     }));
   }, [leadData?.id, leadData?.follow_up_date, leadData?.follow_up_note]);
 
+  if (!canSeeLead) return null;
+
   return (
     <>
       <div className="page-header">
@@ -679,7 +716,7 @@ export default function LeadDetail() {
         </div>
 
         <div className="back">
-          <a onClick={() => router.back()}  className="back-btn">
+          <a onClick={() => router.back()} className="back-btn">
             <GoArrowLeft />
             <span>Back</span>
           </a>
@@ -732,14 +769,16 @@ export default function LeadDetail() {
                 <div className={styles.leadCompanyHeader}>
                   <h3>{displayValue(leadData?.company_name)}</h3>
 
-                  <button
-                    type="button"
-                    className={styles.editLeadBtn}
-                    onClick={() => openPopup("add-details-popup")}
-                  >
-                    <FaPencil />
-                    Add / Edit Details
-                  </button>
+                  {canEditLead && (
+                    <button
+                      type="button"
+                      className={styles.editLeadBtn}
+                      onClick={() => openPopup("add-details-popup")}
+                    >
+                      <FaPencil />
+                      Add / Edit Details
+                    </button>
+                  )}
                 </div>
 
                 <div className={styles.leadInfoGrid}>
@@ -819,13 +858,15 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>CONTACT INFORMATION</h3>
 
-                  <a
-                    onClick={() => openPopup("add-contact")}
-                    className={styles.addCreditBtn}
-                  >
-                    <GoPlus />
-                    Add Contact
-                  </a>
+                  {canEditLead && (
+                    <a
+                      onClick={() => openPopup("add-contact")}
+                      className={styles.addCreditBtn}
+                    >
+                      <GoPlus />
+                      Add Contact
+                    </a>
+                  )}
                 </div>
 
                 <div className={styles.contactInformationSection}>
@@ -835,40 +876,46 @@ export default function LeadDetail() {
                         className={styles.leadContactCard}
                         key={contact?.id ?? `${contact?.name}-${index}`}
                       >
-                        <div
-                          className={`${styles.serviceActions} ${styles.actionAbsolute}`}
-                        >
-                          <button
-                            type="button"
-                            title="Delete contact"
-                            aria-label={`Delete contact ${contact?.name || ""}`}
-                            onClick={() => {
-                              dispatch(setIsPopupVisible("deletePopup"));
-                              setDeleteInfo((prev) => ({
-                                ...prev,
-                                id: contact?.id,
-                                lead_id: contact?.lead_id,
-                                type: "contacts",
-                              }));
-                            }}
+                        {(canDeleteLead || canEditLead) && (
+                          <div
+                            className={`${styles.serviceActions} ${styles.actionAbsolute}`}
                           >
-                            <FiTrash2 />
-                          </button>
-                          <button
-                            type="button"
-                            title="Edit contact"
-                            aria-label={`Edit contact ${contact?.name || ""}`}
-                            onClick={() =>
-                              openPopup("add-contact", {
-                                type: "contact",
-                                data: contact,
-                                index,
-                              })
-                            }
-                          >
-                            <FaPencil />
-                          </button>
-                        </div>
+                            {canDeleteLead && (
+                              <button
+                                type="button"
+                                title="Delete contact"
+                                aria-label={`Delete contact ${contact?.name || ""}`}
+                                onClick={() => {
+                                  dispatch(setIsPopupVisible("deletePopup"));
+                                  setDeleteInfo((prev) => ({
+                                    ...prev,
+                                    id: contact?.id,
+                                    lead_id: contact?.lead_id,
+                                    type: "contacts",
+                                  }));
+                                }}
+                              >
+                                <FiTrash2 />
+                              </button>
+                            )}
+                            {canEditLead && (
+                              <button
+                                type="button"
+                                title="Edit contact"
+                                aria-label={`Edit contact ${contact?.name || ""}`}
+                                onClick={() =>
+                                  openPopup("add-contact", {
+                                    type: "contact",
+                                    data: contact,
+                                    index,
+                                  })
+                                }
+                              >
+                                <FaPencil />
+                              </button>
+                            )}
+                          </div>
+                        )}
 
                         <div className={styles.contactInfoGrid}>
                           <div>
@@ -906,30 +953,32 @@ export default function LeadDetail() {
                 <div className="common-table-card p-16">
                   <div className={styles.cardHeader}>
                     <h3>CURRENT SERVICE (INFO)</h3>
-                    <a
-                      onClick={() => openPopup("add-current-service")}
-                      className={styles.addCreditBtn}
-                      id="openAddInfoService"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        data-lucide="plus"
-                        aria-hidden="true"
-                        className="lucide lucide-plus"
+                    {canEditLead && (
+                      <a
+                        onClick={() => openPopup("add-current-service")}
+                        className={styles.addCreditBtn}
+                        id="openAddInfoService"
                       >
-                        <path d="M5 12h14"></path>
-                        <path d="M12 5v14"></path>
-                      </svg>
-                      Add Current Service
-                    </a>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          data-lucide="plus"
+                          aria-hidden="true"
+                          className="lucide lucide-plus"
+                        >
+                          <path d="M5 12h14"></path>
+                          <path d="M12 5v14"></path>
+                        </svg>
+                        Add Current Service
+                      </a>
+                    )}
                   </div>
                   {currentServices?.length ? (
                     currentServices?.map((service, index) => (
@@ -937,40 +986,46 @@ export default function LeadDetail() {
                         className={`${styles.serviceRequiredCard} ${styles.serviceRequiredCard2}`}
                         key={service?.id}
                       >
-                        <div
-                          className={`${styles.serviceActions} ${styles.actionAbsolute}`}
-                        >
-                          <button
-                            type="button"
-                            title="Delete current service"
-                            aria-label="Delete current service"
-                            onClick={() => {
-                              dispatch(setIsPopupVisible("deletePopup"));
-                              setDeleteInfo((prev) => ({
-                                ...prev,
-                                id: service?.id,
-                                lead_id: service?.lead_id,
-                                type: "services",
-                              }));
-                            }}
+                        {(canDeleteLead || canEditLead) && (
+                          <div
+                            className={`${styles.serviceActions} ${styles.actionAbsolute}`}
                           >
-                            <FiTrash2 />
-                          </button>
-                          <button
-                            type="button"
-                            title="Edit current service"
-                            aria-label="Edit current service"
-                            onClick={() =>
-                              openPopup("add-current-service", {
-                                type: "current-service",
-                                data: service,
-                                index,
-                              })
-                            }
-                          >
-                            <FaPencil />
-                          </button>
-                        </div>
+                            {canDeleteLead && (
+                              <button
+                                type="button"
+                                title="Delete current service"
+                                aria-label="Delete current service"
+                                onClick={() => {
+                                  dispatch(setIsPopupVisible("deletePopup"));
+                                  setDeleteInfo((prev) => ({
+                                    ...prev,
+                                    id: service?.id,
+                                    lead_id: service?.lead_id,
+                                    type: "services",
+                                  }));
+                                }}
+                              >
+                                <FiTrash2 />
+                              </button>
+                            )}
+                            {canEditLead && (
+                              <button
+                                type="button"
+                                title="Edit current service"
+                                aria-label="Edit current service"
+                                onClick={() =>
+                                  openPopup("add-current-service", {
+                                    type: "current-service",
+                                    data: service,
+                                    index,
+                                  })
+                                }
+                              >
+                                <FaPencil />
+                              </button>
+                            )}
+                          </div>
+                        )}
                         <div className={styles.serviceItem}>
                           <label>Domain</label>
                           <p>{displayValue(service.domain)}</p>
@@ -1013,13 +1068,15 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>OUR SERVICE</h3>
 
-                  <a
-                    onClick={() => openPopup("add-our-service")}
-                    className={styles.addCreditBtn}
-                  >
-                    <GoPlus />
-                    Add Service
-                  </a>
+                  {canEditLead && (
+                    <a
+                      onClick={() => openPopup("add-our-service")}
+                      className={styles.addCreditBtn}
+                    >
+                      <GoPlus />
+                      Add Service
+                    </a>
+                  )}
                 </div>
 
                 {ourServices?.length ? (
@@ -1028,40 +1085,46 @@ export default function LeadDetail() {
                       className={styles.serviceRequiredCard}
                       key={service?.id}
                     >
-                      <div
-                        className={`${styles.serviceActions} ${styles.actionAbsolute}`}
-                      >
-                        <button
-                          type="button"
-                          title="Delete service"
-                          aria-label="Delete service"
-                          onClick={() => {
-                            dispatch(setIsPopupVisible("deletePopup"));
-                            setDeleteInfo((prev) => ({
-                              ...prev,
-                              id: service?.id,
-                              lead_id: service?.lead_id,
-                              type: "services",
-                            }));
-                          }}
+                      {(canDeleteLead || canEditLead) && (
+                        <div
+                          className={`${styles.serviceActions} ${styles.actionAbsolute}`}
                         >
-                          <FiTrash2 />
-                        </button>
-                        <button
-                          type="button"
-                          title="Edit service"
-                          aria-label="Edit service"
-                          onClick={() =>
-                            openPopup("add-our-service", {
-                              type: "our-service",
-                              data: service,
-                              index,
-                            })
-                          }
-                        >
-                          <FaPencil />
-                        </button>
-                      </div>
+                          {canDeleteLead && (
+                            <button
+                              type="button"
+                              title="Delete service"
+                              aria-label="Delete service"
+                              onClick={() => {
+                                dispatch(setIsPopupVisible("deletePopup"));
+                                setDeleteInfo((prev) => ({
+                                  ...prev,
+                                  id: service?.id,
+                                  lead_id: service?.lead_id,
+                                  type: "services",
+                                }));
+                              }}
+                            >
+                              <FiTrash2 />
+                            </button>
+                          )}
+                          {canEditLead && (
+                            <button
+                              type="button"
+                              title="Edit service"
+                              aria-label="Edit service"
+                              onClick={() =>
+                                openPopup("add-our-service", {
+                                  type: "our-service",
+                                  data: service,
+                                  index,
+                                })
+                              }
+                            >
+                              <FaPencil />
+                            </button>
+                          )}
+                        </div>
+                      )}
                       <div className={styles.serviceItem}>
                         <label>Service</label>
                         <p>{displayValue(service.provider?.name)}</p>
@@ -1105,11 +1168,13 @@ export default function LeadDetail() {
                   <p>No services added.</p>
                 )}
 
-                <div className={styles.submitWrap}>
-                  <button type="button" className={styles.submitBtn}>
-                    Create Quotation
-                  </button>
-                </div>
+                {canCreateQuotation && (
+                  <div className={styles.submitWrap}>
+                    <button type="button" className={styles.submitBtn}>
+                      Create Quotation
+                    </button>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -1122,13 +1187,15 @@ export default function LeadDetail() {
                 <div className={styles.cardHeader}>
                   <h3>DOCUMENTS</h3>
 
-                  <a
-                    onClick={() => openPopup("add-document")}
-                    className={styles.addCreditBtn}
-                  >
-                    <GoPlus />
-                    Add Document
-                  </a>
+                  {canEditLead && (
+                    <a
+                      onClick={() => openPopup("add-document")}
+                      className={styles.addCreditBtn}
+                    >
+                      <GoPlus />
+                      Add Document
+                    </a>
+                  )}
                 </div>
 
                 <div className={styles.downloadList}>
@@ -1152,18 +1219,20 @@ export default function LeadDetail() {
                           >
                             {displayValue(item?.name)}
                           </Link>
-                          <button
-                            onClick={() => {
-                              dispatch(setIsPopupVisible("deleteDocument"));
-                              setDeleteInfo((prev) => ({
-                                ...prev,
-                                idx: idx,
-                              }));
-                            }}
-                            className="cursor-pointer"
-                          >
-                            <BiTrash color="red" />
-                          </button>
+                          {canDeleteLead && (
+                            <button
+                              onClick={() => {
+                                dispatch(setIsPopupVisible("deleteDocument"));
+                                setDeleteInfo((prev) => ({
+                                  ...prev,
+                                  idx: idx,
+                                }));
+                              }}
+                              className="cursor-pointer"
+                            >
+                              <BiTrash color="red" />
+                            </button>
+                          )}
                         </div>
                       );
                     })
@@ -1207,6 +1276,7 @@ export default function LeadDetail() {
                           handleFormChange(e, "lead_specification")
                         }
                         name="lead_priority"
+                        disabled={!canEditLead}
                       >
                         <option value="">Select Category</option>
                         {getLeadDeatils?.data?.options?.lead_priority?.map(
@@ -1233,6 +1303,7 @@ export default function LeadDetail() {
                           handleFormChange(e, "lead_specification")
                         }
                         name="lead_source"
+                        disabled={!canEditLead}
                       >
                         <option value="">Select Source</option>
                         {getLeadDeatils?.data?.options?.lead_source?.map(
@@ -1258,6 +1329,7 @@ export default function LeadDetail() {
                           handleFormChange(e, "lead_specification")
                         }
                         defaultValue={leadData.lead_status || ""}
+                        disabled={!canEditLead}
                       >
                         <option value="">Select Status</option>
                         {getLeadDeatils?.data?.options?.lead_status?.map(
@@ -1281,6 +1353,7 @@ export default function LeadDetail() {
                       onChange={(e) =>
                         handleFormChange(e, "lead_specification")
                       }
+                      disabled={!canEditLead}
                     >
                       <option value="">Select Employee</option>
                       {getLeadDeatils?.data?.options?.assignees?.map(
@@ -1313,6 +1386,7 @@ export default function LeadDetail() {
                           handleFormChange(e, "follow_up_detail")
                         }
                         placeholder="dd/mm/yy - hh:mm"
+                        disabled={!canEditLead}
                       />
                     </div>
                   </div>
@@ -1332,18 +1406,21 @@ export default function LeadDetail() {
                         leadData?.follow_up_note
                       }
                       onChange={(e) => handleFormChange(e, "follow_up_detail")}
+                      disabled={!canEditLead}
                     />
                   </div>
 
-                  <div className={styles.submitWrap}>
-                    <button
-                      type="button"
-                      className={styles.submitBtn}
-                      onClick={handleUpdate}
-                    >
-                      Save
-                    </button>
-                  </div>
+                  {canEditLead && (
+                    <div className={styles.submitWrap}>
+                      <button
+                        type="button"
+                        className={styles.submitBtn}
+                        onClick={handleUpdate}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>

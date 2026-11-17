@@ -3,10 +3,14 @@ import AllLeads from "@/components/leads/all-leads/AllLeads";
 import LeadSummary from "@/components/leads/lead-summary/LeadSummary";
 import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
 import { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import React from "react";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const index = () => {
   const router = useRouter();
+  const { canView } = usePermissions();
+  const canSeeLeads =
+    canView("leads") || canView("jd_leads") || canView("exhibition_leads");
   const { data: allLeadsListData } = useGetAllLeadsQuery(
     {
       source: router?.query?.type,
@@ -14,15 +18,19 @@ const index = () => {
       items_per_page: router?.query?.items_per_page || 10,
     },
     {
-      skip: !router?.query?.type,
+      skip: !router?.query?.type || !canSeeLeads,
     },
   );
 
   return (
     <Layout>
       <div className="content">
-        <LeadSummary allLeadsListData={allLeadsListData} />
-        <AllLeads allLeadsListData={allLeadsListData} />
+        {canSeeLeads && (
+          <>
+            <LeadSummary allLeadsListData={allLeadsListData} />
+            <AllLeads allLeadsListData={allLeadsListData} />
+          </>
+        )}
       </div>
     </Layout>
   );

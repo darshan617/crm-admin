@@ -5,14 +5,14 @@ import { CiSearch } from "react-icons/ci";
 import { LuCalendarDays } from "react-icons/lu";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import styles from "@/components/leads/all-leads/AllLeads.module.css";
-import { useGetAllLeadsQuery } from "@/redux/apis/leadsApi";
 import { useRouter } from "next/router";
 import Pagination from "@/common-components/pagination/Pagination";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const TABS = [
-  { label: "All Leads", href: "#", active: false, query: "all" },
-  { label: "JD Leads", href: "#", active: false, query: "justdial" },
-  { label: "Exhibition Leads", href: "#", active: false, query: "exhibition" },
+  { label: "All Leads", query: "all", moduleKey: "leads" },
+  { label: "JD Leads", query: "justdial", moduleKey: "jd_leads" },
+  { label: "Exhibition Leads", query: "exhibition", moduleKey: "exhibition_leads" },
 ];
 
 const FILTER_SELECTS = [
@@ -178,9 +178,11 @@ const TOTAL_CUSTOMERS = 124;
 
 export default function AllLeads({ allLeadsListData }) {
   const router = useRouter();
+  const { canView } = usePermissions();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [tabs, setTabs] = useState(TABS);
+  const visibleTabs = TABS.filter((tab) => canView(tab.moduleKey));
+  const visibleTabKey = visibleTabs.map((tab) => tab.query).join(",");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemPerPage, setItemPerPage] = useState(10);
   const paginationData = allLeadsListData?.data?.pagination || {};
@@ -199,11 +201,18 @@ export default function AllLeads({ allLeadsListData }) {
   };
 
   useEffect(() => {
-    router?.push({
-      pathname: "/leads",
-      query: `type=${router?.query?.type || "all"}`,
-    });
-  }, []);
+    if (!router.isReady || !visibleTabs.length) return;
+
+    const currentType = router.query?.type;
+    const isAllowed = visibleTabs.some((tab) => tab.query === currentType);
+
+    if (!isAllowed) {
+      router.replace({
+        pathname: "/leads",
+        query: `type=${visibleTabs[0].query}`,
+      });
+    }
+  }, [router, visibleTabKey]);
 
   // useEffect(() => {
   //   setCurrentPage(paginationData?.page_no);
@@ -213,7 +222,7 @@ export default function AllLeads({ allLeadsListData }) {
   return (
     <section className={styles.commonTableSection}>
       <div className={styles.crmLeadTabs}>
-        {tabs.map((tab) => (
+        {visibleTabs.map((tab) => (
           <button
             key={tab.label}
             className={router?.query?.type === tab?.query ? styles.active : ""}
