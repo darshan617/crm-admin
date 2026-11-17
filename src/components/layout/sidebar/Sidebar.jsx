@@ -5,9 +5,11 @@ import { useRouter } from "next/router";
 import { FiChevronDown, FiMessageSquare } from "react-icons/fi";
 import { SIDEBAR_CHAT, SIDEBAR_SECTIONS } from "@/constants/sidebar";
 import styles from "./Sidebar.module.css";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const Sidebar = ({ collapsed, onExpandSidebar }) => {
   const [manageOpen, setManageOpen] = useState(false);
+  const { canView } = usePermissions();
 
   const router = useRouter();
   const currentPath = router.asPath.split(/[?#]/)[0];
@@ -36,7 +38,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
       aria-label="Main navigation"
     >
       <nav className={styles.navigation}>
-        {SIDEBAR_SECTIONS.map((section) => (
+        {SIDEBAR_SECTIONS?.map((section) => (
           <React.Fragment key={section.key}>
             <span
               className={`${styles.sectionLabel} ${
@@ -50,6 +52,12 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
               const Icon = item.icon;
 
               if (item.children) {
+                const visibleChildren = item.children.filter((child) =>
+                  canView(child.moduleKey),
+                );
+
+                if (!visibleChildren.length) return null;
+
                 return (
                   <div
                     key={item.key}
@@ -91,7 +99,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                       aria-hidden={!manageOpen}
                       inert={!manageOpen}
                     >
-                      {item.children.map((child) => {
+                      {visibleChildren.map((child) => {
                         const childActive = currentPath === child.url;
 
                         return (
@@ -110,6 +118,8 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                   </div>
                 );
               }
+
+              if (!canView(item.moduleKey)) return null;
 
               const active =
                 currentPath === item.url ||

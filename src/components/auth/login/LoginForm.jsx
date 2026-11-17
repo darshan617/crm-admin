@@ -30,6 +30,15 @@ const LoginForm = () => {
       if (res?.success) {
         Cookies.set("CRM_USER", JSON.stringify(res?.data?.user));
         Cookies.set("token", JSON.stringify(res?.data?.token));
+
+        const permissions = res?.data?.permissions;
+
+        if (Array.isArray(permissions)) {
+          localStorage.setItem("UP", JSON.stringify(permissions));
+        } else {
+          localStorage.removeItem("UP");
+        }
+
         showToast(res?.message, "success");
         router?.push("/dashboard");
       } else {
