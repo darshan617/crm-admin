@@ -111,60 +111,61 @@
 }
 
 .planFeatures li::before {
-    content: "\2713";
-    position: absolute;
-    left: 0;
-    top: 0;
-    color: #00bfa5;
-    font-size: var(--font-size-14px);
-    font-weight: 700;
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #00bfa5;
+  font-size: var(--font-size-14px);
+  font-weight: 700;
 }
 
 .planCard:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 16px 35px rgba(0, 55, 100, 0.20);
+  transform: translateY(-8px);
+  box-shadow: 0 16px 35px rgba(0, 55, 100, 0.2);
 }
 
 .planCard:hover .planCardHeader {
-    background: linear-gradient(135deg, #147bdc, #07519c);
+  background: linear-gradient(135deg, #147bdc, #07519c);
 }
 
 .partnerTabsWrap {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0 18px;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 18px;
 }
 .partnerTabs {
-    display: inline-flex;
-    align-items: center;
-    background: #E6F1FD;
-    border-radius: 999px;
-    padding: 4px;
-    gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  background: #e6f1fd;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
 }
 
-.crmLeadTabs, .partnerTabs {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    -webkit-overflow-scrolling: touch;
+.crmLeadTabs,
+.partnerTabs {
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
 }
 
 .partnerTab.active {
-    background: #FFFFFF;
-    color: var(--primary);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+  background: #ffffff;
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
 }
 
 .partnerTab {
-    border: none;
-    background: transparent;
-    color: #5B6472;
-    font-size: var(--font-size-14px);
-    font-weight: 500;
-    padding: 10px 20px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: all .25s ease;
+  border: none;
+  background: transparent;
+  color: #5b6472;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
 @media (max-width: 1680px) {
@@ -178,6 +179,183 @@
     font-size: 30px;
   }
   .planFeatures li {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .planGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .planCardHeader h3 {
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .planCardBody {
+    padding: 18px 15px;
+  }
+
+  .planPrice strong {
+    font-size: 28px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .planSection {
+    padding: 18px 0 30px;
+  }
+
+  .planGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .planCardHeader h3 {
+    font-size: 17px;
+    line-height: 24px;
+  }
+
+  .planCardBody {
+    padding: 16px 14px;
+  }
+
+  .planPrice strong {
+    font-size: 27px;
+  }
+
+  .planFeatures li {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .planGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .planCardHeader {
+    padding: 12px 8px;
+  }
+
+  .planCardHeader h3 {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .planCardBody {
+    padding: 15px 12px;
+  }
+
+  .planPrice strong {
+    font-size: 25px;
+  }
+
+  .planFeatures li {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 575px) {
+  .planSection {
+    padding: 15px 0 25px;
+  }
+
+  .planHeading {
+    margin-bottom: 20px;
+  }
+
+  .planHeading h2 {
+    font-size: 18px;
+  }
+
+  .planGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .planCardHeader {
+    padding: 14px 10px;
+  }
+
+  .planCardHeader h3 {
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  .planCardBody {
+    padding: 18px 16px;
+  }
+
+  .planPrice strong {
+    font-size: 30px;
+  }
+
+  .planFeatures li {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .planCard:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 375px) {
+  .planCardHeader h3 {
+    font-size: 16px;
+    line-height: 23px;
+  }
+
+  .planCardBody {
+    padding: 15px 12px;
+  }
+
+  .planPrice strong {
+    font-size: 26px;
+  }
+
+  .planFeatures li {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .partnerTabsWrap {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .partnerTabs {
+    display: flex;
+    flex-wrap: nowrap;
+    width: max-content;
+    min-width: max-content;
+    gap: 4px;
+  }
+
+  .partnerTab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+}
+
+@media (max-width: 575px) {
+  .partnerTabsWrap {
+    margin: 15px 0;
+  }
+
+  .partnerTab {
+    padding: 9px 13px;
     font-size: 12px;
   }
 }
