@@ -1,0 +1,118 @@
+.rptSectionTitle {
+  margin: 20px 0;
+  font-size: 18px;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.rptInsights {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  margin-bottom: 0;
+}
+
+.rptInsight {
+  background: #fff;
+  border: 1px solid #e7e9eb;
+  border-radius: 12px;
+  padding: 18px;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.rptInsight span {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.rptInsight strong {
+  display: block;
+  font-size: 16px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.rptInsight p {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+}
+.rptInsight.tone-blue {
+  border-top: 3px solid #0355ac;
+}
+
+.rptInsight.tone-teal {
+  border-top: 3px solid #0d9488;
+}
+
+.rptInsight.tone-purple {
+  border-top: 3px solid #7c3aed;
+}
+
+.rptInsight.tone-orange {
+  border-top: 3px solid #ea580c;
+}
+
+.rptInsight.tone-yellow {
+  border-top: 3px solid #ca8a04;
+}
+
+.rptSub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 400;
+}
+.rptRange {
+  font-size: 13px;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e7e9eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+.rptForecast {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 12px 4px 4px;
+}
+.rptForecastTrack {
+  height: 10px;
+  background: #edf2f7;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.rptForecastTrack span {
+  display: block;
+  width: var(--w, 0%);
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+
+.rptForecastRow {
+  width: 100%;
+}
+.rptForecastRow.tone-navy .rptForecastTrack span {
+  background: #1e4f96;
+}
+
+.rptForecastRow.tone-blue .rptForecastTrack span {
+  background: #0355ac;
+}
+
+.rptForecastRow.tone-sky .rptForecastTrack span {
+  background: #60a5fa;
+}
+
+.rptForecastRow.tone-teal .rptForecastTrack span {
+  background: #14b8a6;
+}
+
+.rptForecastRow.tone-purple .rptForecastTrack span {
+  background: #8b5cf6;
+}

@@ -5,20 +5,18 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import { FiBell, FiSearch, FiChevronDown, FiX } from "react-icons/fi";
+import { FiBell, FiSearch, FiChevronDown, FiX, FiUser } from "react-icons/fi";
 import styles from "./Navbar.module.css";
 import {
   TbLayoutSidebarLeftExpand,
   TbLayoutSidebarRightExpand,
 } from "react-icons/tb";
-import { FaUser } from "react-icons/fa";
 import { CiSettings } from "react-icons/ci";
 import { MdLogout } from "react-icons/md";
 import Cookies from "js-cookie";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Link from "next/link";
 import Sidebar from "../sidebar/Sidebar";
 
 const subscribeToUserCookie = () => () => {};
@@ -214,9 +212,11 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
                 <div className={styles.profilePattern}></div>
                 <div className={styles.profileContent}>
                   <div className={styles.profileAvatar}>
-                    <span>{userData?.name?.charAt(0) || "-"}</span>
+                    <span className="text-capitalize">
+                      {userData?.name?.charAt(0) || "-"}
+                    </span>
                   </div>
-                  <h2>{userData?.name || "-"}</h2>
+                  <h2 className="text-capitalize">{userData?.name || "-"}</h2>
                   <div className={styles.profileMeta}>
                     <span>Partner ID : {userData?.id || "-"}</span>
                     <span className={styles.adminBadge}>
@@ -228,7 +228,7 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
 
               <div className={styles.profileMenu}>
                 <a href="/my-profile">
-                  <FaUser />
+                  <FiUser />
                   <span>My Profile</span>
                 </a>
                 <a href="/account-settings">

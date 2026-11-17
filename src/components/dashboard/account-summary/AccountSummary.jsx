@@ -69,7 +69,7 @@ const AccountSummary = ({
       <div className={styles.pageHeader}>
         <div>
           <p className={styles.welcomeText}>Welcome,</p>
-          <h2>{user?.name || "User"}</h2>
+          <h2 className="text-capitalize">{user?.name || "User"}</h2>
         </div>
 
         <div className={styles.summarySection}>
