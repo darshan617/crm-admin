@@ -1,0 +1,63 @@
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+}
+
+.summaryCard {
+  position: relative;
+  padding: 16px;
+  border: 1px solid #e7e9eb;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 5px 5px 10px rgba(80, 145, 197, 0.15);
+  transition: all 0.35s ease;
+  overflow: hidden;
+}
+
+.cardIcon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: var(--font-size-20px);
+  margin-bottom: 5px;
+  transition: 0.35s;
+}
+
+.summaryCard p {
+  margin: 0 0 8px;
+  font-size: var(--font-size-14px);
+  color: #313a46;
+  font-weight: 400;
+}
+
+.summaryCard h3 {
+  margin: 0;
+  font-size: var(--font-size-24px);
+  font-weight: 600;
+  color: var(--text-light);
+  line-height: 1.2;
+}
+.toneBlue .cardIcon {
+  background: #e7f1ff;
+  color: #0355ac;
+}
+.toneTeal .cardIcon {
+  background: #e6fbf6;
+  color: #0d9488;
+}
+.toneGreen .cardIcon {
+  background: #e8fff3;
+  color: #16b364;
+}
+.tonePurple .cardIcon {
+  background: #f1ecff;
+  color: #7c3aed;
+}
+.toneOrange .cardIcon {
+  background: #fff3df;
+  color: #f59e0b;
+}
