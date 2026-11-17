@@ -3,9 +3,11 @@ import AccountSummary from "@/components/dashboard/account-summary/AccountSummar
 import PendingApproval from "@/components/dashboard/pending-approval/PendingApproval";
 import TeamPerformance from "@/components/dashboard/team-performance/TeamPerformance";
 import Layout from "@/components/layout/Layout";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import { useDashboardQuery } from "@/redux/apis/dashboardApi";
 
 const Dashboard = () => {
+  const { canView } = usePermissions();
   const [filters, setFilters] = useState({ period: "7d", from: "", to: "" });
   const params = Object.fromEntries(
     Object.entries(filters).filter(([, value]) => value),
@@ -29,28 +31,34 @@ const Dashboard = () => {
     setFilters({ period: "", from, to });
   };
 
+  const showDashboard = canView("dashboard");
+
   return (
     <Layout>
       <div className="content">
-        <AccountSummary
-          summary={dashboardData?.summary}
-          user={dashboardData?.user}
-          filters={filters}
-          defaultRange={defaultRange}
-          onRangeChange={handleRangeChange}
-        />
+        {showDashboard && (
+          <>
+            <AccountSummary
+              summary={dashboardData?.summary}
+              user={dashboardData?.user}
+              filters={filters}
+              defaultRange={defaultRange}
+              onRangeChange={handleRangeChange}
+            />
 
-        <TeamPerformance
-          team={dashboardData?.team}
-          filters={filters}
-          periodOptions={periodOptions}
-          onPeriodChange={handlePeriodChange}
-        />
+            <TeamPerformance
+              team={dashboardData?.team}
+              filters={filters}
+              periodOptions={periodOptions}
+              onPeriodChange={handlePeriodChange}
+            />
 
-        <PendingApproval
-          summary={dashboardData?.summary}
-          recentActivities={dashboardData?.recent_activities}
-        />
+            <PendingApproval
+              summary={dashboardData?.summary}
+              recentActivities={dashboardData?.recent_activities}
+            />
+          </>
+        )}
       </div>
     </Layout>
   );

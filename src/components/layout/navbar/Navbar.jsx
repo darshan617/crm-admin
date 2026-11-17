@@ -49,6 +49,7 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     try {
       (Cookies?.remove("CRM_USER"),
         Cookies?.remove("token"),
+        localStorage.removeItem("UP"),
         showToast("User Logout Successfully", "success"));
       router?.push("/auth/login");
     } catch (error) {
