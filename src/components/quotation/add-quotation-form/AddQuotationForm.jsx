@@ -13,6 +13,7 @@ import CustomDropdown from "@/common-components/custom-dropdown/CustomDropdown";
 import { BiX } from "react-icons/bi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
+import { useRouter } from "next/router";
 
 const countryCodes = [
   ["91", "India"],
@@ -34,6 +35,7 @@ const blankRow = () => ({
 
 export default function Page() {
   const { showToast } = useToast();
+  const router = useRouter();
   const { canAdd } = usePermissions();
   const canCreateQuotation =
     canAdd("quotations") || canAdd("create_quotations");
@@ -199,8 +201,13 @@ export default function Page() {
     }
 
     setError(newError);
-    showToast("Please fill all required fields in the form.", "error");
-    return Object.keys(newError).length === 0;
+
+    if (Object.keys(newError).length > 0) {
+      showToast("Please fill all required fields in the form.", "error");
+      return false;
+    }
+
+    return true;
   };
 
   useEffect(() => {

@@ -11,6 +11,7 @@ import {
   useDealsPoSourceMutation,
 } from "@/redux/apis/crmDeals";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -33,12 +34,15 @@ const CrmOrderView = () => {
   const router = useRouter();
   const { slug } = router.query;
   const { showToast } = useToast();
+  const { canView, canEdit } = usePermissions();
+  const canSeeDeals = canView("crm_deals");
+  const canEditDeal = canEdit("crm_deals");
 
   const [poMode, setPoMode] = useState("generated");
 
   const { data, isLoading, isError, refetch } = useCrmDealsDetailsQuery(
     { id: slug },
-    { skip: !router.isReady || !slug },
+    { skip: !router.isReady || !slug || !canSeeDeals },
   );
 
   const [DealsPoSource, { isLoading: isPoSubmitting }] =
@@ -69,6 +73,7 @@ const CrmOrderView = () => {
 
   const handleActivate = async (e) => {
     e.preventDefault();
+    if (!canEditDeal) return;
 
     const formData = new FormData(e.currentTarget);
 
@@ -89,6 +94,7 @@ const CrmOrderView = () => {
 
   const handlePoSubmit = async (e) => {
     e.preventDefault();
+    if (!canEditDeal) return;
 
     const form = e.currentTarget;
     const formValues = new FormData(form);
@@ -146,6 +152,8 @@ const CrmOrderView = () => {
 
   // isFetching is intentionally not used here, so the page doesn't
   // unmount while refetch() runs after a successful PO submit.
+  if (!canSeeDeals) return null;
+
   if (!router.isReady || isLoading) {
     return <div className="content">Loading deal details...</div>;
   }
@@ -219,7 +227,7 @@ const CrmOrderView = () => {
         </div>
 
         <form onSubmit={handleActivate} className={styles.actions}>
-          {canActivate && (
+          {canActivate && canEditDeal && (
             <>
               <label className={styles.fieldLabel} htmlFor="start_date">
                 Start Date
@@ -488,7 +496,7 @@ const CrmOrderView = () => {
               </div>
             </div>
           </div>
-        ) : (
+        ) : canEditDeal ? (
           <form onSubmit={handlePoSubmit}>
             <label className={styles.sourceLabel}>PO Source</label>
 
@@ -599,7 +607,7 @@ const CrmOrderView = () => {
                 className={`${styles.btn} ${styles.btnPrimary}`}
               >
                 <FiFilePlus />
-                {isPoSganeratedubmitting
+                {isPoSubmitting
                   ? "Submitting..."
                   : poMode === "generated"
                     ? "Generate PO"
@@ -607,7 +615,7 @@ const CrmOrderView = () => {
               </button>
             </div>
           </form>
-        )}
+        ) : null}
       </section>
     </div>
   );
