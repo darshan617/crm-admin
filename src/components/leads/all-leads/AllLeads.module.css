@@ -10,6 +10,8 @@
   gap: 20px;
   padding-left: 20px;
   margin-bottom: 0;
+  overflow-x: scroll;
+  scrollbar-width: none;
 }
 
 .crmLeadTabs button {
@@ -244,6 +246,13 @@
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.customer h5 {
+  /* margin: 0 0 5px; */
+  color: #0355ac;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
 }
 
 .contactInfo h5 {

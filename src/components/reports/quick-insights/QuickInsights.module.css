@@ -116,3 +116,14 @@
 .rptForecastRow.tone-purple .rptForecastTrack span {
   background: #8b5cf6;
 }
+
+@media (max-width: 768px) {
+  .rptInsights {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 575px) {
+  .rptInsights {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

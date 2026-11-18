@@ -68,6 +68,8 @@
   gap: 20px;
   padding-left: 20px;
   margin-bottom: 0;
+  overflow: scroll;
+  scrollbar-width: none;
 }
 
 .crmLeadTabs button {

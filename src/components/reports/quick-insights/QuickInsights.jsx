@@ -1,63 +1,62 @@
 import React from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+} from "recharts";
 import styles from "@/components/reports/quick-insights/QuickInsights.module.css";
 
-// Replace these with your API data later.
-const insights = [
-  {
-    label: "Top Lead Source",
-    value: "Unknown",
-    note: "33% of leads",
-    tone: "blue",
-  },
-  {
-    label: "Top Employee",
-    value: "Account Manager User",
-    note: "0 won deals",
-    tone: "teal",
-  },
-  {
-    label: "Highest Value Deal",
-    value: "₹18,902",
-    note: "TRUPTI TRADERS",
-    tone: "purple",
-  },
-  {
-    label: "Highest Won Deal",
-    value: "₹18,360",
-    note: "SWR KARNATAKA · 13 Nov 2026",
-    tone: "orange",
-  },
-  {
-    label: "Follow-up Tasks",
-    value: "6 overdue",
-    note: "Need attention",
-    tone: "yellow",
-  },
-];
+const FORECAST_COLORS = {
+  navy: "#1e4f96",
+  blue: "#0355ac",
+  sky: "#60a5fa",
+  teal: "#14b8a6",
+  purple: "#8b5cf6",
+};
 
-// `width` is the bar fill in percent.
-const forecast = [
-  { label: "Current Pipeline", value: "₹1 L", width: 100, tone: "navy" },
-  { label: "Expected Revenue", value: "₹59,611", width: 59, tone: "blue" },
-  { label: "Still Valid", value: "₹18,902", width: 19, tone: "sky" },
-  { label: "Closing This Month", value: "₹73,841", width: 74, tone: "teal" },
-  { label: "Closing This Quarter", value: "₹1 L", width: 100, tone: "purple" },
-];
+const TRACK_COLOR = "#edf2f7";
 
-const QuickInsights = () => {
+const ForecastBar = ({ width, color }) => (
+  <div style={{ width: "100%", height: 14 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart
+        layout="vertical"
+        data={[{ name: "bar", width }]}
+        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+      >
+        <XAxis type="number" domain={[0, 100]} hide />
+        <YAxis type="category" dataKey="name" hide />
+        <Bar
+          dataKey="width"
+          barSize={10}
+          radius={10}
+          background={{ fill: TRACK_COLOR, radius: 10 }}
+          isAnimationActive={false}
+        >
+          <Cell fill={color} />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+);
+
+const QuickInsights = ({ insights = [], forecast = [] }) => {
   return (
     <>
       <h3 className={styles.rptSectionTitle}>Quick Insights</h3>
 
       <div className={styles.rptInsights}>
-        {insights.map(({ label, value, note, tone }) => (
+        {insights.map(({ label, value, meta, tone }) => (
           <div
             key={label}
-            className={`${styles.rptInsight} ${styles[`tone-${tone}`]}`}
+            className={`${styles.rptInsight} ${styles[`tone-${tone}`] || ""}`}
           >
             <span>{label}</span>
             <strong>{value}</strong>
-            <p>{note}</p>
+            <p>{meta}</p>
           </div>
         ))}
       </div>
@@ -73,18 +72,24 @@ const QuickInsights = () => {
           </div>
 
           <div className={styles.rptForecast}>
-            {forecast.map(({ label, value, width, tone }) => (
-              <div
-                key={label}
-                className={`${styles.rptForecastRow} ${styles[`tone-${tone}`]}`}
-              >
-                <div className={styles.rptForecastLabel}>
+            {forecast.map(({ label, value, pct, tone }) => (
+              <div key={label} className={styles.rptForecastRow}>
+                <div
+                  className={styles.rptForecastLabel}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 4,
+                  }}
+                >
                   <span>{label}</span>
                   <strong>{value}</strong>
                 </div>
-                <div className={styles.rptForecastTrack}>
-                  <span style={{ "--w": `${width}%` }} />
-                </div>
+                <ForecastBar
+                  width={pct}
+                  color={FORECAST_COLORS[tone] || FORECAST_COLORS.blue}
+                />
               </div>
             ))}
           </div>

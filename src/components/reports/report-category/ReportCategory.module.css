@@ -93,3 +93,18 @@
   background: #fef9c3;
   color: #ca8a04;
 }
+
+
+@media (max-width: 768px ){
+  .rptCats {
+    grid-template-columns: repeat(3, 1fr);
+
+  }
+}
+
+@media (max-width: 575px ){
+  .rptCats {
+    grid-template-columns: repeat(2, 1fr);
+
+  }
+}
