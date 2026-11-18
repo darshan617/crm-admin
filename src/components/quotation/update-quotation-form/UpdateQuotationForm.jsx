@@ -222,8 +222,13 @@ export default function UpdateQuotationForm() {
     }
 
     setError(newError);
-    showToast("Please fill all required fields in the form.", "error");
-    return Object.keys(newError).length === 0;
+
+    if (Object.keys(newError).length > 0) {
+      showToast("Please fill all required fields in the form.", "error");
+      return false;
+    }
+
+    return true;
   };
 
   useEffect(() => {

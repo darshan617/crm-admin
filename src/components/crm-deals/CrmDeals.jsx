@@ -8,17 +8,23 @@ import { IoEyeOutline, IoSearch } from "react-icons/io5";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { useCrmDealsQuery } from "@/redux/apis/crmDeals";
 import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 export default function CrmDeals() {
   const router = useRouter();
+  const { canView } = usePermissions();
+  const canSeeDeals = canView("crm_deals");
   const [search, setSearch] = useState("");
 
   const page = Number(router.query.page) || 1;
 
-  const { data, isLoading, isError } = useCrmDealsQuery({
-    page,
-    search,
-  });
+  const { data, isLoading, isError } = useCrmDealsQuery(
+    {
+      page,
+      search,
+    },
+    { skip: !canSeeDeals },
+  );
 
   const deals = data?.data?.deals ?? [];
   const pagination = data?.data?.pagination;
@@ -26,6 +32,8 @@ export default function CrmDeals() {
   const currentPage = pagination?.current_page || 1;
   const lastPage = pagination?.last_page || 1;
   const total = pagination?.total ?? deals.length;
+
+  if (!canSeeDeals) return null;
 
   return (
     <section className="content">

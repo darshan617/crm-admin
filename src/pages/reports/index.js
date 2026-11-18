@@ -4,17 +4,24 @@ import BusinessOverview from "@/components/reports/performance-overview/Business
 import QuickInsights from "@/components/reports/quick-insights/QuickInsights";
 import ReportCategory from "@/components/reports/report-category/ReportCategory";
 import ReportSummary from "@/components/reports/report-summary/ReportSummary";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import React from "react";
 
 const ReportsPage = () => {
+  const { canView } = usePermissions();
+
   return (
     <Layout>
       <div className="content">
-        <ReportSummary />
-        <BusinessOverview />
-        <EmployeePerformance />
-        <ReportCategory />
-        <QuickInsights />
+        {canView("reports") && (
+          <>
+            <ReportSummary />
+            <BusinessOverview />
+            <EmployeePerformance />
+            <ReportCategory />
+            <QuickInsights />
+          </>
+        )}
       </div>
     </Layout>
   );
