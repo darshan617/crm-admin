@@ -25,6 +25,7 @@ import {
 import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
 import SendQuotationPopup from "./send-quotation-popupo/SendQuotationPopup";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -81,9 +82,30 @@ const getAmount = (quotation) =>
 const getDiscountStatus = (quotation) =>
   quotation.discount_status || quotation.discount_request_status || "pending";
 
+const listTotal = (response) => {
+  const rows = Array.isArray(response?.data?.quotations)
+    ? response.data.quotations
+    : Array.isArray(response?.data)
+      ? response.data
+      : [];
+
+  return response?.data?.pagination?.total ?? rows.length;
+};
+
 const Quotation = () => {
   const router = useRouter();
   const popupRef = useRef(null);
+  const { canView, canAdd, canEdit, loginAs } = usePermissions();
+  const canSeeQuotations = canView("quotations");
+  const canCreateQuotation =
+    canAdd("quotations") || canAdd("create_quotations");
+  const canEditQuotation = canEdit("quotations");
+  const canSeeDiscount = canView("discount_approval");
+  const isAdminUser = loginAs === "Admin" || loginAs === "super_admin";
+  const canRequestDiscount = canAdd("discount_approval") && !isAdminUser;
+  const visibleTabs = TABS.filter(
+    (tab) => tab.key !== "discount" || canSeeDiscount,
+  );
 
   const [view, setView] = useState({
     filterOpen: false,
@@ -169,15 +191,46 @@ const Quotation = () => {
     isFetching,
     isError,
     refetch,
-  } = useGetAllQuotationsQuery({
+  } = useGetAllQuotationsQuery(
+    {
+      search: view.search,
+      tab: view.activeTab,
+      status,
+      date_type: view.dateType,
+      from: view.from,
+      to: view.to,
+      page: 1,
+    },
+    { skip: !canSeeQuotations },
+  );
+
+  const discountCountArgs = {
     search: view.search,
-    tab: view.activeTab,
-    status,
+    tab: "discount",
     date_type: view.dateType,
     from: view.from,
     to: view.to,
     page: 1,
-  });
+  };
+  const skipDiscountCounts = !canSeeQuotations || view.activeTab !== "discount";
+
+  const { data: pendingCountResponse } = useGetAllQuotationsQuery(
+    { ...discountCountArgs, status: "pending" },
+    { skip: skipDiscountCounts },
+  );
+  const { data: approvedCountResponse } = useGetAllQuotationsQuery(
+    { ...discountCountArgs, status: "approved" },
+    { skip: skipDiscountCounts },
+  );
+  const { data: allCountResponse } = useGetAllQuotationsQuery(
+    { ...discountCountArgs, status: "" },
+    { skip: skipDiscountCounts },
+  );
+  const discountCounts = {
+    pending: listTotal(pendingCountResponse),
+    approved: listTotal(approvedCountResponse),
+    all: listTotal(allCountResponse),
+  };
 
   const quotations = Array.isArray(quotationResponse?.data?.quotations)
     ? quotationResponse.data.quotations
@@ -411,7 +464,7 @@ const Quotation = () => {
                         <LuHistory size={19} />
                         <span>History</span>
                       </Link>
-                      {approved && (
+                      {approved && canEditQuotation && (
                         <Link
                           href={`/quotations/update-quotation?qid=${quotation.id}`}
                           className={styles.popupAction}
@@ -495,7 +548,7 @@ const Quotation = () => {
                         </div>
                       </div>
                     )}
-                    {!approved && (
+                    {!approved && canRequestDiscount && (
                       <button
                         type="button"
                         className={styles.discountBtn}
@@ -517,6 +570,8 @@ const Quotation = () => {
 
   /* ---------------------------- render ---------------------------- */
 
+  if (!canSeeQuotations) return null;
+
   return (
     <div className="content">
       <div className="page-header">
@@ -529,21 +584,23 @@ const Quotation = () => {
           </div>
           <h2>Quotations</h2>
         </div>
-        <div className={styles.crmActions}>
-          <Link
-            href="/quotations/add-quotation"
-            className={`${styles.crmActionBtn} ${styles.active}`}
-          >
-            <AiOutlineFileAdd size={20} />
-            <span>Add Quotations</span>
-          </Link>
-        </div>
+        {canCreateQuotation && (
+          <div className={styles.crmActions}>
+            <Link
+              href="/quotations/add-quotation"
+              className={`${styles.crmActionBtn} ${styles.active}`}
+            >
+              <AiOutlineFileAdd size={20} />
+              <span>Add Quotations</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       <section className="common-table-section crm-quo-list">
         {/* Tabs */}
         <div className={styles.crmLeadTabs} role="tablist">
-          {TABS.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
@@ -724,13 +781,7 @@ const Quotation = () => {
                     onClick={() => updateView({ discountFilter: key })}
                   >
                     {label} (
-                    <span className="tab-count">
-                      {key === "all"
-                        ? total
-                        : quotations.filter(
-                            (quotation) => getDiscountStatus(quotation) === key,
-                          ).length}
-                    </span>
+                    <span className="tab-count">{discountCounts[key] ?? 0}</span>
                     )
                   </button>
                 ))}
