@@ -47,10 +47,12 @@ const readLoginAs = () => {
 const usePermissions = () => {
   const [permissions, setPermissions] = useState([]);
   const [loginAs, setLoginAs] = useState(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     setPermissions(readStoredPermissions());
     setLoginAs(readLoginAs());
+    setReady(true);
   }, []);
 
   const getPermission = useCallback(
@@ -101,6 +103,7 @@ const usePermissions = () => {
   return {
     permissions,
     loginAs,
+    ready,
     getPermission,
     canView,
     canAdd,

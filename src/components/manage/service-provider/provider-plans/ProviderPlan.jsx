@@ -8,15 +8,20 @@ import {
   useGetProviderPlanQuery,
   useGetProviderQuery,
 } from "@/redux/apis/providerApi";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const ProviderPlan = () => {
   const router = useRouter();
+  const { canView, ready } = usePermissions();
+  const canSeeProviders = ready && canView("services_providers");
   const { slug, variant } = router.query;
 
   const id = Array.isArray(slug) ? slug[0] : slug;
   const activeVariant = Number(variant) || 1;
 
-  const { data: providerData } = useGetProviderQuery();
+  const { data: providerData } = useGetProviderQuery(undefined, {
+    skip: !canSeeProviders,
+  });
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetProviderPlanQuery(
@@ -24,7 +29,7 @@ const ProviderPlan = () => {
         id,
         variant: String(id) === "2" ? activeVariant : undefined,
       },
-      { skip: !router.isReady || !id },
+      { skip: !canSeeProviders || !router.isReady || !id },
     );
 
   const providers = providerData?.data?.providers ?? [];
@@ -40,6 +45,8 @@ const ProviderPlan = () => {
   const variants = data?.data?.variants ?? [];
 
   const selectedVariant = Number(data?.data?.selected_variant) || activeVariant;
+
+  if (!canSeeProviders) return null;
 
   return (
     <main className="content">

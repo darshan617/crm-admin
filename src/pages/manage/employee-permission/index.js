@@ -4,24 +4,39 @@ import EmployeePermission from "@/components/manage/employee-permission/Employee
 import { FiArrowLeft, FiBell, FiShield, FiUser } from "react-icons/fi";
 import { useRouter } from "next/router";
 import styles from "../employee/EmployeePage.module.css";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const sidePanelItems = [
-  { label: "Employee", icon: FiUser, href: "/manage/employee" },
+  {
+    label: "Employee",
+    icon: FiUser,
+    href: "/manage/employee",
+    moduleKey: "employees",
+  },
   {
     label: "Employee Permissions",
     icon: FiShield,
     href: "/manage/employee-permission",
     active: true,
+    moduleKey: "employee_permissions",
   },
   {
     label: "Attendance Overview",
     icon: FiBell,
     href: "/manage/attendance-overview",
+    moduleKey: "employees",
   },
 ];
 
 const EmployeePermissionPage = () => {
   const router = useRouter();
+  const { canView, ready } = usePermissions();
+  const canSeePermissions = ready && canView("employee_permissions");
+  const visibleNav = sidePanelItems.filter((item) => canView(item.moduleKey));
+
+  if (!canSeePermissions) {
+    return <Layout />;
+  }
 
   return (
     <Layout>
@@ -35,7 +50,7 @@ const EmployeePermissionPage = () => {
             className={styles.sideNav}
             aria-label="Employee management navigation"
           >
-            {sidePanelItems.map(({ label, icon: Icon, active, href }) => (
+            {visibleNav.map(({ label, icon: Icon, active, href }) => (
               <button
                 type="button"
                 key={label}

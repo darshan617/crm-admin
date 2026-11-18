@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetEmployeesQuery } from "@/redux/apis/employeeApi";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import { FiSearch, FiSliders, FiEdit, FiEye, FiShield } from "react-icons/fi";
 import Pagination, {
   usePageQuery,
@@ -132,7 +133,7 @@ function EmployeeFilters({ status, role, onChange, onClear }) {
 }
 
 /* ---------- Row ---------- */
-function EmployeeTableRow({ employee }) {
+function EmployeeTableRow({ employee, canEditEmployee, canSeePermissions }) {
   const isActive = employee?.status === "active";
   const photo = getAvatarUrl(employee?.avatar_url);
 
@@ -185,13 +186,15 @@ function EmployeeTableRow({ employee }) {
 
       <td className={`${styles.td} ${styles.center}`}>
         <div className={styles.actions}>
-          <Link
-            href={`/manage/employee/edit/${employee?.id}`}
-            title="Edit Employee"
-            className={styles.actionBtn}
-          >
-            <FiEdit size={16} />
-          </Link>
+          {canEditEmployee && (
+            <Link
+              href={`/manage/employee/edit/${employee?.id}`}
+              title="Edit Employee"
+              className={styles.actionBtn}
+            >
+              <FiEdit size={16} />
+            </Link>
+          )}
           <Link
             href={`/manage/employee/employee-details/${employee.id}`}
             title="View Employee Details"
@@ -199,19 +202,21 @@ function EmployeeTableRow({ employee }) {
           >
             <FiEye size={16} />
           </Link>
-          <Link
-            href={{
-              pathname: "/manage/employee-permission",
-              query: {
-                employee_id: employee.id,
-                ...(employee?.role ? { role: employee.role } : {}),
-              },
-            }}
-            title="Employee Permissions"
-            className={styles.actionBtn}
-          >
-            <FiShield size={16} />
-          </Link>
+          {canSeePermissions && (
+            <Link
+              href={{
+                pathname: "/manage/employee-permission",
+                query: {
+                  employee_id: employee.id,
+                  ...(employee?.role ? { role: employee.role } : {}),
+                },
+              }}
+              title="Employee Permissions"
+              className={styles.actionBtn}
+            >
+              <FiShield size={16} />
+            </Link>
+          )}
         </div>
       </td>
     </tr>
@@ -220,6 +225,10 @@ function EmployeeTableRow({ employee }) {
 
 /* ---------- Table (main component) ---------- */
 export default function EmployeeTable({ from = "", to = "", onSummary }) {
+  const { canView, canEdit, ready } = usePermissions();
+  const canSeeEmployees = ready && canView("employees");
+  const canEditEmployee = ready && canEdit("employees");
+  const canSeePermissions = ready && canView("employee_permissions");
   const [filters, setFilters] = useState({ search: "", status: "", role: "" });
   const { page, setPage, isReady } = usePageQuery("page");
   const datesReady = useRef(false);
@@ -233,7 +242,7 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
       to,
       page,
     },
-    { skip: !isReady },
+    { skip: !isReady || !canSeeEmployees },
   );
 
   const employees = data?.data?.employees || [];
@@ -271,6 +280,8 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
     setFilters({ search: "", status: "", role: "" });
     setPage(1, { replace: true });
   };
+
+  if (!canSeeEmployees) return null;
 
   return (
     <section className={styles.tableCard}>
@@ -330,7 +341,12 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
               </tr>
             ) : employees.length > 0 ? (
               employees.map((employee) => (
-                <EmployeeTableRow key={employee?.id} employee={employee} />
+                <EmployeeTableRow
+                  key={employee?.id}
+                  employee={employee}
+                  canEditEmployee={canEditEmployee}
+                  canSeePermissions={canSeePermissions}
+                />
               ))
             ) : (
               <tr>
