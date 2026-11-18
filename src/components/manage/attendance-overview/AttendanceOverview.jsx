@@ -5,6 +5,7 @@ import Pagination, {
   usePageQuery,
 } from "@/common-components/pagination/Pagination";
 import { useGetEmployeeAttendanceQuery } from "@/redux/apis/employeeApi";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import styles from "./AttendanceOverview.module.css";
 
 const AVATAR_TONES = ["purple", "blue", "pink", "teal", "orange", "indigo"];
@@ -244,6 +245,8 @@ function EmployeeAvatar({ name, photo }) {
 }
 
 export default function AttendanceOverview() {
+  const { canView, ready } = usePermissions();
+  const canSeeEmployees = ready && canView("employees");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
@@ -266,7 +269,7 @@ export default function AttendanceOverview() {
         to: filters.to,
         page,
       },
-      { skip: !isReady },
+      { skip: !isReady || !canSeeEmployees },
     );
 
   const attendance = useMemo(() => unwrapAttendance(data), [data]);
@@ -305,6 +308,8 @@ export default function AttendanceOverview() {
     setFilters((current) => ({ ...current, [key]: value }));
     setPage(1, { replace: true });
   };
+
+  if (!canSeeEmployees) return null;
 
   return (
     <section className={styles.card}>

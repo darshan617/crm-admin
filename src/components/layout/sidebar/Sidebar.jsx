@@ -9,7 +9,7 @@ import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const Sidebar = ({ collapsed, onExpandSidebar }) => {
   const [manageOpen, setManageOpen] = useState(false);
-  const { canView } = usePermissions();
+  const { canView, ready } = usePermissions();
 
   const router = useRouter();
   const currentPath = router.asPath.split(/[?#]/)[0];
@@ -52,8 +52,8 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
               const Icon = item.icon;
 
               if (item.children) {
-                const visibleChildren = item.children.filter((child) =>
-                  canView(child.moduleKey),
+                const visibleChildren = item.children.filter(
+                  (child) => ready && canView(child.moduleKey),
                 );
 
                 if (!visibleChildren.length) return null;

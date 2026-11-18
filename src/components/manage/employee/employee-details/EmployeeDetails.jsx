@@ -12,6 +12,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import { useGetEmployeeQuery } from "@/redux/apis/employeeApi";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import styles from "./EmployeeDetails.module.css";
 
 const ROLE_LABELS = {
@@ -205,8 +206,19 @@ function EmployeeAvatar({ name, src }) {
 }
 
 const EmployeeDetails = ({ employeeId }) => {
+  const { canView, canEdit, ready } = usePermissions();
+  const canSeeEmployees = ready && canView("employees");
+  const canEditEmployee = ready && canEdit("employees");
+  const canViewLead =
+    ready &&
+    (canView("leads") || canView("jd_leads") || canView("exhibition_leads"));
+  const canViewFollowUps = ready && canView("follow_ups");
+  const canViewQuotations = ready && canView("quotations");
   const { data, isLoading, isUninitialized, isError, isFetching } =
-    useGetEmployeeQuery({ id: employeeId }, { skip: !employeeId });
+    useGetEmployeeQuery(
+      { id: employeeId },
+      { skip: !employeeId || !canSeeEmployees },
+    );
 
   const payload =
     data?.data && !Array.isArray(data.data) ? data.data : data || {};
@@ -216,6 +228,8 @@ const EmployeeDetails = ({ employeeId }) => {
       : payload?.id != null
         ? payload
         : null;
+
+  if (!canSeeEmployees) return null;
 
   if (
     !employeeId ||
@@ -279,16 +293,24 @@ const EmployeeDetails = ({ employeeId }) => {
   ];
 
   const quickActions = [
-    {
+    canViewLead && {
       label: "View Leads",
       icon: FiUsers,
       href: employee?.name
         ? { pathname: "/leads", query: { assigned_to: employee?.name } }
         : "/leads",
     },
-    { label: "View Follow-up", icon: FiClock, href: "/follow-up" },
-    { label: "View Quotations", icon: FiFileText, href: "/quotations" },
-  ];
+    canViewFollowUps && {
+      label: "View Follow-up",
+      icon: FiClock,
+      href: "/follow-up",
+    },
+    canViewQuotations && {
+      label: "View Quotations",
+      icon: FiFileText,
+      href: "/quotations",
+    },
+  ].filter(Boolean);
 
   return (
     <div className={styles.frame}>
@@ -321,15 +343,17 @@ const EmployeeDetails = ({ employeeId }) => {
           ))}
         </section>
 
-        <section className={`${styles.sideCard} ${styles.quickCard}`}>
-          <h3 className={styles.sideTitle}>Quick Action</h3>
-          {quickActions.map(({ label, icon: Icon, href }) => (
-            <Link key={label} href={href} className={styles.actionLink}>
-              <Icon size={16} />
-              <span>{label}</span>
-            </Link>
-          ))}
-        </section>
+        {quickActions.length > 0 && (
+          <section className={`${styles.sideCard} ${styles.quickCard}`}>
+            <h3 className={styles.sideTitle}>Quick Action</h3>
+            {quickActions.map(({ label, icon: Icon, href }) => (
+              <Link key={label} href={href} className={styles.actionLink}>
+                <Icon size={16} />
+                <span>{label}</span>
+              </Link>
+            ))}
+          </section>
+        )}
 
         <section className={styles.overviewCard}>
           <h3 className={styles.sectionTitle}>
@@ -356,13 +380,15 @@ const EmployeeDetails = ({ employeeId }) => {
           </div>
 
           <div className={styles.cardActions}>
-            <Link
-              href={`/manage/employee/edit/${employee.id}`}
-              className={styles.editButton}
-            >
-              <FiEdit2 size={15} />
-              Edit Employee
-            </Link>
+            {canEditEmployee && (
+              <Link
+                href={`/manage/employee/edit/${employee.id}`}
+                className={styles.editButton}
+              >
+                <FiEdit2 size={15} />
+                Edit Employee
+              </Link>
+            )}
             <Link href="/manage/employee" className={styles.listButton}>
               <FiArrowLeft size={15} />
               Back to List

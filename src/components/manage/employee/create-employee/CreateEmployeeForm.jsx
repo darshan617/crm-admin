@@ -8,6 +8,7 @@ import {
   useUpdateEmployeeMutation,
 } from "@/redux/apis/employeeApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import { useRouter } from "next/router";
 
 const mapOptions = (items) =>
@@ -74,9 +75,12 @@ const getAvatarUrl = (avatar) => {
 const CreateEmployeeForm = ({ employeeId }) => {
   const router = useRouter();
   const { showToast } = useToast();
+  const { canAdd, canEdit, ready } = usePermissions();
   const imageInputRef = useRef(null);
   const hydratedRef = useRef(false);
   const isEdit = Boolean(employeeId);
+  const allowed =
+    ready && (isEdit ? canEdit("employees") : canAdd("employees"));
   const [showPassword, setShowPassword] = useState(false);
   const [imagePreview, setImagePreview] = useState("");
   const [avatar, setAvatar] = useState(null);
@@ -97,13 +101,16 @@ const CreateEmployeeForm = ({ employeeId }) => {
     isLoading: isFetching,
     isUninitialized,
     isError,
-  } = useGetEmployeeQuery({ id: employeeId }, { skip: !employeeId });
+  } = useGetEmployeeQuery(
+    { id: employeeId },
+    { skip: !employeeId || !allowed },
+  );
   const {
     data: createFormData,
     isLoading: isFormLoading,
     isUninitialized: isFormUninitialized,
     isError: isFormError,
-  } = useGetEmployeeCreateFormQuery();
+  } = useGetEmployeeCreateFormQuery(undefined, { skip: !allowed });
   const [createEmployee, { isLoading: isCreating }] =
     useCreateEmployeeMutation();
   const [updateEmployee, { isLoading: isUpdating }] =
@@ -295,6 +302,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!allowed) return;
     if (!validateForm()) return;
 
     try {
@@ -353,6 +361,8 @@ const CreateEmployeeForm = ({ employeeId }) => {
   };
 
   const isFormPending = isFormLoading || isFormUninitialized;
+
+  if (!allowed) return null;
 
   if ((isEdit && !employee) || isFormPending) {
     return (

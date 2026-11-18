@@ -4,16 +4,28 @@ import { FiArrowLeft, FiBell, FiShield, FiUser } from "react-icons/fi";
 import { useRouter } from "next/router";
 import styles from "../EmployeePage.module.css";
 import CreateEmployeeForm from "@/components/manage/employee/create-employee/CreateEmployeeForm";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const sidePanelItems = [
-  { label: "Employee", icon: FiUser, active: true },
-  { label: "Employee Permissions", icon: FiShield },
-  { label: "Attendance Overview", icon: FiBell },
+  { label: "Employee", icon: FiUser, active: true, moduleKey: "employees" },
+  {
+    label: "Employee Permissions",
+    icon: FiShield,
+    moduleKey: "employee_permissions",
+  },
+  { label: "Attendance Overview", icon: FiBell, moduleKey: "employees" },
 ];
 
 const EditEmployee = () => {
   const router = useRouter();
+  const { canView, canEdit, ready } = usePermissions();
+  const canEditEmployee = ready && canEdit("employees");
+  const visibleNav = sidePanelItems.filter((item) => canView(item.moduleKey));
   const employeeId = router.isReady ? router.query.slug : "";
+
+  if (!canEditEmployee) {
+    return <Layout />;
+  }
 
   return (
     <Layout>
@@ -27,7 +39,7 @@ const EditEmployee = () => {
             className={styles.sideNav}
             aria-label="Employee management navigation"
           >
-            {sidePanelItems.map(({ label, icon: Icon, active }) => (
+            {visibleNav.map(({ label, icon: Icon, active }) => (
               <button
                 type="button"
                 key={label}

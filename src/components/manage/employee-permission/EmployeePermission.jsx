@@ -6,6 +6,7 @@ import {
   useSaveEmployeePermissionsMutation,
 } from "@/redux/apis/employeeApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import styles from "./EmployeePermission.module.css";
 
 const ACTIONS = ["view", "add", "edit", "delete"];
@@ -202,6 +203,9 @@ function PermissionCheckbox({
 const EmployeePermission = () => {
   const router = useRouter();
   const { showToast } = useToast();
+  const { canView, canEdit, ready } = usePermissions();
+  const canSeePermissions = ready && canView("employee_permissions");
+  const canChangePermissions = ready && canEdit("employee_permissions");
   const [role, setRole] = useState("Admin");
   const [employeeId, setEmployeeId] = useState("");
   const [queryReady, setQueryReady] = useState(false);
@@ -234,7 +238,7 @@ const EmployeePermission = () => {
       role,
       employeeId,
     },
-    { skip: !queryReady || !role },
+    { skip: !canSeePermissions || !queryReady || !role },
   );
   const [saveEmployeePermissions, { isLoading: isSaving }] =
     useSaveEmployeePermissionsMutation();
@@ -341,7 +345,7 @@ const EmployeePermission = () => {
 
   const handleSave = async (event) => {
     event.preventDefault();
-    if (!permissions) return;
+    if (!canChangePermissions || !permissions) return;
 
     const savingEmployee = Boolean(employeeId);
 
@@ -374,6 +378,8 @@ const EmployeePermission = () => {
         selectedEmployee?.name || `employee ${employeeId}`
       } and replace the ${role} role defaults.`
     : `These defaults apply to all ${role} employees without an individual override.`;
+
+  if (!canSeePermissions) return null;
 
   return (
     <form className={styles.card} onSubmit={handleSave}>
@@ -417,14 +423,16 @@ const EmployeePermission = () => {
                 </option>
               ))}
             </select>
-            <button
-              type="button"
-              className={styles.selectAll}
-              onClick={handleSelectAll}
-              disabled={!permissions || allSelected || isFetching}
-            >
-              Select All
-            </button>
+            {canChangePermissions && (
+              <button
+                type="button"
+                className={styles.selectAll}
+                onClick={handleSelectAll}
+                disabled={!permissions || allSelected || isFetching}
+              >
+                Select All
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -462,7 +470,7 @@ const EmployeePermission = () => {
                   <PermissionCheckbox
                     checked={moduleState.checked}
                     indeterminate={moduleState.indeterminate}
-                    disabled={!permissions}
+                    disabled={!permissions || !canChangePermissions}
                     label={`${module.label} permissions`}
                     onChange={(event) =>
                       setModuleValue(module.key, items, event.target.checked)
@@ -488,7 +496,7 @@ const EmployeePermission = () => {
                         checked={Boolean(
                           permissions?.[module.key]?.[item.key]?.[action],
                         )}
-                        disabled={!permissions}
+                        disabled={!permissions || !canChangePermissions}
                         label={`${item.label} ${ACTION_LABELS[action]}`}
                         onChange={(event) =>
                           setAction(
@@ -508,20 +516,22 @@ const EmployeePermission = () => {
         })}
       </div>
 
-      <div className={styles.footer}>
-        <button
-          type="submit"
-          className={styles.saveButton}
-          disabled={!permissions || isSaving || isFetching}
-        >
-          <FiSave size={15} />
-          {isSaving
-            ? "Saving..."
-            : employeeId
-              ? "Save Employee Permissions"
-              : "Save Role Defaults"}
-        </button>
-      </div>
+      {canChangePermissions && (
+        <div className={styles.footer}>
+          <button
+            type="submit"
+            className={styles.saveButton}
+            disabled={!permissions || isSaving || isFetching}
+          >
+            <FiSave size={15} />
+            {isSaving
+              ? "Saving..."
+              : employeeId
+                ? "Save Employee Permissions"
+                : "Save Role Defaults"}
+          </button>
+        </div>
+      )}
     </form>
   );
 };
