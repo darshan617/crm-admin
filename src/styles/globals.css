@@ -79,6 +79,7 @@
   --gap-xl: 24px;
   --gap-xxl: 25px;
 }
+
 html {
   scroll-behavior: smooth;
   font-size: 14px;
@@ -94,6 +95,7 @@ body {
   font-optical-sizing: auto;
   color: var(--textBody);
 }
+
 a {
   text-decoration: none;
   color: inherit;
@@ -143,28 +145,33 @@ textarea,
   justify-content: space-between;
   align-items: center;
 }
+
 .welcome-text {
   color: #777;
   font-size: var(--font-size-16px);
   margin-bottom: 5px;
 }
+
 .page-header h2 {
   font-size: var(--font-size-24px);
   color: var(--text-light);
   font-weight: var(--fw-bold);
   margin-top: 5px;
 }
+
 .breadcrumb p {
   display: flex;
   flex-direction: row;
   gap: 5px;
 }
+
 .breadcrumb-para p {
   color: #9ba6b7;
   font-size: var(--font-size-16px);
   font-style: normal;
   font-weight: 400;
 }
+
 .breadcrumb-para a {
   color: var(--Background-Colors-Colors-500, var(--primary));
   font-size: var(--font-size-16px);
@@ -188,21 +195,26 @@ textarea,
   font-family: Arial, sans-serif;
   transition: all 0.3s ease;
 }
+
 .back {
   display: flex;
   gap: 16px;
 }
+
 .back-btn:hover {
   background: #165aad;
   color: #fff;
 }
+
 .back-btn svg {
   width: 16px;
   height: 16px;
 }
+
 .back-btn svg path {
   transition: stroke 0.3s ease;
 }
+
 .back-btn:hover svg path {
   stroke: #fff;
 }
@@ -229,11 +241,13 @@ textarea,
   border: none;
   outline: none;
 }
+
 .form-group input:focus,
 .form-group textarea:focus {
   border-color: #165aad;
   box-shadow: 0 0 0 3px rgba(22, 90, 173, 0.12);
 }
+
 .form-group textarea {
   resize: none;
   height: 90px;
@@ -258,6 +272,7 @@ textarea {
 .section-title {
   margin-top: 22px !important;
 }
+
 .phone-group {
   display: flex;
   /* align-items: center; */
@@ -284,9 +299,11 @@ textarea {
   box-shadow: 5px 5px 10px 0 rgba(80, 145, 197, 0.15);
   overflow: hidden;
 }
+
 table {
   width: 100%;
 }
+
 .table-head {
   display: grid;
   grid-template-columns: 120px 2fr 2.3fr 125px 80px 135px;
@@ -301,6 +318,7 @@ table {
   border-radius: 10px;
   line-height: normal;
 }
+
 .table-row {
   display: grid;
   padding: 12px 24px;
@@ -312,6 +330,7 @@ table {
   margin-bottom: 12px;
   transition: all 0.3s ease;
 }
+
 .table-row:hover {
   border-color: #dbe4f0;
   box-shadow: 0 0 10px 0 rgba(3, 85, 172, 0.2);
@@ -328,38 +347,47 @@ table {
   color: #fff;
   background: #6750a4;
 }
+
 .table-row:nth-child(2) .avatar {
   color: #fff;
   background: #37768b;
 }
+
 .table-row:nth-child(3) .avatar {
   color: #fff;
   background: #a88828;
 }
+
 .table-row:nth-child(4) .avatar {
   color: #fff;
   background: #2871a8;
 }
+
 .table-row:nth-child(5) .avatar {
   color: #fff;
   background: #9c2f63;
 }
+
 .table-row:nth-child(6) .avatar {
   color: #fff;
   background: #28468b;
 }
+
 .table-row:nth-child(7) .avatar {
   color: #fff;
   background: #c00f0c;
 }
+
 .table-row:nth-child(8) .avatar {
   color: #fff;
   background: #6750a4;
 }
+
 .table-row:nth-child(9) .avatar {
   color: #fff;
   background: #37768b;
 }
+
 .table-row:nth-child(10) .avatar {
   color: #fff;
   background: #a88828;
@@ -406,7 +434,8 @@ table {
   color: #fff;
 }
 
-.badge.quotation-sent {
+.badge.quotation-sent,
+.sent {
   background: #7764e8;
   color: #fff;
 }
@@ -421,7 +450,8 @@ table {
   color: #fff;
 }
 
-.badge.lost {
+.badge.lost,
+.not-sent {
   background: #929da3;
   color: #fff;
 }
@@ -458,6 +488,7 @@ table {
   justify-content: center;
   margin-bottom: 25px;
 }
+
 .border-line {
   position: absolute;
   top: 0;
@@ -466,6 +497,7 @@ table {
   height: 1px;
   background: #e7e9eb;
 }
+
 .filter-btn {
   display: flex;
   align-items: center;
@@ -483,6 +515,7 @@ table {
   z-index: 1;
   transition: all 0.3s ease;
 }
+
 #filterPanel .filter-options select,
 #filterPanel .date-input input,
 #filterPanel .date-input input[type="date"],
@@ -592,8 +625,7 @@ table {
 .crm-quo-table .table-head,
 .crm-quo-table .crm-quo-row {
   grid-template-columns:
-    minmax(120px, 0.8fr) minmax(200px, 1.3fr) minmax(240px, 1.7fr)
-    minmax(100px, 0.6fr) minmax(200px, 1.2fr);
+    minmax(120px, 0.8fr) minmax(200px, 1.3fr) minmax(240px, 1.7fr) minmax(100px, 0.6fr) minmax(200px, 1.2fr);
   align-items: center;
 }
 
@@ -603,6 +635,7 @@ table {
 .es-quo-table .plan-info {
   align-items: flex-start;
 }
+
 .customer,
 .plan-info {
   display: flex;
@@ -610,6 +643,7 @@ table {
   gap: 14px;
   flex-direction: row;
 }
+
 .crm-quo-table .plan-icon,
 .es-quo-table .plan-icon {
   width: 40px;
@@ -662,6 +696,7 @@ table {
   background: #02bc9c;
   color: #fff;
 }
+
 .rejected {
   background: var(--danger-bg);
   color: #fff;
@@ -684,6 +719,7 @@ table {
   flex-wrap: nowrap;
   margin-bottom: 15px;
 }
+
 .common-table-header p {
   margin: 6px 0 0;
   font-size: var(--font-size-14px);
@@ -760,6 +796,7 @@ table {
   gap: 18px 20px;
   align-items: start;
 }
+
 #filterPanel .date-range {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -772,10 +809,10 @@ table {
 .es-quo-table .table-head,
 .es-quo-table .es-quo-row {
   grid-template-columns:
-    minmax(120px, 0.8fr) minmax(190px, 1.2fr) minmax(240px, 1.6fr)
-    96px 96px minmax(190px, 1.1fr);
+    minmax(120px, 0.8fr) minmax(190px, 1.2fr) minmax(240px, 1.6fr) 96px 96px minmax(190px, 1.1fr);
   align-items: center;
 }
+
 .action-btn {
   width: 30px;
   height: 30px;
@@ -846,6 +883,7 @@ table {
 .form-group label span {
   color: #ef4444;
 }
+
 .quotation-status-select {
   appearance: none;
   -webkit-appearance: none;
@@ -876,10 +914,12 @@ table {
     5px 5px;
   background-repeat: no-repeat;
 }
+
 .quotation-status-select option {
   background-color: #ffffff;
   color: #333333;
 }
+
 .quotation-status-select.is-not_shared,
 .quotation-status-select.is-not_sent {
   background-color: #64748b;
@@ -923,7 +963,7 @@ table {
   min-width: 0;
 }
 
-.common-form.quotation-detail > div {
+.common-form.quotation-detail>div {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -943,6 +983,7 @@ table {
 }
 
 @media (max-width: 1199px) {
+
   .crm-page .crm-lead-table .table-head,
   .crm-page .crm-lead-table .crm-lead-row {
     gap: 10px;
@@ -980,6 +1021,7 @@ table {
     text-align: center;
     text-decoration: none;
   }
+
   #filterPanel .filter-grid {
     display: block;
     margin-bottom: 25px;
@@ -1094,8 +1136,8 @@ table {
       "assigned assigned assigned";
   }
 
-  .crm-quo-list .crm-quo-row > td,
-  .crm-quo-list .es-quo-row > td {
+  .crm-quo-list .crm-quo-row>td,
+  .crm-quo-list .es-quo-row>td {
     min-width: 0;
     width: auto;
     padding: 0;
@@ -1105,27 +1147,33 @@ table {
   .crm-quo-list td[data-label="Id"] {
     grid-area: id;
   }
+
   .crm-quo-list td[data-label="Contact"] {
     grid-area: contact;
   }
+
   .crm-quo-list td[data-label="Plan"] {
     grid-area: plan;
   }
+
   .crm-quo-list td[data-label="Status"] {
     grid-area: status;
     width: auto !important;
     text-align: right !important;
   }
+
   .crm-quo-list td[data-label="Invoice"] {
     grid-area: invoice;
     width: auto !important;
     text-align: right !important;
   }
+
   .crm-quo-list td[data-label="Invoice"]::before {
     content: "Invoice: ";
     font-size: 12px;
     color: #7b7e8d;
   }
+
   .crm-quo-list td[data-label="Assigned To"] {
     grid-area: assigned;
   }
@@ -1240,7 +1288,7 @@ table {
     align-items: start;
   }
 
-  .crm-page .crm-lead-table .crm-lead-row > td {
+  .crm-page .crm-lead-table .crm-lead-row>td {
     min-width: 0;
     width: auto;
   }

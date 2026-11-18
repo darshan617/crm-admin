@@ -5,7 +5,8 @@ import { LuSearch, LuChevronRight } from "react-icons/lu";
 import { useRouter } from "next/router";
 import styles from "@/components/follow-up/FollowUp.module.css";
 import Pagination from "@/common-components/pagination/Pagination";
-import { useDashboardQuery, useGetFollowUpsQuery } from "@/redux/apis/followUpApi";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
+import { useGetFollowUpsQuery } from "@/redux/apis/followUpApi";
 
 const TABS = [
   { label: "All Follow-Ups", value: "all" },
@@ -137,6 +138,8 @@ const normalizeFollowUp = (item, index) => {
 
 const Followup = () => {
   const router = useRouter();
+  const { canView } = usePermissions();
+  const canSeeFollowUps = canView("follow_ups");
 
   // URL-driven state
   const activeTab = router.isReady
@@ -213,7 +216,7 @@ const Followup = () => {
         search,
       },
       {
-        skip: !router.isReady,
+        skip: !router.isReady || !canSeeFollowUps,
       },
     );
 
@@ -353,6 +356,8 @@ const Followup = () => {
 
   const errorMessage =
     error?.data?.message || "Unable to load follow-ups. Please try again.";
+
+  if (!canSeeFollowUps) return null;
 
   return (
     <main className="content">

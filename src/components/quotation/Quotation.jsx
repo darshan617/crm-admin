@@ -168,6 +168,7 @@ const Quotation = () => {
     isLoading,
     isFetching,
     isError,
+    refetch,
   } = useGetAllQuotationsQuery({
     search: view.search,
     tab: view.activeTab,
@@ -233,6 +234,14 @@ const Quotation = () => {
       document.removeEventListener("pointerdown", handleOutsideClick);
   }, [view.activeQuotationId]);
 
+  const getInvoiceStatus = (invoiceStatus) => {
+    if (invoiceStatus === "not_sent") return "Not Sent";
+    if (invoiceStatus === "approved") return "Approved";
+    if (invoiceStatus === "sent") return "Sent";
+    if (invoiceStatus === "pending") return "Pending";
+    return invoiceStatus;
+  };
+
   /* --------------------------- rows --------------------------- */
 
   const renderRows = () => {
@@ -279,11 +288,7 @@ const Quotation = () => {
           className={`${customerTab ? "es" : "crm"}-quo-row table-row`}
           style={{ cursor: "pointer" }}
           onClick={() =>
-            router.push(
-              customerTab
-                ? `/quotations/quotation-detail/${quotation.id}/activity`
-                : `/quotations/quotation-detail/${quotation.id}`,
-            )
+            router.push(`/quotations/quotation-detail/${quotation.id}`)
           }
         >
           {/* Id */}
@@ -349,11 +354,11 @@ const Quotation = () => {
 
           {customerTab && (
             <td className="status-col" data-label="Invoice">
-              {quotation.approved ? (
-                <span className="badge approved">Approved</span>
-              ) : (
-                "—"
-              )}
+              <span
+                className={`badge ${getStatusClass(getInvoiceStatus(quotation.invoice_status))}`}
+              >
+                {getInvoiceStatus(quotation.invoice_status) || "-"}
+              </span>
             </td>
           )}
 

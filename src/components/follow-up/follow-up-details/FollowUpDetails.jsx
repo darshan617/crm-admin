@@ -10,6 +10,7 @@ import {
   useFollowUpDetailQuery,
 } from "@/redux/apis/followUpApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const statuses = [
   "New",
@@ -41,6 +42,11 @@ const formatDate = (value) => {
 
 const FollowUpDetails = () => {
   const router = useRouter();
+  const { canView, canAdd } = usePermissions();
+  const canSeeFollowUps = canView("follow_ups");
+  const canAddFollowUp = canAdd("follow_ups");
+  const canViewLead =
+    canView("leads") || canView("jd_leads") || canView("exhibition_leads");
 
   const id = router.isReady
     ? Array.isArray(router.query.id)
@@ -50,7 +56,7 @@ const FollowUpDetails = () => {
 
   const { data, isLoading, isError, error, refetch } = useFollowUpDetailQuery(
     { id },
-    { skip: !router.isReady || !id },
+    { skip: !router.isReady || !id || !canSeeFollowUps },
   );
 
   const detail = data?.data || {};
@@ -78,6 +84,7 @@ const FollowUpDetails = () => {
 
   const handleAddFollowup = async (e) => {
     e.preventDefault();
+    if (!canAddFollowUp) return;
 
     try {
       const body = {
@@ -116,6 +123,8 @@ const FollowUpDetails = () => {
       );
     }
   };
+
+  if (!canSeeFollowUps) return null;
 
   if (!router.isReady || isLoading) {
     return (
@@ -174,14 +183,17 @@ const FollowUpDetails = () => {
         </div>
       </div>
 
-      <div className={styles.followupDetail}>
+      <div
+        className={styles.followupDetail}
+        style={canAddFollowUp ? undefined : { gridTemplateColumns: "1fr" }}
+      >
         {/* Follow-Up Details and History */}
         <section className="common-table-section">
           <div className="common-table-card p-16">
             <div className={styles.cardHeader}>
               <h3>{lead.company_name || "-"}</h3>
 
-              {lead?.id && (
+              {lead?.id && canViewLead && (
                 <button
                   type="button"
                   onClick={() => router.push(`/leads/leads-details/${lead.id}`)}
@@ -248,7 +260,7 @@ const FollowUpDetails = () => {
           </div>
         </section>
 
-        {/* Add Follow-Up Form */}
+        {canAddFollowUp && (
         <section className="common-table-section">
           <div className="common-table-card p-16">
             <div className={styles.cardHeader}>
@@ -348,6 +360,7 @@ const FollowUpDetails = () => {
             </form>
           </div>
         </section>
+        )}
       </div>
     </main>
   );
