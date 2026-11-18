@@ -25,6 +25,13 @@
   flex-shrink: 0;
 }
 
+.contactInfo h5 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  font-weight: 400;
+  color: #444444;
+}
+
 .crmLeadTabs {
   display: flex;
   align-items: flex-end;

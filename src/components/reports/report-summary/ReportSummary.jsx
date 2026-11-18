@@ -7,22 +7,27 @@ import { VscGitBranch } from "react-icons/vsc";
 import { FiTarget } from "react-icons/fi";
 import styles from "@/components/reports/report-summary/ReportSummary.module.css";
 
-const kpis = [
-  { label: "Total Sales", value: "₹37,538", tone: "blue", Icon: LuIndianRupee },
-  { label: "Won Deals", value: "4", tone: "teal", Icon: GoTrophy },
+const KPI_FIELDS = [
+  { label: "Total Sales", key: "totalSales", tone: "blue", Icon: LuIndianRupee },
+  { label: "Won Deals", key: "wonDeals", tone: "teal", Icon: GoTrophy },
   {
     label: "Win Rate",
-    value: "100%",
+    key: "winRate",
     tone: "green",
     Icon: AiOutlinePercentage,
   },
   {
     label: "Pipeline Value",
-    value: "₹1 L",
+    key: "pipelineValue",
     tone: "purple",
     Icon: VscGitBranch,
   },
-  { label: "Target Achievement", value: "27%", tone: "orange", Icon: FiTarget },
+  {
+    label: "Target Achievement",
+    key: "targetAchievement",
+    tone: "orange",
+    Icon: FiTarget,
+  },
 ];
 
 const toneClass = {
@@ -33,7 +38,12 @@ const toneClass = {
   orange: styles.toneOrange,
 };
 
-const ReportSummary = () => {
+const ReportSummary = ({ data, isLoading, isError }) => {
+  const kpis = KPI_FIELDS.map((kpi) => ({
+    ...kpi,
+    value: isLoading ? "…" : isError ? "—" : (data?.[kpi.key] ?? "—"),
+  }));
+
   return (
     <>
       <div className="page-header">

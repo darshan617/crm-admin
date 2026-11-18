@@ -30,6 +30,9 @@ const formatAmount = (value) =>
     maximumFractionDigits: 2,
   })}`;
 
+// Short alias used in the Order Items table and summary
+const inr = formatAmount;
+
 const CrmOrderView = () => {
   const router = useRouter();
   const { slug } = router.query;
@@ -57,6 +60,12 @@ const CrmOrderView = () => {
   const items = details?.items ?? [];
   const po = details?.po ?? {};
   const poJourney = details?.po_journey ?? [];
+  const totals = details?.totals ?? {};
+
+  // Amounts for the Order Items summary (rename fields to match your API)
+  const discount = Number(order.discount_amount ?? 0);
+  const cgst = Number(order.cgst_amount ?? 0);
+  const sgst = Number(order.sgst_amount ?? 0);
 
   const billingCycles = details?.billing_cycle_options ?? [];
 
@@ -104,23 +113,13 @@ const CrmOrderView = () => {
     const poDocument = formValues.get("po_document");
 
     if (!poDate) {
-      showToast("Please select PO date");
+      showToast("Please select the PO date.", "error");
       return;
     }
 
-    if (poMode === "uploaded") {
-      if (!(poDocument instanceof File) || !poDocument.size) {
-        showToast("Please upload PO PDF");
-        return;
-      }
-
-      if (
-        poDocument.type !== "application/pdf" &&
-        !poDocument.name.toLowerCase().endsWith(".pdf")
-      ) {
-        showToast("Only PDF files are allowed");
-        return;
-      }
+    if (poMode === "uploaded" && !poDocument?.name) {
+      showToast("Please upload the PO PDF.", "error");
+      return;
     }
 
     const body = new FormData();
@@ -138,14 +137,12 @@ const CrmOrderView = () => {
         body,
       }).unwrap();
 
-      // Message comes from the API only
       showToast(response?.message);
 
       form.reset();
       setPoMode("generated");
       refetch();
     } catch (error) {
-      // Message comes from the API only
       showToast(error?.data?.message);
     }
   };
@@ -239,7 +236,6 @@ const CrmOrderView = () => {
                 id="start_date"
                 className={`${styles.control} ${styles.dateInput}`}
                 defaultValue={defaultStart}
-                required
               />
 
               <label className={styles.fieldLabel} htmlFor="billing_cycle">
@@ -275,7 +271,7 @@ const CrmOrderView = () => {
               href={details.links.view_quotation}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${styles.btn} ${styles.btnOutline}`}
+              className={`${styles.viewPoDocument} btn d-flex gap-1 align-items-center`}
             >
               <FiFileText />
               View Quotation
@@ -287,7 +283,7 @@ const CrmOrderView = () => {
               href={details.links.view_invoice}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${styles.btn} ${styles.btnPrimary}`}
+              className={`${styles.viewInvoice} btn d-flex gap-1 align-items-center`}
             >
               <FiFile />
               View Invoice
@@ -377,9 +373,9 @@ const CrmOrderView = () => {
                 <tr>
                   <th>Item</th>
                   <th>Description</th>
-                  <th>Qty</th>
-                  <th>Unit Price</th>
-                  <th>Total</th>
+                  <th className={styles.end}>Qty</th>
+                  <th className={styles.end}>Unit Price</th>
+                  <th className={styles.end}>Total</th>
                 </tr>
               </thead>
 
@@ -388,23 +384,55 @@ const CrmOrderView = () => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td className={styles.muted}>{item.description}</td>
-                    <td>{item.quantity}</td>
-                    <td>₹{Number(item.unit_price).toLocaleString("en-IN")}</td>
-                    <td>₹{Number(item.total).toLocaleString("en-IN")}</td>
+                    <td className={styles.end}>{item.quantity}</td>
+                    <td className={styles.end}>{inr(item.unit_price)}</td>
+                    <td className={styles.end}>{inr(item.total)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          <div className={styles.total}>
-            <div>
-              <div className={styles.label}>Grand total</div>
-              <div className={styles.totalAmount}>
-                ₹
-                {Number(
-                  order.total_amount ?? deal.total_amount ?? 0,
-                ).toLocaleString("en-IN")}
+          <div className={styles.summaryWrap}>
+            <div className={styles.summary}>
+              <div className={styles.row}>
+                <span className={styles.label}>Subtotal</span>
+                <span>{inr(totals?.sub_total ?? 0)}</span>
+              </div>
+
+              {discount >= 0 && (
+                <div className={styles.row}>
+                  <span className={styles.label}>
+                    Discount {totals?.discount_percent ?? 0}%
+                  </span>
+                  <span>- {inr(totals?.discount_amount ?? 0)}</span>
+                </div>
+              )}
+
+              <div className={styles.row}>
+                <span className={styles.label}>Taxable</span>
+                <span>{inr(totals?.taxable_amount ?? 0)}</span>
+              </div>
+
+              {cgst >= 0 && (
+                <div className={styles.row}>
+                  <span className={styles.label}>CGST 9%</span>
+                  <span>{inr(totals?.cgst_total ?? 0)}</span>
+                </div>
+              )}
+
+              {sgst >= 0 && (
+                <div className={styles.row}>
+                  <span className={styles.label}>SGST 9%</span>
+                  <span>{inr(totals?.sgst_total ?? 0)}</span>
+                </div>
+              )}
+
+              <div className={styles.grandTotal}>
+                <span className={styles.grandLabel}>Grand total</span>
+                <span className={styles.grandAmount}>
+                  {inr(totals?.grand_total ?? 0)}
+                </span>
               </div>
             </div>
           </div>
@@ -421,7 +449,7 @@ const CrmOrderView = () => {
               href={poDocumentUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn btn-sm btn-outline-primary d-flex"
+              className={`${styles.viewPoDocument} btn d-flex`}
             >
               <FiFileText className="me-1 " /> View PO Document
             </a>

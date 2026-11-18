@@ -417,6 +417,27 @@
   margin-top: 16px;
 }
 
+.viewPoDocument {
+  background: #ffffff;
+  color: #0759ad;
+  border-color: #0759ad;
+  border-radius: 99px;
+}
+.viewPoDocument:hover {
+  background: #0759ad;
+  color: #fff;
+}
+
+.viewInvoice {
+  background: #0759ad;
+  color: #fff;
+  border-color: #0759ad;
+  border-radius: 99px;
+}
+.viewInvoice:hover {
+  background: #0759ad;
+  color: #fff;
+}
 .odStepDot {
   display: inline-flex;
   align-items: center;
@@ -439,6 +460,66 @@
 .generateGrid {
   width: 100%;
   min-width: 0;
+}
+
+.end {
+  text-align: right;
+}
+
+.summaryWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.summary {
+  width: 100%;
+  max-width: 230px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.row .label {
+  margin-bottom: 0;
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #dbe3ee;
+}
+
+.grandLabel {
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.grandAmount {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 575px) {
+  .summary {
+    max-width: 100%;
+  }
+  .grandAmount {
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 1440px) {

@@ -1,31 +1,34 @@
 import React from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  Tooltip,
+} from "recharts";
 import styles from "@/components/reports/performance-overview/BusinessOverview.module.css";
 
-const stats = [
-  { label: "Total Revenue", value: "₹37,538", tone: "blue" },
-  { label: "Won Deals", value: "4", tone: "teal" },
-  { label: "Lost Deals", value: "0", tone: "orange" },
-  { label: "Pipeline Value", value: "₹1 L", tone: "purple" },
-  { label: "Expected Revenue", value: "₹59,611", tone: "green" },
-  { label: "Win Rate", value: "100%", tone: "yellow" },
+const STAT_FIELDS = [
+  { label: "Total Revenue", key: "yearRevenue", tone: "blue" },
+  { label: "Won Deals", key: "wonDeals", tone: "teal" },
+  { label: "Lost Deals", key: "lostDeals", tone: "orange" },
+  { label: "Pipeline Value", key: "pipelineValue", tone: "purple" },
+  { label: "Expected Revenue", key: "expectedRevenue", tone: "green" },
+  { label: "Win Rate", key: "winRate", tone: "yellow" },
 ];
 
-const months = [
-  { label: "Dec", height: 0 },
-  { label: "Jan", height: 0 },
-  { label: "Feb", height: 0 },
-  { label: "Mar", height: 0 },
-  { label: "Apr", height: 0 },
-  { label: "May", height: 0 },
-  { label: "Jun", height: 0 },
-  { label: "Jul", height: 0 },
-  { label: "Aug", height: 0 },
-  { label: "Sep", height: 0 },
-  { label: "Oct", height: 31 },
-  { label: "Nov", height: 100 },
-];
+const BAR_COLOR = "#3a72bf";
+const BAR_COLOR_TOP = "#1f4e95";
 
-const BusinessOverview = () => {
+const BusinessOverview = ({ data }) => {
+  const stats = STAT_FIELDS.map((stat) => ({
+    ...stat,
+    value: data?.[stat.key] ?? "—",
+  }));
+  const months = data?.months ?? [];
+  const maxHeight = Math.max(0, ...months.map((month) => Number(month.h) || 0));
+
   return (
     <section className="common-table-section mt-4">
       <div className={`common-table-card ${styles.rptCard}`}>
@@ -48,13 +51,43 @@ const BusinessOverview = () => {
           ))}
         </div>
 
-        <div className={styles.rptBars}>
-          {months.map(({ label, height }) => (
-            <div key={label} className={styles.rptBarCol}>
-              <div className={styles.rptBar} style={{ "--h": `${height}%` }} />
-              <small>{label}</small>
-            </div>
-          ))}
+        <div style={{ width: "100%", height: 240, marginTop: 16 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={months}
+              margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+              barCategoryGap="30%"
+            >
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: "#9aa5bd", fontSize: 12 }}
+                dy={10}
+              />
+              <Tooltip
+                cursor={{ fill: "rgba(58, 114, 191, 0.06)" }}
+                formatter={(value) => [value, "Relative"]}
+              />
+              <Bar
+                dataKey="h"
+                maxBarSize={28}
+                radius={[6, 6, 0, 0]}
+                minPointSize={0}
+              >
+                {months.map((month) => (
+                  <Cell
+                    key={month.label}
+                    fill={
+                      Number(month.h) === maxHeight && maxHeight > 0
+                        ? BAR_COLOR_TOP
+                        : BAR_COLOR
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </section>

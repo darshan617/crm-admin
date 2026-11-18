@@ -17,7 +17,6 @@ import Cookies from "js-cookie";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import Sidebar from "../sidebar/Sidebar";
 
 const subscribeToUserCookie = () => () => {};
 const getUserCookieSnapshot = () => Cookies.get("CRM_USER") || null;
@@ -121,18 +120,9 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     };
   }, []);
 
-  const handleExpandSidebar = () => {
-    setSidebarCollapsed(false);
-  };
-
   return (
     <>
       <header className={styles.navbar}>
-        <Sidebar
-          collapsed={sidebarCollapsed}
-          onExpandSidebar={handleExpandSidebar}
-        />
-
         <div className={styles.brand}>
           <Image
             className={styles.brandLogo}

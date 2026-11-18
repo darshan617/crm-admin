@@ -6,7 +6,10 @@ import { useRouter } from "next/router";
 import styles from "@/components/follow-up/FollowUp.module.css";
 import Pagination from "@/common-components/pagination/Pagination";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
-import { useGetFollowUpsQuery } from "@/redux/apis/followUpApi";
+import {
+ 
+  useGetFollowUpsQuery,
+} from "@/redux/apis/followUpApi";
 
 const TABS = [
   { label: "All Follow-Ups", value: "all" },
@@ -208,7 +211,7 @@ const Followup = () => {
 
   // API integration
   const { data, isLoading, isFetching, isError, error, refetch } =
-  useGetFollowUpsQuery(
+    useGetFollowUpsQuery(
       {
         filter: activeTab,
         page,
@@ -557,7 +560,7 @@ const Followup = () => {
                       </td>
 
                       {/* Contact */}
-                      <td className="contact-info" data-label="Contact">
+                      <td className={styles.contactInfo} data-label="Contact">
                         <div>
                           <h5>{f.email}</h5>
                           <p>{f.phone}</p>
