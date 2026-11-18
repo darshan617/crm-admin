@@ -37,6 +37,7 @@
 }
 
 .card {
+  min-width: 0;
   background: #fff;
   border: 1px solid #e7edf5;
   border-radius: 12px;
@@ -47,6 +48,7 @@
 }
 
 .card1 {
+  min-width: 0;
   background: #fff;
   border: 1px solid #e7edf5;
   border-radius: 12px;
@@ -55,8 +57,7 @@
 }
 
 .orderTitle {
-  /* display: flex;
-  align-items: center; */
+  min-width: 0;
   gap: 8px;
 }
 
@@ -201,6 +202,7 @@
 }
 
 .split {
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(280px, 0.92fr) minmax(320px, 1.25fr);
   gap: 16px;
@@ -230,6 +232,7 @@
 }
 
 .customerValue {
+  overflow-wrap: anywhere;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.45;
@@ -241,8 +244,12 @@
   font-weight: 600;
 }
 
+/* ================= Order Items table ================= */
+
 .tableWrap {
-  overflow-x: auto;
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
 }
 
 .table {
@@ -266,11 +273,34 @@
   border-bottom: 1px solid #eef2f6;
   color: #1f2937;
   font-weight: 500;
+  vertical-align: top;
 }
 
 .table th:nth-child(n + 3),
 .table td:nth-child(n + 3) {
   text-align: right;
+}
+
+/* Column widths (desktop) */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 30%;
+}
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 28%;
+}
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 9%;
+}
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 16%;
+}
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 17%;
 }
 
 .muted {
@@ -387,6 +417,27 @@
   margin-top: 16px;
 }
 
+.viewPoDocument {
+  background: #ffffff;
+  color: #0759ad;
+  border-color: #0759ad;
+  border-radius: 99px;
+}
+.viewPoDocument:hover {
+  background: #0759ad;
+  color: #fff;
+}
+
+.viewInvoice {
+  background: #0759ad;
+  color: #fff;
+  border-color: #0759ad;
+  border-radius: 99px;
+}
+.viewInvoice:hover {
+  background: #0759ad;
+  color: #fff;
+}
 .odStepDot {
   display: inline-flex;
   align-items: center;
@@ -406,25 +457,398 @@
   color: #fff;
 }
 
-@media (max-width: 1100px) {
-  .details {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+.generateGrid {
+  width: 100%;
+  min-width: 0;
+}
 
-  .split,
-  .uploadGrid {
-    grid-template-columns: 1fr;
+.end {
+  text-align: right;
+}
+
+.summaryWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.summary {
+  width: 100%;
+  max-width: 230px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.row .label {
+  margin-bottom: 0;
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #dbe3ee;
+}
+
+.grandLabel {
+  color: #98a2b3;
+  font-size: 12px;
+}
+
+.grandAmount {
+  color: #1f2937;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 575px) {
+  .summary {
+    max-width: 100%;
+  }
+  .grandAmount {
+    font-size: 15px;
   }
 }
 
-@media (max-width: 640px) {
-  .details,
-  .customerGrid {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 1440px) {
+  .card,
+  .card1 {
+    padding: 18px;
   }
+  .details {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  }
+  .table {
+    table-layout: fixed;
+  }
+  .table th,
+  .table td {
+    padding: 12px 8px;
+    overflow-wrap: anywhere;
+  }
+  .table th {
+    white-space: normal;
+  }
+  .table th:nth-child(1),
+  .table td:nth-child(1) {
+    width: 26%;
+  }
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    width: 28%;
+  }
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    width: 8%;
+  }
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    width: 19%;
+  }
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    width: 19%;
+  }
+}
 
+@media (max-width: 1199px) {
+  .card {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .details {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .uploadGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .actions {
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 991px) {
+  .page {
+    gap: 14px;
+  }
+  .header {
+    align-items: center;
+  }
+  .title {
+    font-size: 20px;
+  }
+  .card,
+  .card1 {
+    padding: 16px;
+  }
+  .details {
+    gap: 16px 12px;
+  }
+  .customerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Order Items */
+  .table {
+    table-layout: fixed;
+    font-size: 13px;
+  }
+  .table th,
+  .table td {
+    padding: 10px 6px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    gap: 12px;
+    padding-inline: 12px;
+  }
+  .header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .title {
+    font-size: 19px;
+  }
+  .crumbs {
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+  .card,
+  .card1 {
+    width: 100%;
+    padding: 14px 12px;
+  }
+  .split {
+    width: 100%;
+    gap: 12px;
+  }
+  .split > * {
+    min-width: 0;
+    width: 100%;
+  }
+  .details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .customerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .uploadGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .dateInput,
   .select {
+    max-width: 100%;
+  }
+  .value {
+    overflow-wrap: anywhere;
+  }
+  .table,
+  .table tbody {
+    display: block;
+    width: 100%;
+  }
+  .table thead {
+    display: none;
+  }
+  .table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 12px;
+    padding: 12px;
+    background: #fafbfd;
+    border: 1px solid #e7edf5;
+    border-radius: 10px;
+  }
+  .table tbody td:nth-child(n) {
+    display: block;
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    font-size: 13px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .table tbody td::before {
+    display: block;
+    margin-bottom: 2px;
+    color: #98a2b3;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .table tbody td:nth-child(1) {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .table tbody td:nth-child(2) {
+    grid-column: 1 / -1;
+  }
+  .table tbody td:nth-child(2):empty {
+    display: none;
+  }
+  .table tbody td:nth-child(2)::before {
+    content: "Description";
+  }
+  .table tbody td:nth-child(3)::before {
+    content: "Qty";
+  }
+  .table tbody td:nth-child(4)::before {
+    content: "Unit Price";
+  }
+  .table tbody td:nth-child(5)::before {
+    content: "Total";
+  }
+}
+
+@media (max-width: 575px) {
+  .title {
+    font-size: 18px;
+  }
+  .card,
+  .card1 {
+    padding: 14px 10px;
+  }
+  .orderTitle h2 {
+    font-size: 15px;
+  }
+  .meta {
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .actions {
+    gap: 10px;
+    width: 100%;
+  }
+  .fieldLabel {
+    width: 100%;
+  }
+  .dateInput,
+  .select {
+    width: 100%;
+  }
+  .btn {
+    padding-inline: 12px;
+    font-size: 12px;
+  }
+  .details {
+    gap: 16px 10px;
+  }
+  .label {
+    font-size: 11px;
+  }
+  .value,
+  .customerValue {
+    font-size: 12px;
+  }
+  .customerName {
+    font-size: 16px;
+  }
+  .customerCompany {
+    font-size: 12px;
+  }
+  .customerGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .sectionTitle {
+    font-size: 15px;
+  }
+  .totalAmount {
+    font-size: 17px;
+  }
+  .radios {
+    gap: 12px;
+  }
+  .radio {
+    font-size: 12px;
+  }
+  .fileInput {
+    height: auto;
+    min-height: 34px;
+  }
+  .stepper {
+    max-width: 100%;
+  }
+  .stepLabel {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 375px) {
+  .card,
+  .card1 {
+    padding: 12px 8px;
+  }
+  .title {
+    font-size: 17px;
+  }
+  .details {
+    gap: 14px 8px;
+  }
+  .orderTitle h2 {
+    font-size: 14px;
+  }
+  .badgeWarn,
+  .badgeMuted {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+  .btn {
+    font-size: 11px;
+    padding-inline: 10px;
+  }
+  .table tbody tr {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .table tbody td:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 320px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .card,
+  .card1 {
+    padding: 10px 6px;
+  }
+  .title {
+    font-size: 16px;
+  }
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .btn {
     width: 100%;
   }
 }

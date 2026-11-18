@@ -244,6 +244,7 @@
   color: #fff;
   font-weight: 600;
   font-size: var(--font-size-14px, 14px);
+  min-width: 32px;
 }
 .tableRow:nth-child(1) .avatar {
   background: #6750a4;

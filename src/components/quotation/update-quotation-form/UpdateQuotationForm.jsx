@@ -13,6 +13,7 @@ import {
 import CustomDropdown from "@/common-components/custom-dropdown/CustomDropdown";
 import { BiX } from "react-icons/bi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import { useRouter } from "next/router";
 
 const countryCodes = [
@@ -38,6 +39,8 @@ const toDateInputValue = (value) => (value ? String(value).slice(0, 10) : "");
 export default function UpdateQuotationForm() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { canEdit } = usePermissions();
+  const canEditQuotation = canEdit("quotations");
   const [formData, setFormData] = useState({
     lead: "",
     company_name: "",
@@ -63,14 +66,16 @@ export default function UpdateQuotationForm() {
   const form = formData;
   const { plans } = formData;
 
-  const { data: ddData } = useGetQuotationDdDataQuery();
+  const { data: ddData } = useGetQuotationDdDataQuery(undefined, {
+    skip: !canEditQuotation,
+  });
 
   const { data: domainAvailable, isLoading: isCheckingDomain } =
     useCheckQuotaionDomainQuery(
       {
         domain: formData?.domain_name,
       },
-      { skip: !formData?.domain_name },
+      { skip: !canEditQuotation || !formData?.domain_name },
     );
   // const { data: getLeadDeatils } = useGetLeadDataForQuotationQuery(
   //   {
@@ -80,7 +85,7 @@ export default function UpdateQuotationForm() {
   // );
   const { data: getLeadDeatils } = useGetLeadDataForQuotationQuery(
     { lead_id: formData?.lead?.value },
-    { skip: !formData?.lead?.value },
+    { skip: !canEditQuotation || !formData?.lead?.value },
   );
 
   const {
@@ -89,7 +94,7 @@ export default function UpdateQuotationForm() {
     isError,
   } = useGetQuotationDetailQuery(
     { quotation_id: router?.query?.qid },
-    { skip: !router?.query?.qid },
+    { skip: !canEditQuotation || !router?.query?.qid },
   );
   const [updateQuotation, { isLoading: isUpdatingQuoatation }] =
     useUpdateQuotationMutation();
@@ -137,7 +142,7 @@ export default function UpdateQuotationForm() {
 
   const handleUpdateQuotation = async (event) => {
     event.preventDefault();
-    if (!validateForm()) return;
+    if (!canEditQuotation || !validateForm()) return;
 
     try {
       const res = await updateQuotation({
@@ -217,8 +222,13 @@ export default function UpdateQuotationForm() {
     }
 
     setError(newError);
-    showToast("Please fill all required fields in the form.", "error");
-    return Object.keys(newError).length === 0;
+
+    if (Object.keys(newError).length > 0) {
+      showToast("Please fill all required fields in the form.", "error");
+      return false;
+    }
+
+    return true;
   };
 
   useEffect(() => {
@@ -313,6 +323,8 @@ export default function UpdateQuotationForm() {
 
     setError({});
   }, [getLeadDeatils?.data?.lead]);
+
+  if (!canEditQuotation) return null;
 
   return (
     <main className="content">

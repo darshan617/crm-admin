@@ -5,9 +5,11 @@ import { useRouter } from "next/router";
 import { FiChevronDown, FiMessageSquare } from "react-icons/fi";
 import { SIDEBAR_CHAT, SIDEBAR_SECTIONS } from "@/constants/sidebar";
 import styles from "./Sidebar.module.css";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const Sidebar = ({ collapsed, onExpandSidebar }) => {
   const [manageOpen, setManageOpen] = useState(false);
+  const { canView, ready } = usePermissions();
 
   const router = useRouter();
   const currentPath = router.asPath.split(/[?#]/)[0];
@@ -36,23 +38,29 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
       aria-label="Main navigation"
     >
       <nav className={styles.navigation}>
-        {SIDEBAR_SECTIONS.map((section) => (
-          <React.Fragment key={section.key}>
+        {SIDEBAR_SECTIONS?.map((section) => (
+          <React.Fragment key={section?.key}>
             <span
               className={`${styles.sectionLabel} ${
                 section.key !== "menu" ? styles.settingsLabel : ""
               }`}
             >
-              {section.name}
+              {section?.name}
             </span>
 
-            {section.items.map((item) => {
+            {section?.items?.map((item) => {
               const Icon = item.icon;
 
               if (item.children) {
+                const visibleChildren = item.children.filter(
+                  (child) => ready && canView(child.moduleKey),
+                );
+
+                if (!visibleChildren.length) return null;
+
                 return (
                   <div
-                    key={item.key}
+                    key={item?.key}
                     className={styles.manageWrapper}
                     onMouseEnter={handleManageMouseEnter}
                     onMouseLeave={handleManageMouseLeave}
@@ -73,7 +81,7 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                         <Icon aria-hidden="true" />
                       </span>
 
-                      <span className={styles.navLabel}>{item.name}</span>
+                      <span className={styles.navLabel}>{item?.name}</span>
 
                       <FiChevronDown
                         className={`${styles.chevron} ${
@@ -91,18 +99,18 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                       aria-hidden={!manageOpen}
                       inert={!manageOpen}
                     >
-                      {item.children.map((child) => {
+                      {visibleChildren.map((child) => {
                         const childActive = currentPath === child.url;
 
                         return (
                           <Link
-                            key={child.key}
-                            href={child.url}
+                            key={child?.key}
+                            href={child?.url}
                             aria-current={childActive ? "page" : undefined}
                             tabIndex={manageOpen ? 0 : -1}
                             className={childActive ? styles.subnavActive : ""}
                           >
-                            {child.name}
+                            {child?.name}
                           </Link>
                         );
                       })}
@@ -110,6 +118,8 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
                   </div>
                 );
               }
+
+              if (!canView(item.moduleKey)) return null;
 
               const active =
                 currentPath === item.url ||

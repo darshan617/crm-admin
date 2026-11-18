@@ -12,6 +12,8 @@ import {
 import CustomDropdown from "@/common-components/custom-dropdown/CustomDropdown";
 import { BiX } from "react-icons/bi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
+import { useRouter } from "next/router";
 
 const countryCodes = [
   ["91", "India"],
@@ -33,6 +35,10 @@ const blankRow = () => ({
 
 export default function Page() {
   const { showToast } = useToast();
+  const router = useRouter();
+  const { canAdd } = usePermissions();
+  const canCreateQuotation =
+    canAdd("quotations") || canAdd("create_quotations");
   const [formData, setFormData] = useState({
     lead: "",
     company_name: "",
@@ -57,7 +63,9 @@ export default function Page() {
   const form = formData;
   const { plans } = formData;
 
-  const { data: ddData } = useGetQuotationDdDataQuery();
+  const { data: ddData } = useGetQuotationDdDataQuery(undefined, {
+    skip: !canCreateQuotation,
+  });
   const [createQuotation, { isLoading: isCreatingQuotation }] =
     useCreateQuotationMutation();
   const { data: domainAvailable, isLoading: isCheckingDomain } =
@@ -65,13 +73,13 @@ export default function Page() {
       {
         domain: formData?.domain_name,
       },
-      { skip: !formData?.domain_name },
+      { skip: !canCreateQuotation || !formData?.domain_name },
     );
   const { data: getLeadDeatils } = useGetLeadDataForQuotationQuery(
     {
       lead_id: formData?.lead?.value,
     },
-    { skip: formData?.lead === "" },
+    { skip: !canCreateQuotation || formData?.lead === "" },
   );
   console.log(getLeadDeatils, "getLeadDeatils");
 
@@ -114,7 +122,7 @@ export default function Page() {
 
   const handleCreateQuotation = async (event) => {
     event.preventDefault();
-    if (!validateForm()) return;
+    if (!canCreateQuotation || !validateForm()) return;
 
     try {
       const res = await createQuotation({
@@ -193,8 +201,13 @@ export default function Page() {
     }
 
     setError(newError);
-    showToast("Please fill all required fields in the form.", "error");
-    return Object.keys(newError).length === 0;
+
+    if (Object.keys(newError).length > 0) {
+      showToast("Please fill all required fields in the form.", "error");
+      return false;
+    }
+
+    return true;
   };
 
   useEffect(() => {
@@ -242,6 +255,8 @@ export default function Page() {
       plans: null,
     }));
   }, [getLeadDeatils?.data]);
+
+  if (!canCreateQuotation) return null;
 
   return (
     <main className="content">

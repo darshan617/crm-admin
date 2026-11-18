@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "@/components/manage/service-provider/ServiceProvider.module.css";
 import { useGetProviderQuery } from "@/redux/apis/providerApi";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 
 const tabs = [
@@ -14,11 +15,17 @@ const tabs = [
 ];
 
 export default function ServiceProvider({ providerId, variant = 1 }) {
+  const { canView, ready } = usePermissions();
+  const canSeeProviders = ready && canView("services_providers");
   const activeVariant = Number(variant);
 
-  const { data, isLoading, isError, refetch } = useGetProviderQuery();
+  const { data, isLoading, isError, refetch } = useGetProviderQuery(undefined, {
+    skip: !canSeeProviders,
+  });
 
   const providers = data?.data?.providers ?? [];
+
+  if (!canSeeProviders) return null;
 
   return (
     <main className="content">

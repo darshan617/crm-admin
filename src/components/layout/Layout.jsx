@@ -4,28 +4,26 @@ import styles from "./Layout.module.css";
 import Navbar from "./navbar/Navbar";
 import Sidebar from "./sidebar/Sidebar";
 
+const COMPACT_SIDEBAR_QUERY = "(max-width: 1100px)";
+
 const Layout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth <= 992;
-      setIsMobile(mobile);
+    const media = window.matchMedia(COMPACT_SIDEBAR_QUERY);
 
-      if (!mobile) {
-        setSidebarCollapsed(false);
-      } else {
-        setSidebarCollapsed(true);
-      }
+    const handleChange = (event) => {
+      const compact = event.matches;
+      setIsCompact(compact);
+      setSidebarCollapsed(compact);
     };
 
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
+    handleChange(media);
+    media.addEventListener("change", handleChange);
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      media.removeEventListener("change", handleChange);
     };
   }, []);
 
@@ -38,7 +36,7 @@ const Layout = ({ children }) => {
   };
 
   const handleCloseSidebar = () => {
-    if (isMobile) {
+    if (isCompact) {
       setSidebarCollapsed(true);
     }
   };
@@ -54,7 +52,7 @@ const Layout = ({ children }) => {
         onExpandSidebar={handleExpandSidebar}
       />
 
-      {isMobile && !sidebarCollapsed && (
+      {isCompact && !sidebarCollapsed && (
         <div
           className={styles.sidebarOverlay}
           onClick={handleCloseSidebar}

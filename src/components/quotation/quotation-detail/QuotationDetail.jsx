@@ -17,10 +17,15 @@ import {
   useLazyDownloadQuotationQuery,
 } from "@/redux/apis/quotationApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import SendQuotationPopup from "../send-quotation-popupo/SendQuotationPopup";
 
 function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
   const router = useRouter();
+  const { canEdit, canAdd, loginAs } = usePermissions();
+  const canEditQuotation = canEdit("quotations");
+  const isAdminUser = loginAs === "Admin" || loginAs === "super_admin";
+  const canRequestDiscount = canAdd("discount_approval") && !isAdminUser;
   const [isSendOpen, setIsSendOpen] = useState(false);
   const { showToast } = useToast();
   const [downloadQuotation, { isFetching: isDownloading }] =
@@ -357,7 +362,7 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
         </div>
 
         <div className={styles.quotationActions}>
-          {!isApproved && (
+          {!isApproved && canRequestDiscount && (
             <button type="button" onClick={handleSendForDiscount}>
               <MdOutlineTurnRight size={18} />
               Send For More Discount
@@ -373,7 +378,7 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
             {isDownloading ? "Downloading..." : "Download"}
           </button>
 
-          {!isApproved && (
+          {!isApproved && canEditQuotation && (
             <button
               type="button"
               onClick={() =>
@@ -419,6 +424,8 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
 
 function QuotationDetail({ badge = "New", onOpenModal }) {
   const router = useRouter();
+  const { canView } = usePermissions();
+  const canSeeQuotations = canView("quotations");
   const [openQuotationId, setOpenQuotationId] = useState(undefined);
 
   const {
@@ -427,7 +434,7 @@ function QuotationDetail({ badge = "New", onOpenModal }) {
     isError,
   } = useGetQuotationDetailQuery(
     { quotation_id: router?.query?.slug },
-    { skip: !router?.query?.slug },
+    { skip: !router?.query?.slug || !canSeeQuotations },
   );
 
   const quotations = Array.isArray(quotationDetail?.data?.quotation)
@@ -435,6 +442,8 @@ function QuotationDetail({ badge = "New", onOpenModal }) {
     : [];
 
   const orderedQuotations = [...quotations].reverse();
+
+  if (!canSeeQuotations) return null;
 
   return (
     <main className="content">

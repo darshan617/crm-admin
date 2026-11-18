@@ -8,9 +8,19 @@ import {
 } from "react-icons/lu";
 import { GoTrophy } from "react-icons/go";
 import { useRouter } from "next/router";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
+
+const leadModuleKey = (type) => {
+  if (type === "justdial") return "jd_leads";
+  if (type === "exhibition") return "exhibition_leads";
+  return "leads";
+};
 
 const LeadSummary = ({ allLeadsListData }) => {
   const router = useRouter();
+  const { canAdd } = usePermissions();
+  const canUploadLeads = canAdd("import_leads");
+  const canCreateLead = canAdd(leadModuleKey(router.query?.type));
 
   return (
     <div className="">
@@ -24,23 +34,29 @@ const LeadSummary = ({ allLeadsListData }) => {
           </div>
           <h2>Leads </h2>
         </div>
-        <div className={styles.crmActions}>
-          <a
-            onClick={() => router.push("/leads/upload-leads")}
-            className={styles.crmActionBtn}
-          >
-            <FiUpload />
-            <span>Upload Leads</span>
-          </a>
+        {(canUploadLeads || canCreateLead) && (
+          <div className={styles.crmActions}>
+            {canUploadLeads && (
+              <a
+                onClick={() => router.push("/leads/upload-leads")}
+                className={styles.crmActionBtn}
+              >
+                <FiUpload />
+                <span>Upload Leads</span>
+              </a>
+            )}
 
-          <a
-            onClick={() => router.push("/leads/add-new-leads")}
-            className={`${styles.crmActionBtn} ${styles.active}`}
-          >
-            <FiUserPlus />
-            <span>Add New Leads</span>
-          </a>
-        </div>
+            {canCreateLead && (
+              <a
+                onClick={() => router.push("/leads/add-new-leads")}
+                className={`${styles.crmActionBtn} ${styles.active}`}
+              >
+                <FiUserPlus />
+                <span>Add New Leads</span>
+              </a>
+            )}
+          </div>
+        )}
       </div>
       <section className={styles.dashboardStats}>
         <div className={styles.statsGrid}>

@@ -16,30 +16,35 @@ export const SIDEBAR_SECTIONS = [
     items: [
       {
         key: "dashboard",
+        moduleKey: "dashboard",
         name: "Dashboard",
         url: "/dashboard",
         icon: LuLayoutDashboard,
       },
       {
         key: "leads",
+        moduleKey: "leads",
         name: "Leads",
         url: "/leads?type=all",
         icon: LuUserSearch,
       },
       {
         key: "follow-up",
+        moduleKey: "follow_ups",
         name: "Follow Up",
         url: "/follow-up",
         icon: HiOutlinePhoneArrowUpRight,
       },
       {
         key: "quotations",
+        moduleKey: "quotations",
         name: "Quotations",
         url: "/quotations",
         icon: FiFileText,
       },
       {
         key: "crm-deals",
+        moduleKey: "crm_deals",
         name: "CRM Deals",
         url: "/crm-deals",
         icon: LuHandshake,
@@ -63,16 +68,19 @@ export const SIDEBAR_SECTIONS = [
         children: [
           {
             key: "employee-management",
+            moduleKey: "employees",
             name: "Employee Management",
             url: "/manage/employee",
           },
           {
             key: "crm-settings",
+            moduleKey: "crm_settings",
             name: "CRM Settings",
             url: "/manage/crm-setting",
           },
           {
             key: "services-providers",
+            moduleKey: "services_providers",
             name: "Services & Providers",
             url: "/manage/service-providers",
           },
@@ -80,6 +88,7 @@ export const SIDEBAR_SECTIONS = [
       },
       {
         key: "reports",
+        moduleKey: "reports",
         name: "Reports",
         url: "/reports",
         icon: HiOutlineDocumentReport,

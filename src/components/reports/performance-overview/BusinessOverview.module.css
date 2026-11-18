@@ -1,0 +1,225 @@
+.rptCard {
+  width: 100%;
+}
+
+.rptSub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.rptRange {
+  font-size: 13px;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e7e9eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  white-space: nowrap;
+}
+
+/* Business Overview Stats */
+
+.rptOverviewStats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  padding: 8px 0 20px;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 20px;
+}
+
+.rptOverviewStats > div {
+  min-width: 0;
+}
+
+.rptOverviewStats span {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.rptOverviewStats strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  overflow-wrap: anywhere;
+}
+
+/* Stats Tone Colors */
+
+.rptOverviewStats .tone-blue strong {
+  color: #0355ac;
+}
+
+.rptOverviewStats .tone-teal strong {
+  color: #0d9488;
+}
+
+.rptOverviewStats .tone-orange strong {
+  color: #ea580c;
+}
+
+.rptOverviewStats .tone-purple strong {
+  color: #7c3aed;
+}
+
+.rptOverviewStats .tone-green strong {
+  color: #16b364;
+}
+
+.rptOverviewStats .tone-yellow strong {
+  color: #ca8a04;
+}
+
+/* Monthly Revenue Chart */
+
+.rptBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  height: 180px;
+  padding: 10px 4px 0;
+}
+
+.rptBarCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 8px;
+}
+
+.rptBarTrack {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+}
+
+.rptBar {
+  width: 100%;
+  max-width: 28px;
+  height: var(--h, 0%);
+  min-height: 0;
+  border-radius: 6px 6px 0 0;
+  transition: height 0.3s ease;
+}
+
+.rptBarCol small {
+  font-size: 12px;
+  font-weight: 400;
+  color: #94a3b8;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Monthly Bar Colors */
+
+.rptBarCol:nth-child(1) .rptBar {
+  background: #b7c7db;
+}
+
+.rptBarCol:nth-child(2) .rptBar {
+  background: #8fb4e0;
+}
+
+.rptBarCol:nth-child(3) .rptBar {
+  background: #c5d4e6;
+}
+
+.rptBarCol:nth-child(4) .rptBar {
+  background: #7aa0d4;
+}
+
+.rptBarCol:nth-child(5) .rptBar {
+  background: #5b8fd0;
+}
+
+.rptBarCol:nth-child(6) .rptBar {
+  background: #a8bdd4;
+}
+
+.rptBarCol:nth-child(7) .rptBar {
+  background: #4a7ec4;
+}
+
+.rptBarCol:nth-child(8) .rptBar {
+  background: #93b4d8;
+}
+
+.rptBarCol:nth-child(9) .rptBar {
+  background: #0355ac;
+}
+
+.rptBarCol:nth-child(10) .rptBar {
+  background: #6b93c9;
+}
+
+.rptBarCol:nth-child(11) .rptBar {
+  background: #3d74be;
+}
+
+.rptBarCol:nth-child(12) .rptBar {
+  background: #1e4f96;
+}
+
+
+@media (max-width: 1199px) {
+  .rptOverviewStats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .rptBars {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 767px) {
+  .rptOverviewStats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+
+  .rptOverviewStats strong {
+    font-size: 16px;
+  }
+
+  .rptBars {
+    gap: 8px;
+    height: 160px;
+  }
+
+  .rptBarCol small {
+    font-size: 10px;
+  }
+
+  .rptRange {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .rptBars {
+    gap: 5px;
+    height: 140px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .rptBarCol {
+    gap: 6px;
+  }
+
+  .rptBarCol small {
+    font-size: 9px;
+  }
+}

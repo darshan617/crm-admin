@@ -4,24 +4,39 @@ import AttendanceOverview from "@/components/manage/attendance-overview/Attendan
 import { FiArrowLeft, FiBell, FiShield, FiUser } from "react-icons/fi";
 import { useRouter } from "next/router";
 import styles from "../employee/EmployeePage.module.css";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const sidePanelItems = [
-  { label: "Employee", icon: FiUser, href: "/manage/employee" },
+  {
+    label: "Employee",
+    icon: FiUser,
+    href: "/manage/employee",
+    moduleKey: "employees",
+  },
   {
     label: "Employee Permissions",
     icon: FiShield,
     href: "/manage/employee-permission",
+    moduleKey: "employee_permissions",
   },
   {
     label: "Attendance Overview",
     icon: FiBell,
     href: "/manage/attendance-overview",
     active: true,
+    moduleKey: "employees",
   },
 ];
 
 const AttendanceOverviewPage = () => {
   const router = useRouter();
+  const { canView, ready } = usePermissions();
+  const canSeeEmployees = ready && canView("employees");
+  const visibleNav = sidePanelItems.filter((item) => canView(item.moduleKey));
+
+  if (!canSeeEmployees) {
+    return <Layout />;
+  }
 
   return (
     <Layout>
@@ -35,7 +50,7 @@ const AttendanceOverviewPage = () => {
             className={styles.sideNav}
             aria-label="Employee management navigation"
           >
-            {sidePanelItems.map(({ label, icon: Icon, active, href }) => (
+            {visibleNav.map(({ label, icon: Icon, active, href }) => (
               <button
                 type="button"
                 key={label}

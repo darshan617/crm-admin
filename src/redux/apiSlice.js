@@ -83,6 +83,7 @@ export const apiSlice = createApi({
     "crmDeals",
     "providers",
     "employees",
+    "reports",
   ],
 
   endpoints: () => ({}),

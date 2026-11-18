@@ -9,12 +9,18 @@ import {
   useStatusMutation,
 } from "@/redux/apis/quotationApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const History = () => {
   const router = useRouter();
   const { slug } = router.query;
 
   const { showToast } = useToast();
+  const { canView, canEdit } = usePermissions();
+  const canSeeQuotations = canView("quotations");
+  const canUpdateStatus = canEdit(
+    "update_status_of_invoice_and_quotation",
+  );
 
   const [status, setStatus] = useState({
     quotation: "not_shared",
@@ -29,7 +35,7 @@ const History = () => {
   } = useQuotationHistoryQuery(
     { quotation_id: slug },
     {
-      skip: !router.isReady || !slug,
+      skip: !router.isReady || !slug || !canSeeQuotations,
     },
   );
 
@@ -53,6 +59,8 @@ const History = () => {
   }, [historyData]);
 
   const handleUpdate = async (body, rollback) => {
+    if (!canUpdateStatus) return;
+
     try {
       const res = await updateStatus({
         quotation_id: slug,
@@ -71,6 +79,8 @@ const History = () => {
   };
 
   const onQuotationChange = (event) => {
+    if (!canUpdateStatus) return;
+
     const prevStatus = status.quotation;
     const prevInvoice = status.invoice;
 
@@ -101,6 +111,8 @@ const History = () => {
   };
 
   const onInvoiceChange = (event) => {
+    if (!canUpdateStatus) return;
+
     const prevInvoice = status.invoice;
     const next = event.target.value;
 
@@ -122,6 +134,8 @@ const History = () => {
       },
     );
   };
+
+  if (!canSeeQuotations) return null;
 
   return (
     <main className="content">
@@ -243,67 +257,68 @@ const History = () => {
           </div>
         </section>
 
-        {/* Update Status */}
-        <section className="common-table-section">
-          <div className="common-table-card rpt-card">
-            <div className="common-table-header">
-              <div>
-                <h3>Update status</h3>
+        {canUpdateStatus && (
+          <section className="common-table-section">
+            <div className="common-table-card rpt-card">
+              <div className="common-table-header">
+                <div>
+                  <h3>Update status</h3>
 
-                <p className="rpt-sub">Manual override if needed</p>
-              </div>
-            </div>
-
-            <form
-              className={styles.quotationTopMeta}
-              onSubmit={(event) => event.preventDefault()}
-            >
-              <div className={styles.qmetaField}>
-                <span>Quotation</span>
-
-                <select
-                  name="quotation_status"
-                  className={`quotation-status-select is-${status.quotation}`}
-                  value={status.quotation}
-                  onChange={onQuotationChange}
-                  disabled={isUpdating}
-                >
-                  <option value="not_shared">Not shared</option>
-
-                  <option value="shared">Shared, approval pending</option>
-
-                  <option value="approved">Approved</option>
-
-                  <option value="rejected">Rejected</option>
-                </select>
+                  <p className="rpt-sub">Manual override if needed</p>
+                </div>
               </div>
 
-              <div className={styles.qmetaField}>
-                <span>Invoice</span>
+              <form
+                className={styles.quotationTopMeta}
+                onSubmit={(event) => event.preventDefault()}
+              >
+                <div className={styles.qmetaField}>
+                  <span>Quotation</span>
 
-                {status.quotation === "approved" ? (
                   <select
-                    name="invoice_status"
-                    className={`quotation-status-select is-${status.invoice}`}
-                    value={status.invoice || "not_sent"}
-                    onChange={onInvoiceChange}
+                    name="quotation_status"
+                    className={`quotation-status-select is-${status.quotation}`}
+                    value={status.quotation}
+                    onChange={onQuotationChange}
                     disabled={isUpdating}
                   >
-                    <option value="not_sent">Not sent</option>
+                    <option value="not_shared">Not shared</option>
 
-                    <option value="sent">Sent</option>
+                    <option value="shared">Shared, approval pending</option>
 
                     <option value="approved">Approved</option>
 
                     <option value="rejected">Rejected</option>
                   </select>
-                ) : (
-                  "-"
-                )}
-              </div>
-            </form>
-          </div>
-        </section>
+                </div>
+
+                <div className={styles.qmetaField}>
+                  <span>Invoice</span>
+
+                  {status.quotation === "approved" ? (
+                    <select
+                      name="invoice_status"
+                      className={`quotation-status-select is-${status.invoice}`}
+                      value={status.invoice || "not_sent"}
+                      onChange={onInvoiceChange}
+                      disabled={isUpdating}
+                    >
+                      <option value="not_sent">Not sent</option>
+
+                      <option value="sent">Sent</option>
+
+                      <option value="approved">Approved</option>
+
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  ) : (
+                    "-"
+                  )}
+                </div>
+              </form>
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

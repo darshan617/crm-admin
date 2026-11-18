@@ -1,22 +1,44 @@
 import Layout from "@/components/layout/Layout";
 import EmployeeSummary from "@/components/manage/employee/employee-summary/EmployeeSummary";
 import EmployeeTable from "@/components/manage/employee/employee-table/EmployeeTable";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import React, { useState } from "react";
 import { FiBell, FiPlus, FiShield, FiUser } from "react-icons/fi";
 import styles from "./EmployeePage.module.css";
 import { useRouter } from "next/router";
 
 const sidePanelItems = [
-  { label: "Employee", icon: FiUser, active: true },
-  { label: "Employee Permissions", icon: FiShield },
-  { label: "Attendance Overview", icon: FiBell },
+  {
+    label: "Employee",
+    icon: FiUser,
+    active: true,
+    moduleKey: "employees",
+  },
+  {
+    label: "Employee Permissions",
+    icon: FiShield,
+    moduleKey: "employee_permissions",
+  },
+  {
+    label: "Attendance Overview",
+    icon: FiBell,
+    moduleKey: "employees",
+  },
 ];
 
 const Employee = () => {
   const router = useRouter();
+  const { canView, canAdd, ready } = usePermissions();
+  const canSeeEmployees = ready && canView("employees");
+  const canCreateEmployee = ready && canAdd("employees");
+  const visibleNav = sidePanelItems.filter((item) => canView(item.moduleKey));
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [summary, setSummary] = useState({});
+
+  if (!canSeeEmployees) {
+    return <Layout />;
+  }
 
   return (
     <Layout>
@@ -30,7 +52,7 @@ const Employee = () => {
             className={styles.sideNav}
             aria-label="Employee management navigation"
           >
-            {sidePanelItems.map(({ label, icon: Icon, active }) => (
+            {visibleNav.map(({ label, icon: Icon, active }) => (
               <button
                 type="button"
                 key={label}
@@ -63,14 +85,16 @@ const Employee = () => {
             <div className={styles.headerRow}>
               <h1 className={styles.title}>Employee</h1>
 
-              <button
-                type="button"
-                className={styles.addButton}
-                onClick={() => router?.push("/manage/employee/create")}
-              >
-                <FiPlus size={15} />
-                Add Employee
-              </button>
+              {canCreateEmployee && (
+                <button
+                  type="button"
+                  className={styles.addButton}
+                  onClick={() => router?.push("/manage/employee/create")}
+                >
+                  <FiPlus size={15} />
+                  Add Employee
+                </button>
+              )}
             </div>
           </header>
 

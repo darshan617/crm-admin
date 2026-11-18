@@ -47,6 +47,7 @@ import {
 } from "@/redux/apis/crmSettingsApi";
 
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
 const TABS = [
   {
@@ -347,6 +348,11 @@ export default function CrmSetting() {
   const router = useRouter();
 
   const { showToast } = useToast();
+  const { canView, canAdd, canEdit, canDelete, ready } = usePermissions();
+  const canSeeSettings = ready && canView("crm_settings");
+  const canAddSetting = ready && canAdd("crm_settings");
+  const canEditSetting = ready && canEdit("crm_settings");
+  const canDeleteSetting = ready && canDelete("crm_settings");
 
   const activeTab = TABS.find((tab) => tab.key === router.query.tab) || TABS[0];
 
@@ -376,18 +382,24 @@ export default function CrmSetting() {
 
   const [logoFile, setLogoFile] = useState(null);
 
-  const sources = useLeadsSourceQuery(undefined, { skip: !isLeadSources });
-
-  const statuses = useLeadsStatusQuery(undefined, { skip: !isLeadStatus });
-
-  const bifurcations = useLeadsBifurcationQuery(undefined, {
-    skip: !isBifurcation,
+  const sources = useLeadsSourceQuery(undefined, {
+    skip: !canSeeSettings || !isLeadSources,
   });
 
-  const priorities = useLeadsPriorityQuery(undefined, { skip: !isPriority });
+  const statuses = useLeadsStatusQuery(undefined, {
+    skip: !canSeeSettings || !isLeadStatus,
+  });
+
+  const bifurcations = useLeadsBifurcationQuery(undefined, {
+    skip: !canSeeSettings || !isBifurcation,
+  });
+
+  const priorities = useLeadsPriorityQuery(undefined, {
+    skip: !canSeeSettings || !isPriority,
+  });
 
   const designations = useLeadsDesignationSearchQuery(debouncedSearch, {
-    skip: !isDesignation,
+    skip: !canSeeSettings || !isDesignation,
   });
 
   let query = null;
@@ -480,10 +492,17 @@ export default function CrmSetting() {
 
   const showError = Boolean(query?.isError);
 
+  const showActions = canEditSetting || canDeleteSetting;
+
   const columnCount =
-    4 + (activeTab.hasLeads ? 1 : 0) + (activeTab.showDescription ? 1 : 0);
+    3 +
+    (showActions ? 1 : 0) +
+    (activeTab.hasLeads ? 1 : 0) +
+    (activeTab.showDescription ? 1 : 0);
 
   const openPopup = (item = null) => {
+    if (item ? !canEditSetting : !canAddSetting) return;
+
     setEditingItem(item);
 
     setLogoFile(null);
@@ -516,6 +535,8 @@ export default function CrmSetting() {
   };
 
   const handleDelete = async (id) => {
+    if (!canDeleteSetting) return;
+
     try {
       await api.remove({ id }).unwrap();
 
@@ -527,6 +548,8 @@ export default function CrmSetting() {
 
   const handleSave = async (event) => {
     event.preventDefault();
+
+    if (editingItem ? !canEditSetting : !canAddSetting) return;
 
     const form = new FormData(event.currentTarget);
 
@@ -587,6 +610,8 @@ export default function CrmSetting() {
     closePopup();
   };
 
+  if (!canSeeSettings) return null;
+
   return (
     <div className={styles.shell}>
       <aside className={styles.card}>
@@ -629,15 +654,17 @@ export default function CrmSetting() {
             <h2 className={styles.title}>{activeTab.label}</h2>
           </div>
 
-          <button
-            type="button"
-            onClick={() => openPopup()}
-            className={styles.primaryBtn}
-          >
-            <FiPlus size={15} />
+          {canAddSetting && (
+            <button
+              type="button"
+              onClick={() => openPopup()}
+              className={styles.primaryBtn}
+            >
+              <FiPlus size={15} />
 
-            <span>{activeTab.addLabel}</span>
-          </button>
+              <span>{activeTab.addLabel}</span>
+            </button>
+          )}
         </div>
 
         {summaryCards.length > 0 && (
@@ -702,7 +729,9 @@ export default function CrmSetting() {
 
                 <th className={styles.th}>Created on</th>
 
-                <th className={`${styles.th} ${styles.center}`}>Action</th>
+                {showActions && (
+                  <th className={`${styles.th} ${styles.center}`}>Action</th>
+                )}
               </tr>
             </thead>
 
@@ -767,27 +796,33 @@ export default function CrmSetting() {
                       {formatDate(item.createdOn)}
                     </td>
 
-                    <td className={`${styles.td} ${styles.center}`}>
-                      <div className={styles.actions}>
-                        <button
-                          type="button"
-                          title="Edit"
-                          onClick={() => openPopup(item)}
-                          className={`${styles.actionBtn} ${styles.actionEdit}`}
-                        >
-                          <FiEdit size={16} />
-                        </button>
+                    {showActions && (
+                      <td className={`${styles.td} ${styles.center}`}>
+                        <div className={styles.actions}>
+                          {canEditSetting && (
+                            <button
+                              type="button"
+                              title="Edit"
+                              onClick={() => openPopup(item)}
+                              className={`${styles.actionBtn} ${styles.actionEdit}`}
+                            >
+                              <FiEdit size={16} />
+                            </button>
+                          )}
 
-                        <button
-                          type="button"
-                          title="Delete"
-                          onClick={() => handleDelete(item.id)}
-                          className={`${styles.actionBtn} ${styles.actionDelete}`}
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
+                          {canDeleteSetting && (
+                            <button
+                              type="button"
+                              title="Delete"
+                              onClick={() => handleDelete(item.id)}
+                              className={`${styles.actionBtn} ${styles.actionDelete}`}
+                            >
+                              <FiTrash2 size={16} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (

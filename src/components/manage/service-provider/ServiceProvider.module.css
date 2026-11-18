@@ -81,3 +81,195 @@
   text-decoration: none;
   transition: 0.25s ease;
 }
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .providerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .providerCard {
+    min-height: 230px;
+    padding: 24px 20px 18px;
+  }
+
+  .providerCard h3 {
+    font-size: 17px;
+  }
+
+  .providerCard p {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .providerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .providerCard {
+    min-height: 220px;
+    padding: 24px 18px 18px;
+  }
+
+  .providerCard h3 {
+    font-size: 16px;
+  }
+
+  .providerCard p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .providerStatus {
+    top: 12px;
+    right: 12px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  .providerGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .providerCard {
+    min-height: 210px;
+    padding: 22px 15px 16px;
+  }
+
+  .providerCard h3 {
+    font-size: 15px;
+  }
+
+  .providerCard p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .providerStatus {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+@media (max-width: 575px) {
+  .providerSection {
+    width: 100%;
+  }
+
+  .providerGrid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .providerCard {
+    min-height: auto;
+    padding: 25px 18px 20px;
+  }
+
+  .providerLogo {
+    height: 55px;
+    margin-bottom: 12px;
+  }
+
+  .providerCard h3 {
+    font-size: 17px;
+  }
+
+  .providerCard p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .providerStatus {
+    top: 12px;
+    right: 12px;
+  }
+
+  .providerActions {
+    margin-top: 18px;
+    gap: 10px;
+  }
+
+  .viewPlanBtn {
+    height: 36px;
+    padding: 0 20px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 375px) {
+  .providerGrid {
+    gap: 12px;
+  }
+
+  .providerCard {
+    padding: 22px 14px 18px;
+  }
+
+  .providerCard h3 {
+    font-size: 16px;
+  }
+
+  .providerCard p {
+    font-size: 12px;
+  }
+
+  .providerStatus {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 320px) {
+  .providerCard {
+    padding: 20px 12px 16px;
+  }
+
+  .providerCard h3 {
+    font-size: 15px;
+  }
+
+  .providerCard p {
+    font-size: 12px;
+  }
+
+  .viewPlanBtn {
+    min-width: 90px;
+    padding: 0 14px;
+  }
+}
+
+@media (max-width: 991px) {
+  .partnerTabsWrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .partnerTabs {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .partnerTab {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 575px) {
+  .partnerTabs {
+    gap: 8px;
+  }
+
+  .partnerTab {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
