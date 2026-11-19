@@ -452,15 +452,12 @@ export default function AllLeads({
             <label className={styles.itemsSelected}>
               <input
                 type="checkbox"
-                checked={
-                  LEADS.length > 0 && selectedIds.length === LEADS.length
-                }
+                checked={allSelected}
                 onChange={toggleAll}
               />
 
               <div>
-                <span>{selectedIds.length}</span>/{TOTAL_CUSTOMERS} Items
-                Selected
+                <span>{selectedIds.length}</span>/{total} Items Selected
               </div>
             </label>
           </div>
@@ -605,9 +602,7 @@ export default function AllLeads({
                 <input
                   type="checkbox"
                   id="selectAll"
-                  checked={
-                    LEADS.length > 0 && selectedIds.length === LEADS.length
-                  }
+                  checked={allSelected}
                   onChange={toggleAll}
                 />
               </td>
@@ -685,21 +680,20 @@ export default function AllLeads({
                       </small>
                     </div>
 
-                        <div className="actions">
-                          <button
-                            onClick={() =>
-                              router?.push(`/leads/leads-details/${lead?.id}`)
-                            }
-                            className={styles.viewLeadBtn}
-                          >
-                            <HiChevronRight size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              
+                    <div className="actions">
+                      <button
+                        onClick={() =>
+                          router?.push(`/leads/leads-details/${lead?.id}`)
+                        }
+                        className={styles.viewLeadBtn}
+                      >
+                        <HiChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
