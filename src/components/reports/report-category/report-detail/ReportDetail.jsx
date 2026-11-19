@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FiArrowLeft, FiDownload, FiFileText } from "react-icons/fi";
@@ -13,6 +13,9 @@ import {
 } from "recharts";
 import styles from "@/components/reports/report-category/report-detail/ReportDetail.module.css";
 import { useReportDetailQuery } from "@/redux/apis/reportsApi";
+import Pagination, {
+  usePageQuery,
+} from "@/common-components/pagination/Pagination";
 
 const REPORTS = {
   sales: "Sales Performance",
@@ -49,6 +52,7 @@ const AMOUNT_LABEL = /amount|revenue|value|total/i;
 const LABEL_COLUMN = /quotation|name|customer|title|source|label/i;
 
 const BAR_COLOR = "#0354ab";
+const PAGE_SIZE = 10;
 
 const humanize = (key) =>
   String(key)
@@ -108,10 +112,25 @@ const normalizeReport = (payload) => {
   }
 
   const count = Number(source.count);
+  const pagination = isRecord(source.pagination)
+    ? source.pagination
+    : isRecord(source.meta)
+      ? source.meta
+      : {};
+  const perPage = Number(pagination.item_per_page ?? pagination.items_per_page);
+  const total = Number(pagination.total ?? source.total);
+  const lastPage = Number(pagination.last_page ?? pagination.lastPage);
 
   return {
     title: source.title ?? source.name ?? null,
     count: Number.isFinite(count) ? count : rows.length,
+    total: Number.isFinite(total)
+      ? total
+      : Number.isFinite(count)
+        ? count
+        : rows.length,
+    perPage: Number.isFinite(perPage) && perPage > 0 ? perPage : PAGE_SIZE,
+    lastPage: Number.isFinite(lastPage) && lastPage > 0 ? lastPage : null,
     rows,
     columns,
   };
@@ -234,8 +253,22 @@ const downloadFile = (blob, filename) => {
   const link = document.createElement("a");
   link.href = url;
   link.download = filename;
+  document.body.appendChild(link);
   link.click();
-  URL.revokeObjectURL(url);
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+const isDateText = (column, text) =>
+  Boolean(text) &&
+  (/created|date/i.test(column.label) ||
+    /^\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}$/.test(text));
+
+const csvCell = (column, value) => {
+  const text = plainText(value);
+  const escaped = text.replace(/"/g, '""');
+  if (isDateText(column, text)) return `"=""${escaped}"""`;
+  return `"${escaped}"`;
 };
 
 const CRC_TABLE = new Uint32Array(256);
@@ -707,14 +740,27 @@ const ReportDetail = () => {
   const router = useRouter();
   const slug = typeof router.query.slug === "string" ? router.query.slug : "";
   const allowed = Boolean(REPORTS[slug]);
-  const { data, isLoading, isError, isFetching } = useReportDetailQuery(slug, {
-    skip: !router.isReady || !allowed,
-  });
+  const { page, setPage } = usePageQuery("page_no");
+  const { data, isLoading, isError, isFetching } = useReportDetailQuery(
+    {
+      report: slug,
+      page_no: page,
+      items_per_page: PAGE_SIZE,
+    },
+    {
+      skip: !router.isReady || !allowed,
+    },
+  );
 
   const report = normalizeReport(data);
   const title = report.title || REPORTS[slug] || "Report";
   const columns = report.columns;
   const rows = report.rows;
+  const perPage = PAGE_SIZE;
+  const lastPage =
+    report.lastPage ?? Math.max(1, Math.ceil(report.total / perPage) || 1);
+  const pageRows = rows;
+  const pageStart = pageRows.length ? (page - 1) * perPage : 0;
   const chart = chartSeries(rows, columns);
   const chartRows = chart.points;
   const showChart = chartRows.length > 0;
@@ -726,6 +772,11 @@ const ReportDetail = () => {
     : (value) => Number(value).toLocaleString("en-IN");
   const waiting =
     !router.isReady || (allowed && (isLoading || isFetching) && !data);
+
+  useEffect(() => {
+    if (!data || !report.lastPage || page <= report.lastPage) return;
+    setPage(1, { replace: true });
+  }, [data, page, report.lastPage, setPage]);
 
   return (
     <div className={`${styles.crmReportsPage} content`}>
@@ -873,7 +924,11 @@ const ReportDetail = () => {
               <div className={`common-table-header ${styles.chartHeader}`}>
                 <div>
                   <h3>{title}</h3>
-                  <p className={styles.rptSub}>{report.count} records</p>
+                  <p className={styles.rptSub}>
+                    {lastPage > 1
+                      ? `Showing ${pageStart + 1}–${pageStart + pageRows.length} of ${report.total}`
+                      : `${report.count} records`}
+                  </p>
                 </div>
                 {!showChart && (
                   <div className={styles.actions}>
@@ -917,8 +972,8 @@ const ReportDetail = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((row, index) => (
-                      <tr key={row?.id ?? index}>
+                    {pageRows.map((row, index) => (
+                      <tr key={row?.id ?? pageStart + index}>
                         {columns.map((column) => {
                           const value = readCell(row, column.key);
                           const text = plainText(value) || "—";
@@ -932,7 +987,7 @@ const ReportDetail = () => {
                       </tr>
                     ))}
 
-                    {rows.length === 0 && (
+                    {pageRows.length === 0 && (
                       <tr>
                         <td colSpan={Math.max(columns.length, 1)}>
                           No records found.
@@ -942,6 +997,15 @@ const ReportDetail = () => {
                   </tbody>
                 </table>
               </div>
+
+              <Pagination
+                page={page}
+                totalPages={lastPage}
+                total={report.total}
+                perPage={perPage}
+                onChange={setPage}
+                disabled={isFetching}
+              />
             </div>
           </section>
         </>

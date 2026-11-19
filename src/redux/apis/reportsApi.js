@@ -11,9 +11,13 @@ const reportsApi = apiSlice.injectEndpoints({
       providesTags: ["reports"],
     }),
     reportDetail: builder.query({
-      query: (report) => ({
+      query: ({ report, page_no = 1, items_per_page = 10 }) => ({
         url: `/reports/${report}`,
         method: "GET",
+        params: {
+          page_no,
+          items_per_page,
+        },
       }),
       providesTags: ["reports"],
     }),
