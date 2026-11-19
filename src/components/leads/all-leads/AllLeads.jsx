@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CiSearch } from "react-icons/ci";
-import { LuCalendarDays } from "react-icons/lu";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import styles from "@/components/leads/all-leads/AllLeads.module.css";
 import { useRouter } from "next/router";
@@ -12,51 +11,262 @@ import usePermissions from "@/custom-hooks/permissions/usePermissions";
 const TABS = [
   { label: "All Leads", query: "all", moduleKey: "leads" },
   { label: "JD Leads", query: "justdial", moduleKey: "jd_leads" },
-  { label: "Exhibition Leads", query: "exhibition", moduleKey: "exhibition_leads" },
+  {
+    label: "Exhibition Leads",
+    query: "exhibition",
+    moduleKey: "exhibition_leads",
+  },
 ];
 
-const FILTER_SELECTS = [
+const SKIP_FILTER_KEYS = new Set([
+  "source",
+  "page",
+  "page_no",
+  "per_page",
+  "item_per_page",
+  "items_per_page",
+  "search",
+]);
+
+const isSkippedFilter = (input) => {
+  const key = String(input?.key || "").toLowerCase();
+  const label = String(input?.label || "").toLowerCase();
+
+  return (
+    SKIP_FILTER_KEYS.has(key) ||
+    key.includes("per_page") ||
+    label.includes("per page")
+  );
+};
+
+const FALLBACK_SELECTS = [
   {
     label: "Date Type",
-    options: ["Created Date", "Follow Up Date", "Updated Date"],
+    keys: ["date_type"],
+    optionsKeys: ["date_types"],
   },
   {
     label: "Status",
-    options: [
-      "New",
-      "Contacted",
-      "Qualified",
-      "Quotation Sent",
-      "Negotiation",
-      "Won",
-      "Lost",
-      "Nurturing",
-    ],
+    keys: ["status", "lead_status"],
+    optionsKeys: ["statuses", "lead_statuses"],
   },
   {
     label: "Employee",
-    options: [
-      "Pranali Jadhav",
-      "Rohit Patil",
-      "Nisha Singh",
-      "Aakash Menon",
-      "Sneha Patil",
-      "Aniket Deshmukh",
-      "Karan Choudhury",
-      "Preeti Sinha",
-    ],
+    keys: ["employee_id", "employee", "assigned_to"],
+    optionsKeys: ["employees"],
   },
   {
     label: "Lead Bifurcation",
-    options: ["New", "Existing", "Follow Up", "Converted", "Closed"],
+    keys: ["lead_bifurcation", "bifurcation"],
+    optionsKeys: ["bifurcations", "lead_bifurcations"],
   },
   {
     label: "Lead Priority",
-    options: ["Hot", "Warm", "Cold"],
+    keys: ["priority", "lead_priority", "category"],
+    optionsKeys: ["priorities", "categories", "lead_priorities"],
   },
 ];
 
-const DATE_RANGE_PLACEHOLDERS = ["From", "To"];
+const isOption = (option) => {
+  if (option == null || option === "") return false;
+  if (typeof option !== "object") return true;
+
+  return ["key", "id", "value", "name", "label"].some(
+    (field) => option[field] != null && option[field] !== "",
+  );
+};
+
+const toOption = (option) => {
+  if (typeof option !== "object") {
+    return { value: String(option), label: String(option) };
+  }
+
+  const raw =
+    option.key ?? option.value ?? option.id ?? option.name ?? option.label;
+
+  return {
+    value: String(raw),
+    label: String(
+      option.label ?? option.name ?? option.key ?? option.value ?? raw,
+    ),
+  };
+};
+
+const uniqueOptions = (list) => {
+  const seen = new Set();
+
+  return (Array.isArray(list) ? list : []).reduce((options, item) => {
+    if (!isOption(item)) return options;
+
+    const option = toOption(item);
+    if (!option.value || seen.has(option.value)) return options;
+
+    seen.add(option.value);
+    options.push(option);
+    return options;
+  }, []);
+};
+
+const OPTION_LIST_KEYS = {
+  date_type: ["date_types"],
+  status: ["statuses", "lead_statuses"],
+  lead_status: ["statuses", "lead_statuses"],
+  employee: ["employees"],
+  employee_id: ["employees"],
+  assigned_to: ["employees"],
+  bifurcation: ["bifurcations", "lead_bifurcations"],
+  lead_bifurcation: ["bifurcations", "lead_bifurcations"],
+  priority: ["priorities", "categories"],
+  lead_priority: ["priorities", "categories"],
+  category: ["categories", "priorities"],
+  lead_source: ["sources"],
+};
+
+const collectionFor = (meta, key) => {
+  if (!meta || !key) return [];
+
+  const candidates = [
+    ...(OPTION_LIST_KEYS[key] || []).map((name) => meta[name]),
+    meta[key],
+    meta[`${key}s`],
+    meta[`${key}es`],
+    key.endsWith("y") ? meta[`${key.slice(0, -1)}ies`] : null,
+    meta[`${key}_options`],
+  ];
+  const match = candidates.find((item) => Array.isArray(item));
+
+  return uniqueOptions(match);
+};
+
+const declaredKeys = (meta) =>
+  new Set([
+    ...Object.keys(meta?.params || {}),
+    ...Object.keys(meta?.applied || {}),
+    ...(Array.isArray(meta?.inputs)
+      ? meta.inputs.map((input) => input?.key).filter(Boolean)
+      : []),
+  ]);
+
+const chooseKey = (meta, candidates) => {
+  const keys = declaredKeys(meta);
+  if (!keys.size) return candidates[0];
+
+  return candidates.find((key) => keys.has(key)) || candidates[0];
+};
+
+const isDateField = (key, type) => {
+  const normalized = String(type || "").toLowerCase();
+
+  return (
+    normalized === "date" ||
+    normalized === "datetime" ||
+    ["from", "to", "date_from", "date_to"].includes(key)
+  );
+};
+
+const optionsFromInput = (meta, input) => {
+  const direct = uniqueOptions(input.options || input.values || input.choices);
+  if (direct.length) return direct;
+
+  const aliases = input.aliases;
+  if (typeof aliases === "string" && Array.isArray(meta?.[aliases])) {
+    return uniqueOptions(meta[aliases]);
+  }
+
+  if (Array.isArray(aliases)) {
+    const named = aliases.find(
+      (item) => typeof item === "string" && Array.isArray(meta?.[item]),
+    );
+    if (named) return uniqueOptions(meta[named]);
+  }
+
+  const fromKey = collectionFor(meta, input.key);
+  if (fromKey.length) return fromKey;
+
+  if (aliases && typeof aliases === "object" && !Array.isArray(aliases)) {
+    return uniqueOptions(
+      Object.entries(aliases).map(([key, label]) => ({
+        key,
+        label: typeof label === "string" ? label : label?.label || key,
+      })),
+    );
+  }
+
+  return Array.isArray(aliases) ? uniqueOptions(aliases) : [];
+};
+
+const buildLeadFilters = (meta) => {
+  const inputs = Array.isArray(meta?.inputs)
+    ? meta.inputs.filter((input) => input?.key && !isSkippedFilter(input))
+    : [];
+
+  if (inputs.length) {
+    const fields = inputs.map((input) => ({
+      key: input.key,
+      label: input.label || input.key,
+      type: isDateField(input.key, input.type) ? "date" : "select",
+      options: optionsFromInput(meta, input),
+    }));
+    const keys = new Set(fields.map((field) => field.key));
+
+    if (
+      !keys.has("from") &&
+      (meta?.params?.from || Object.hasOwn(meta?.applied || {}, "from"))
+    ) {
+      fields.splice(1, 0, {
+        key: "from",
+        label: "From",
+        type: "date",
+        options: [],
+      });
+    }
+
+    if (
+      !keys.has("to") &&
+      (meta?.params?.to || Object.hasOwn(meta?.applied || {}, "to"))
+    ) {
+      const fromIndex = fields.findIndex((field) => field.key === "from");
+      fields.splice(fromIndex + 1, 0, {
+        key: "to",
+        label: "To",
+        type: "date",
+        options: [],
+      });
+    }
+
+    return fields;
+  }
+
+  const selects = FALLBACK_SELECTS.map((field) => {
+    const optionsKey =
+      field.optionsKeys.find((name) => Array.isArray(meta?.[name])) ||
+      field.optionsKeys[0];
+
+    return {
+      key: chooseKey(meta, field.keys),
+      label: field.label,
+      type: "select",
+      options: uniqueOptions(meta?.[optionsKey]),
+    };
+  });
+
+  return [
+    selects[0],
+    {
+      key: chooseKey(meta, ["from", "date_from"]),
+      label: "From",
+      type: "date",
+      options: [],
+    },
+    {
+      key: chooseKey(meta, ["to", "date_to"]),
+      label: "To",
+      type: "date",
+      options: [],
+    },
+    ...selects.slice(1),
+  ];
+};
 
 const TABLE_HEADINGS = [
   { label: "Customer Name", className: "" },
@@ -65,128 +275,103 @@ const TABLE_HEADINGS = [
   { label: "Follow Up", className: "" },
 ];
 
-const LEADS = [
-  {
-    id: 1,
-    avatarColor: "purple",
-    company: "Wilson Enterprises Pvt. Ltd.",
-    person: "Wilson Thomas - Owner",
-    email: "wilson@wilsonenterprises.com",
-    phone: "+91-981234 56780",
-    status: "New",
-    badge: "new",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/leads/leads-details",
-  },
-  {
-    id: 2,
-    avatarColor: "blue",
-    company: "Maria Trading Co.",
-    person: "Maria Gonzalez - Manager",
-    email: "maria@mariatrading.com",
-    phone: "+91-987654 32100",
-    status: "Contacted",
-    badge: "contacted",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-  {
-    id: 3,
-    avatarColor: "teal",
-    company: "Ali Solutions Ltd.",
-    person: "Ali Chen - CEO",
-    email: "info@alisolutions.com",
-    phone: "+91-998877 66554",
-    status: "Qualified",
-    badge: "qualified",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-  {
-    id: 4,
-    avatarColor: "purple",
-    company: "Samantha Foods Inc.",
-    person: "Samantha Lee - Director",
-    email: "hello@samanthafoods.com",
-    phone: "+91-945612 34785",
-    status: "Quotation Sent",
-    badge: "quotation-sent",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-  {
-    id: 5,
-    avatarColor: "blue",
-    company: "Michael Technologies",
-    person: "Michael Tran - Sales Head",
-    email: "info@michaeltech.com",
-    phone: "+91-956789 43210",
-    status: "Negotiation",
-    badge: "negotiation",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-  {
-    id: 6,
-    avatarColor: "teal",
-    company: "Royal Business Solutions",
-    person: "Rahul Sharma - Director",
-    email: "rahul@royalbusiness.com",
-    phone: "+91-912345 67890",
-    status: "Won",
-    badge: "won",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-  {
-    id: 7,
-    avatarColor: "red",
-    company: "Tanvi Designs Studio",
-    person: "Tanvi Roy - Founder",
-    email: "contact@tanvidesigns.com",
-    phone: "+91-978654 32125",
-    status: "Lost",
-    badge: "lost",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-  {
-    id: 8,
-    avatarColor: "yellow",
-    company: "Nexus Innovations",
-    person: "Vivek Sharma - Business Analyst",
-    email: "info@nexusinnovations.com",
-    phone: "+91-934567 89123",
-    status: "Nurturing",
-    badge: "nurturing",
-    assignedTo: "Pranali Jadhav",
-    followUp: "29 Jan, 2026 2:56 PM",
-    href: "/crm-lead-details",
-  },
-];
+function FilterSelect({ field, value, onChange }) {
+  return (
+    <div className={styles.filterGroup}>
+      <h6>{field.label} :</h6>
 
-const PAGES = [1, 2, 3, 4, 5];
+      <div className={styles.filterOptions}>
+        <select
+          value={value}
+          onChange={(event) => onChange(field.key, event.target.value)}
+        >
+          <option value="">Select</option>
 
-const TOTAL_CUSTOMERS = 124;
+          {field.options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
 
-export default function AllLeads({ allLeadsListData }) {
+export default function AllLeads({
+  allLeadsListData,
+  filters = {},
+  onFiltersChange,
+  page = 1,
+  onPageChange,
+  search = "",
+  onSearch,
+}) {
   const router = useRouter();
   const { canView } = usePermissions();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [searchInput, setSearchInput] = useState(search);
+  const searchTimer = useRef(null);
   const visibleTabs = TABS.filter((tab) => canView(tab.moduleKey));
   const visibleTabKey = visibleTabs.map((tab) => tab.query).join(",");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemPerPage, setItemPerPage] = useState(10);
   const paginationData = allLeadsListData?.data?.pagination || {};
-  console.log(currentPage, itemPerPage);
+  const leads = allLeadsListData?.data?.leads || [];
+  const total = Number(paginationData.total ?? leads.length) || 0;
+  const perPage =
+    Number(
+      paginationData.item_per_page ||
+        paginationData.items_per_page ||
+        paginationData.per_page,
+    ) || 10;
+  const rangeFrom = total
+    ? Number(paginationData.from) || (page - 1) * perPage + 1
+    : 0;
+  const rangeTo = total
+    ? Number(paginationData.to) || Math.min(page * perPage, total)
+    : 0;
+  const hasActiveFilters = Object.values(filters).some(
+    (value) => value != null && value !== "",
+  );
+  const allSelected =
+    leads.length > 0 && leads.every((lead) => selectedIds.includes(lead.id));
+  const filterFields = useMemo(
+    () => buildLeadFilters(allLeadsListData?.data?.filters),
+    [allLeadsListData],
+  );
+  const fromField = filterFields.find(
+    (field) => field.key === "from" || field.key === "date_from",
+  );
+  const toField = filterFields.find(
+    (field) => field.key === "to" || field.key === "date_to",
+  );
+  const dateTypeField = filterFields.find((field) => field.key === "date_type");
+  const otherFields = filterFields.filter(
+    (field) =>
+      field !== fromField && field !== toField && field !== dateTypeField,
+  );
+
+  const updateFilter = (key, value) => {
+    onFiltersChange?.({
+      ...filters,
+      [key]: value,
+    });
+  };
+
+  const clearFilters = () => {
+    onFiltersChange?.({});
+  };
+
+  const submitSearch = (value) => {
+    clearTimeout(searchTimer.current);
+    onSearch?.(value);
+  };
+
+  const handleSearchInput = (value) => {
+    setSearchInput(value);
+    clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => onSearch?.(value), 400);
+  };
 
   const toggleOne = (id) => {
     setSelectedIds((prev) =>
@@ -195,9 +380,7 @@ export default function AllLeads({ allLeadsListData }) {
   };
 
   const toggleAll = () => {
-    setSelectedIds((prev) =>
-      prev.length === LEADS.length ? [] : LEADS.map((l) => l.id),
-    );
+    setSelectedIds(allSelected ? [] : leads.map((lead) => lead.id));
   };
 
   useEffect(() => {
@@ -209,15 +392,26 @@ export default function AllLeads({ allLeadsListData }) {
     if (!isAllowed) {
       router.replace({
         pathname: "/leads",
-        query: `type=${visibleTabs[0].query}`,
+        query: {
+          type: visibleTabs[0].query,
+          page_no: "1",
+        },
       });
     }
   }, [router, visibleTabKey]);
 
-  // useEffect(() => {
-  //   setCurrentPage(paginationData?.page_no);
-  //   setItemPerPage(paginationData?.item_per_page);
-  // }, [paginationData]);
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [page, router.query?.type]);
+
+  useEffect(() => {
+    if (search) return;
+
+    clearTimeout(searchTimer.current);
+    setSearchInput("");
+  }, [search]);
+
+  useEffect(() => () => clearTimeout(searchTimer.current), []);
 
   return (
     <section className={styles.commonTableSection}>
@@ -229,7 +423,10 @@ export default function AllLeads({ allLeadsListData }) {
             onClick={() => {
               router?.push({
                 pathname: "/leads",
-                query: `type=${tab?.query}`,
+                query: {
+                  type: tab.query,
+                  page_no: "1",
+                },
               });
             }}
           >
@@ -243,8 +440,11 @@ export default function AllLeads({ allLeadsListData }) {
         <div className={`${styles.commonTableHeader} ${styles.crmLeadHeader}`}>
           <div className={styles.crmLeadTitle}>
             <p>
-              Showing <strong>1 - 10</strong> from{" "}
-              <strong>{TOTAL_CUSTOMERS}</strong> Customers
+              Showing{" "}
+              <strong>
+                {rangeFrom} - {rangeTo}
+              </strong>{" "}
+              from <strong>{total}</strong> Customers
             </p>
 
             <span className="header-divider"></span>
@@ -252,29 +452,40 @@ export default function AllLeads({ allLeadsListData }) {
             <label className={styles.itemsSelected}>
               <input
                 type="checkbox"
-                checked={
-                  LEADS.length > 0 && selectedIds.length === LEADS.length
-                }
+                checked={allSelected}
                 onChange={toggleAll}
               />
 
               <div>
-                <span>{selectedIds.length}</span>/{TOTAL_CUSTOMERS} Items
-                Selected
+                <span>{selectedIds.length}</span>/{total} Items Selected
               </div>
             </label>
           </div>
 
-          <div className={`${styles.tableSearch} table-search`}>
+          <form
+            className={`${styles.tableSearch} table-search`}
+            onSubmit={(event) => {
+              event.preventDefault();
+              submitSearch(searchInput);
+            }}
+          >
             <input
               type="text"
               id="partnerSearch"
-              placeholder="Search Partners"
+              placeholder="Search Leads"
+              value={searchInput}
+              onChange={(event) => handleSearchInput(event.target.value)}
               style={{ outline: "none" }}
             />
 
-            <CiSearch size={16} />
-          </div>
+            <button
+              type="submit"
+              className={styles.searchButton}
+              aria-label="Search"
+            >
+              <CiSearch size={16} />
+            </button>
+          </form>
         </div>
 
         {/* Filter Panel */}
@@ -285,71 +496,66 @@ export default function AllLeads({ allLeadsListData }) {
           id="filterPanel"
         >
           <div className={styles.filterGrid}>
-            {/* Date Type */}
-            <div className={styles.filterGroup}>
-              <h6>{FILTER_SELECTS[0].label} :</h6>
+            {dateTypeField && (
+              <FilterSelect
+                field={dateTypeField}
+                value={filters[dateTypeField.key] || ""}
+                onChange={updateFilter}
+              />
+            )}
 
-              <div className={styles.filterOptions}>
-                <select defaultValue="">
-                  <option value="" disabled>
-                    Select
-                  </option>
+            {(fromField || toField) && (
+              <div className={styles.filterGroup}>
+                <h6>Date Range :</h6>
 
-                  {FILTER_SELECTS[0].options.map((o) => (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
+                <div className={styles.dateRange}>
+                  {[fromField, toField].filter(Boolean).map((field) => (
+                    <div className={styles.dateInput} key={field.key}>
+                      <input
+                        type="date"
+                        aria-label={field.label}
+                        value={filters[field.key] || ""}
+                        onChange={(event) =>
+                          updateFilter(field.key, event.target.value)
+                        }
+                      />
+                    </div>
                   ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Date Range */}
-            <div className={styles.filterGroup}>
-              <h6>Date Range :</h6>
-
-              <div className={styles.dateRange}>
-                {DATE_RANGE_PLACEHOLDERS.map((ph) => (
-                  <div className={styles.dateInput} key={ph}>
-                    <input
-                      type="text"
-                      placeholder={ph}
-                      onFocus={(e) => {
-                        e.target.type = "date";
-                      }}
-                    />
-
-                    <LuCalendarDays size={16} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Remaining Filters */}
-            {FILTER_SELECTS.slice(1).map((f) => (
-              <div className={styles.filterGroup} key={f.label}>
-                <h6>{f.label} :</h6>
-
-                <div className={styles.filterOptions}>
-                  <select defaultValue="">
-                    <option value="" disabled>
-                      Select
-                    </option>
-
-                    {f.options.map((o) => (
-                      <option key={o} value={o}>
-                        {o}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
-            ))}
+            )}
+
+            {otherFields.map((field) =>
+              field.type === "date" ? (
+                <div className={styles.filterGroup} key={field.key}>
+                  <h6>{field.label} :</h6>
+                  <div className={styles.dateRange}>
+                    <div className={styles.dateInput}>
+                      <input
+                        type="date"
+                        aria-label={field.label}
+                        value={filters[field.key] || ""}
+                        onChange={(event) =>
+                          updateFilter(field.key, event.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <FilterSelect
+                  key={field.key}
+                  field={field}
+                  value={filters[field.key] || ""}
+                  onChange={updateFilter}
+                />
+              ),
+            )}
           </div>
         </div>
 
         {/* Filter Button */}
-        <div className="table-filter">
+        <div className={`table-filter ${styles.filterActions}`}>
           <div className="border-line"></div>
 
           <button
@@ -376,6 +582,16 @@ export default function AllLeads({ allLeadsListData }) {
 
             <span>Filters</span>
           </button>
+
+          {(showFilters || hasActiveFilters) && (
+            <button
+              className={`filter-btn ${styles.clearFilterBtn}`}
+              type="button"
+              onClick={clearFilters}
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {/* Table */}
@@ -386,9 +602,7 @@ export default function AllLeads({ allLeadsListData }) {
                 <input
                   type="checkbox"
                   id="selectAll"
-                  checked={
-                    LEADS.length > 0 && selectedIds.length === LEADS.length
-                  }
+                  checked={allSelected}
                   onChange={toggleAll}
                 />
               </td>
@@ -402,7 +616,12 @@ export default function AllLeads({ allLeadsListData }) {
           </thead>
 
           <tbody className="table-body">
-            {allLeadsListData?.data?.leads?.map((lead) => (
+            {leads.length === 0 && (
+              <tr className={`${styles.emptyRow} table-row`}>
+                <td className={styles.empty}>No leads found</td>
+              </tr>
+            )}
+            {leads.map((lead) => (
               <tr
                 className={`${styles.crmLeadRow} crm-lead-row table-row`}
                 key={lead.id}
@@ -438,7 +657,7 @@ export default function AllLeads({ allLeadsListData }) {
 
                 {/* Status */}
                 <td className={styles.statusCol}>
-                  <span className={`badge ${lead?.badge}`}>
+                  <span className={`badge ${styles.statusText} ${lead?.lead_status}`}>
                     {lead?.lead_status || "-"}
                   </span>
                 </td>
@@ -480,10 +699,11 @@ export default function AllLeads({ allLeadsListData }) {
 
         {/* Pagination */}
         <Pagination
-          page={currentPage}
-          total={paginationData?.total || 0}
-          perPage={itemPerPage}
-          onChange={setCurrentPage}
+          page={Number(paginationData.page_no) || page}
+          total={total}
+          perPage={perPage}
+          lastPage={paginationData.last_page}
+          onChange={onPageChange}
         />
       </div>
     </section>

@@ -25,6 +25,7 @@ import {
 } from "@/redux/apis/quotationApi";
 import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
 import SendQuotationPopup from "./send-quotation-popupo/SendQuotationPopup";
+import DiscountRequestPopup from "./discount-request-popup/DiscountRequestPopup";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
@@ -50,24 +51,35 @@ const STATUS_OPTIONS = [
 
 const DEFAULT_PER_PAGE = 10;
 
-const getStatus = (quotation, fallback = "-") => {
-  const status =
-    quotation.status ??
-    quotation.quotation_status ??
-    quotation.discount_status ??
-    quotation.customer_status;
+const formatStatusLabel = (value) =>
+  String(value || "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  if (typeof status === "string") return status;
-  return status?.name || status?.label || fallback;
+const getStatus = (quotation, fallback = "-") => {
+  const label = quotation?.quotation_status_label;
+
+  if (typeof label === "string" && label.trim()) return label.trim();
+
+  const status = quotation?.quotation_status ?? quotation?.status;
+
+  if (typeof status === "string" && status.trim()) {
+    return formatStatusLabel(status);
+  }
+
+  return status?.label || status?.name || fallback;
 };
 
 const getStatusClass = (status) =>
   String(status || "")
     .toLowerCase()
-    .replace(/\s+/g, "-");
+    .replace(/[\s_]+/g, "-");
 
 const isApproved = (quotation) =>
-  String(getStatus(quotation, "")).toLowerCase() === "approved";
+  String(
+    quotation?.quotation_status || quotation?.status || "",
+  ).toLowerCase() === "approved";
 
 const getCompany = (quotation) => quotation.company_name || "-";
 const getContact = (quotation) =>
@@ -82,9 +94,6 @@ const getFollowUp = (quotation) =>
   quotation.follow_up_date || quotation.shared_at || quotation.created_at || "";
 const getAmount = (quotation) =>
   quotation.total_amount ?? quotation.grand_total ?? quotation.amount ?? "";
-const getDiscountStatus = (quotation) =>
-  quotation.discount_status || quotation.discount_request_status || "pending";
-
 const listTotal = (response) => {
   const rows = Array.isArray(response?.data?.quotations)
     ? response.data.quotations
@@ -135,6 +144,7 @@ const Quotation = () => {
     activeQuotationId: null,
     sendQuotationId: null,
     sendMode: "quotation",
+    discountQuotationId: null,
   });
   const { showToast } = useToast();
 
@@ -153,11 +163,10 @@ const Quotation = () => {
       }
     });
 
-    router.push(
-      { pathname: router.pathname, query },
-      undefined,
-      { shallow: true, scroll: false },
-    );
+    router.push({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+      scroll: false,
+    });
   };
 
   const resetPage = () => {
@@ -326,20 +335,25 @@ const Quotation = () => {
   const perPage = Number(pagination.per_page) || 10;
   const total = Number(pagination.total ?? quotations.length) || 0;
   const currentPage = Number(pagination.current_page ?? page) || 1;
-  const lastPage = Number(
-    pagination.last_page ?? Math.max(1, Math.ceil(total / perPage)),
-  ) || 1;
+  const lastPage =
+    Number(pagination.last_page ?? Math.max(1, Math.ceil(total / perPage))) ||
+    1;
   const rangeFrom = total
     ? Number(pagination.from ?? (currentPage - 1) * perPage + 1)
     : 0;
   const rangeTo = total
-    ? Number(pagination.to ?? Math.min(rangeFrom + quotations.length - 1, total))
+    ? Number(
+        pagination.to ?? Math.min(rangeFrom + quotations.length - 1, total),
+      )
     : 0;
 
   const customerTab = activeTab === "customer";
   const tableClass = customerTab ? "es-quo-table" : "crm-quo-table";
   const sendQuotation = quotations.find(
     (quotation) => quotation?.id === view.sendQuotationId,
+  );
+  const discountQuotation = quotations.find(
+    (quotation) => quotation?.id === view.discountQuotationId,
   );
 
   const selectTab = (tab) => {
@@ -443,10 +457,7 @@ const Quotation = () => {
       const company = getCompany(quotation);
       const contact = getContact(quotation);
       const assignee = getAssignee(quotation);
-      const rowStatus =
-        activeTab === "discount"
-          ? getDiscountStatus(quotation)
-          : getStatus(quotation);
+      const rowStatus = getStatus(quotation);
       const isMenuOpen = view.activeQuotationId === quotation?.id;
       const approved = isApproved(quotation);
 
@@ -663,16 +674,24 @@ const Quotation = () => {
                         </div>
                       </div>
                     )}
-                    {!approved && canRequestDiscount && (
-                      <button
-                        type="button"
-                        className={styles.discountBtn}
-                        onClick={closeMenu}
-                      >
-                        <LuCornerUpRight size={18} />
-                        <span>Send for more discount</span>
-                      </button>
-                    )}
+                    {view.activeTab !== "discount" &&
+                      !approved &&
+                      canRequestDiscount && (
+                        <button
+                          type="button"
+                          className={styles.discountBtn}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            updateView({
+                              activeQuotationId: null,
+                              discountQuotationId: quotation.id,
+                            });
+                          }}
+                        >
+                          <LuCornerUpRight size={18} />
+                          <span>Send for more discount</span>
+                        </button>
+                      )}
                   </div>
                 )}
               </div>
@@ -820,9 +839,7 @@ const Quotation = () => {
 
               <div className="filter-group">
                 <h6>
-                  {activeTab === "discount"
-                    ? "Discount Status :"
-                    : "Status :"}
+                  {activeTab === "discount" ? "Discount Status :" : "Status :"}
                 </h6>
                 <div className="filter-options">
                   <select
@@ -900,7 +917,9 @@ const Quotation = () => {
                     }}
                   >
                     {label} (
-                    <span className="tab-count">{discountCounts[key] ?? 0}</span>
+                    <span className="tab-count">
+                      {discountCounts[key] ?? 0}
+                    </span>
                     )
                   </button>
                 ))}
@@ -944,6 +963,12 @@ const Quotation = () => {
         quotation={sendQuotation}
         mode={view.sendMode}
         title={view.sendMode === "invoice" ? "Send Invoice" : "Send Quotation"}
+      />
+
+      <DiscountRequestPopup
+        isOpen={view.discountQuotationId !== null && Boolean(discountQuotation)}
+        onClose={() => updateView({ discountQuotationId: null })}
+        quotation={discountQuotation}
       />
     </div>
   );

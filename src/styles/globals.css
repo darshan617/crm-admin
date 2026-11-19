@@ -453,7 +453,12 @@ table {
 
 .badge.lost,
 .not-sent {
-  background: #929da3;
+  background: #64748b;
+  color: #fff;
+}
+
+.badge.not-shared {
+  background: #f9bf59;
   color: #fff;
 }
 
