@@ -436,6 +436,7 @@ export default function AllLeads({
       </div>
 
       <div className="common-table-card">
+        {/* Header */}
         <div className={`${styles.commonTableHeader} ${styles.crmLeadHeader}`}>
           <div className={styles.crmLeadTitle}>
             <p>
@@ -451,12 +452,15 @@ export default function AllLeads({
             <label className={styles.itemsSelected}>
               <input
                 type="checkbox"
-                checked={allSelected}
+                checked={
+                  LEADS.length > 0 && selectedIds.length === LEADS.length
+                }
                 onChange={toggleAll}
               />
 
               <div>
-                <span>{selectedIds.length}</span>/{total} Items Selected
+                <span>{selectedIds.length}</span>/{TOTAL_CUSTOMERS} Items
+                Selected
               </div>
             </label>
           </div>
@@ -487,6 +491,7 @@ export default function AllLeads({
           </form>
         </div>
 
+        {/* Filter Panel */}
         <div
           className={`${styles.tableFilterWrap} ${
             showFilters ? styles.active : ""
@@ -592,6 +597,7 @@ export default function AllLeads({
           )}
         </div>
 
+        {/* Table */}
         <table className={`${styles.crmLeadTable} crm-lead-table`}>
           <thead>
             <tr className={`${styles.tableHead} table-head`}>
@@ -599,14 +605,18 @@ export default function AllLeads({
                 <input
                   type="checkbox"
                   id="selectAll"
-                  checked={allSelected}
+                  checked={
+                    LEADS.length > 0 && selectedIds.length === LEADS.length
+                  }
                   onChange={toggleAll}
                 />
               </td>
-              <td>Customer Name</td>
-              <td>Contact Information</td>
-              <td className={styles.statusCol}>Status</td>
-              <td>Follow Up</td>
+
+              {TABLE_HEADINGS.map((h) => (
+                <td key={h.label} className={h.className || undefined}>
+                  {h.label}
+                </td>
+              ))}
             </tr>
           </thead>
 
@@ -630,25 +640,25 @@ export default function AllLeads({
                   />
                 </td>
 
-                    <td className={styles.customer}>
-                      <div className="avatar">
-                        {lead?.company_name?.charAt(0)?.toUpperCase() ||
-                          lead?.name?.charAt(0)?.toUpperCase() ||
-                          "-"}
-                      </div>
+                {/* Customer */}
+                <td className={styles.customer}>
+                  <div className={`avatar ${lead?.avatarColor}`}>
+                    {lead?.company_name?.charAt(0) || "-"}
+                  </div>
 
-                      <div>
-                        <h5>{textOrDash(lead?.company_name)}</h5>
-                        <p>{textOrDash(person)}</p>
-                      </div>
-                    </td>
+                  <div>
+                    <h5>{lead?.company_name || "-"}</h5>
+                    <p>{lead?.name || "-"}</p>
+                  </div>
+                </td>
 
-                    <td className={styles.contactInfo}>
-                      <div>
-                        <h5>{textOrDash(lead?.email)}</h5>
-                        <p>{formatPhone(lead)}</p>
-                      </div>
-                    </td>
+                {/* Contact */}
+                <td className={styles.contactInfo}>
+                  <div>
+                    <h5>{lead?.email || "-"}</h5>
+                    <p>{lead?.mobile || "-"}</p>
+                  </div>
+                </td>
 
                 {/* Status */}
                 <td className={styles.statusCol}>
@@ -657,23 +667,23 @@ export default function AllLeads({
                   </span>
                 </td>
 
-                    <td className="plan-action">
-                      <div className={styles.assignedUser}>
-                        <div className="user-info">
-                          <div className={styles.avatarFlex}>
-                            <div className="mini-avatar primary">
-                              {lead?.assigned_to?.charAt(0)?.toUpperCase() ||
-                                "-"}
-                            </div>
-
-                            <h5>{textOrDash(lead?.assigned_to)}</h5>
-                          </div>
-
-                          <small>
-                            Follow up on&nbsp;
-                            <strong>{formatDate(lead?.follow_up_date)}</strong>
-                          </small>
+                {/* Plan / Assigned User */}
+                <td className="plan-action">
+                  <div className={styles.assignedUser}>
+                    <div className="user-info">
+                      <div className={styles.avatarFlex}>
+                        <div className="mini-avatar primary">
+                          {lead?.assigned_to?.charAt(0) || "-"}
                         </div>
+
+                        <h5>{lead?.assigned_to || "-"}</h5>
+                      </div>
+
+                      <small>
+                        Follow up on&nbsp;
+                        <strong>{lead?.follow_up_date || "-"}</strong>
+                      </small>
+                    </div>
 
                         <div className="actions">
                           <button
@@ -693,6 +703,7 @@ export default function AllLeads({
           </tbody>
         </table>
 
+        {/* Pagination */}
         <Pagination
           page={Number(paginationData.page_no) || page}
           total={total}
@@ -702,21 +713,5 @@ export default function AllLeads({
         />
       </div>
     </section>
-  );
-}
-
-function FilterSelect({ input, value, onChange }) {
-  const options = Array.isArray(input.options) ? input.options : [];
-  const hasEmpty = options.some((option) => option.value === "");
-
-  return (
-    <select value={value} onChange={(event) => onChange(event.target.value)}>
-      {!hasEmpty && <option value="">All</option>}
-      {options.map((option) => (
-        <option key={`${input.key}-${option.value}`} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
   );
 }

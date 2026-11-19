@@ -254,10 +254,7 @@
 
 .crmLeadTable .tableHead,
 .crmLeadTable .crmLeadRow {
-  grid-template-columns: 35px minmax(180px, 1.5fr) minmax(200px, 1.5fr) minmax(120px, 0.7fr) minmax(220px, 1.2fr);
-  width: 100%;
-  min-width: 920px;
-  box-sizing: border-box;
+  grid-template-columns: 35px 1.5fr 1.5fr 0.65fr 1.2fr;
 }
 
 .emptyRow {
@@ -304,7 +301,8 @@
 }
 
 .statusCol {
-  text-align: center;
+  width: 100% !important;
+  text-align: center !important;
 }
 
 .statusText {
@@ -440,20 +438,13 @@
 
   /* Table -> cards */
   .crmLeadTable,
-  .crmLeadTable tbody,
-  .crmLeadTable thead {
+  .crmLeadTable tbody {
     display: block;
     width: 100%;
-    min-width: 0;
   }
 
   .crmLeadTable thead {
     display: none;
-  }
-
-  .crmLeadTable .tableHead,
-  .crmLeadTable .crmLeadRow {
-    min-width: 0;
   }
 
   .crmLeadTable .crmLeadRow {
