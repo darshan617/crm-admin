@@ -56,12 +56,12 @@
 
 .pdfBtn {
   color: #fff;
-  background: #0355ac;
-  border: 1px solid #0355ac;
+  background: #0354ab;
+  border: 1px solid #0354ab;
 }
 
 .pdfBtn:hover {
-  background: #1e4f96;
+  filter: brightness(0.92);
 }
 
 .chart {
