@@ -436,7 +436,6 @@ export default function AllLeads({
       </div>
 
       <div className="common-table-card">
-        {/* Header */}
         <div className={`${styles.commonTableHeader} ${styles.crmLeadHeader}`}>
           <div className={styles.crmLeadTitle}>
             <p>
@@ -488,7 +487,6 @@ export default function AllLeads({
           </form>
         </div>
 
-        {/* Filter Panel */}
         <div
           className={`${styles.tableFilterWrap} ${
             showFilters ? styles.active : ""
@@ -594,7 +592,6 @@ export default function AllLeads({
           )}
         </div>
 
-        {/* Table */}
         <table className={`${styles.crmLeadTable} crm-lead-table`}>
           <thead>
             <tr className={`${styles.tableHead} table-head`}>
@@ -606,12 +603,10 @@ export default function AllLeads({
                   onChange={toggleAll}
                 />
               </td>
-
-              {TABLE_HEADINGS.map((h) => (
-                <td key={h.label} className={h.className || undefined}>
-                  {h.label}
-                </td>
-              ))}
+              <td>Customer Name</td>
+              <td>Contact Information</td>
+              <td className={styles.statusCol}>Status</td>
+              <td>Follow Up</td>
             </tr>
           </thead>
 
@@ -635,25 +630,25 @@ export default function AllLeads({
                   />
                 </td>
 
-                {/* Customer */}
-                <td className={styles.customer}>
-                  <div className={`avatar ${lead?.avatarColor}`}>
-                    {lead?.company_name?.charAt(0) || "-"}
-                  </div>
+                    <td className={styles.customer}>
+                      <div className="avatar">
+                        {lead?.company_name?.charAt(0)?.toUpperCase() ||
+                          lead?.name?.charAt(0)?.toUpperCase() ||
+                          "-"}
+                      </div>
 
-                  <div>
-                    <h5>{lead?.company_name || "-"}</h5>
-                    <p>{lead?.name || "-"}</p>
-                  </div>
-                </td>
+                      <div>
+                        <h5>{textOrDash(lead?.company_name)}</h5>
+                        <p>{textOrDash(person)}</p>
+                      </div>
+                    </td>
 
-                {/* Contact */}
-                <td className={styles.contactInfo}>
-                  <div>
-                    <h5>{lead?.email || "-"}</h5>
-                    <p>{lead?.mobile || "-"}</p>
-                  </div>
-                </td>
+                    <td className={styles.contactInfo}>
+                      <div>
+                        <h5>{textOrDash(lead?.email)}</h5>
+                        <p>{formatPhone(lead)}</p>
+                      </div>
+                    </td>
 
                 {/* Status */}
                 <td className={styles.statusCol}>
@@ -662,42 +657,42 @@ export default function AllLeads({
                   </span>
                 </td>
 
-                {/* Plan / Assigned User */}
-                <td className="plan-action">
-                  <div className={styles.assignedUser}>
-                    <div className="user-info">
-                      <div className={styles.avatarFlex}>
-                        <div className="mini-avatar primary">
-                          {lead?.assigned_to?.charAt(0) || "-"}
+                    <td className="plan-action">
+                      <div className={styles.assignedUser}>
+                        <div className="user-info">
+                          <div className={styles.avatarFlex}>
+                            <div className="mini-avatar primary">
+                              {lead?.assigned_to?.charAt(0)?.toUpperCase() ||
+                                "-"}
+                            </div>
+
+                            <h5>{textOrDash(lead?.assigned_to)}</h5>
+                          </div>
+
+                          <small>
+                            Follow up on&nbsp;
+                            <strong>{formatDate(lead?.follow_up_date)}</strong>
+                          </small>
                         </div>
 
-                        <h5>{lead?.assigned_to || "-"}</h5>
+                        <div className="actions">
+                          <button
+                            onClick={() =>
+                              router?.push(`/leads/leads-details/${lead?.id}`)
+                            }
+                            className={styles.viewLeadBtn}
+                          >
+                            <HiChevronRight size={16} />
+                          </button>
+                        </div>
                       </div>
-
-                      <small>
-                        Follow up on&nbsp;
-                        <strong>{lead?.follow_up_date || "-"}</strong>
-                      </small>
-                    </div>
-
-                    <div className="actions">
-                      <button
-                        onClick={() =>
-                          router?.push(`/leads/leads-details/${lead?.id}`)
-                        }
-                        className={styles.viewLeadBtn}
-                      >
-                        <HiChevronRight size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                    </td>
+                  </tr>
+                ))}
+              
           </tbody>
         </table>
 
-        {/* Pagination */}
         <Pagination
           page={Number(paginationData.page_no) || page}
           total={total}
@@ -707,5 +702,21 @@ export default function AllLeads({
         />
       </div>
     </section>
+  );
+}
+
+function FilterSelect({ input, value, onChange }) {
+  const options = Array.isArray(input.options) ? input.options : [];
+  const hasEmpty = options.some((option) => option.value === "");
+
+  return (
+    <select value={value} onChange={(event) => onChange(event.target.value)}>
+      {!hasEmpty && <option value="">All</option>}
+      {options.map((option) => (
+        <option key={`${input.key}-${option.value}`} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
   );
 }
