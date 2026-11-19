@@ -11,6 +11,17 @@
     justify-content: space-between;
 }
 
+.searchButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
 .avatarFlex {
     display: flex;
     gap: 8px;

@@ -5,11 +5,15 @@ import QuickInsights from "@/components/reports/quick-insights/QuickInsights";
 import ReportCategory from "@/components/reports/report-category/ReportCategory";
 import ReportSummary from "@/components/reports/report-summary/ReportSummary";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
-import React from "react";
+import React, { useState } from "react";
 import { useReportsQuery } from "@/redux/apis/reportsApi";
 
 const ReportsPage = () => {
-  const { data, isLoading, isError } = useReportsQuery();
+  const [range, setRange] = useState({ from: "", to: "" });
+  const params = Object.fromEntries(
+    Object.entries(range).filter(([, value]) => value),
+  );
+  const { data, isLoading, isError } = useReportsQuery(params);
   const report = data?.data;
 
   const { canView } = usePermissions();
@@ -19,7 +23,14 @@ const ReportsPage = () => {
       <div className="content">
         {canView("reports") && (
           <>
-            <ReportSummary data={report} isLoading={isLoading} isError={isError} />
+            <ReportSummary
+              data={report}
+              isLoading={isLoading}
+              isError={isError}
+              from={range.from}
+              to={range.to}
+              onRangeChange={setRange}
+            />
             <BusinessOverview data={report} />
             <EmployeePerformance employees={report?.employees} />
             <ReportCategory categories={report?.categories} />

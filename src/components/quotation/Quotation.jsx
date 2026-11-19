@@ -16,6 +16,7 @@ import {
   LuCornerUpRight,
 } from "react-icons/lu";
 import styles from "@/components/quotation/Quotation.module.css";
+import Pagination from "@/common-components/pagination/Pagination";
 import {
   useDownloadInvoiceQuery,
   useGetAllQuotationsQuery,
@@ -24,6 +25,7 @@ import {
 } from "@/redux/apis/quotationApi";
 import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
 import SendQuotationPopup from "./send-quotation-popupo/SendQuotationPopup";
+import DiscountRequestPopup from "./discount-request-popup/DiscountRequestPopup";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
 
@@ -47,24 +49,37 @@ const STATUS_OPTIONS = [
   "accepted",
 ];
 
-const getStatus = (quotation, fallback = "-") => {
-  const status =
-    quotation.status ??
-    quotation.quotation_status ??
-    quotation.discount_status ??
-    quotation.customer_status;
+const DEFAULT_PER_PAGE = 10;
 
-  if (typeof status === "string") return status;
-  return status?.name || status?.label || fallback;
+const formatStatusLabel = (value) =>
+  String(value || "")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const getStatus = (quotation, fallback = "-") => {
+  const label = quotation?.quotation_status_label;
+
+  if (typeof label === "string" && label.trim()) return label.trim();
+
+  const status = quotation?.quotation_status ?? quotation?.status;
+
+  if (typeof status === "string" && status.trim()) {
+    return formatStatusLabel(status);
+  }
+
+  return status?.label || status?.name || fallback;
 };
 
 const getStatusClass = (status) =>
   String(status || "")
     .toLowerCase()
-    .replace(/\s+/g, "-");
+    .replace(/[\s_]+/g, "-");
 
 const isApproved = (quotation) =>
-  String(getStatus(quotation, "")).toLowerCase() === "approved";
+  String(
+    quotation?.quotation_status || quotation?.status || "",
+  ).toLowerCase() === "approved";
 
 const getCompany = (quotation) => quotation.company_name || "-";
 const getContact = (quotation) =>
@@ -79,9 +94,6 @@ const getFollowUp = (quotation) =>
   quotation.follow_up_date || quotation.shared_at || quotation.created_at || "";
 const getAmount = (quotation) =>
   quotation.total_amount ?? quotation.grand_total ?? quotation.amount ?? "";
-const getDiscountStatus = (quotation) =>
-  quotation.discount_status || quotation.discount_request_status || "pending";
-
 const listTotal = (response) => {
   const rows = Array.isArray(response?.data?.quotations)
     ? response.data.quotations
@@ -107,9 +119,22 @@ const Quotation = () => {
     (tab) => tab.key !== "discount" || canSeeDiscount,
   );
 
+  const activeTab = router.isReady
+    ? visibleTabs.some((tab) => tab.key === router.query.filter)
+      ? router.query.filter
+      : "all"
+    : "all";
+
+  const page = router.isReady
+    ? Math.max(1, Number(router.query.page_no) || 1)
+    : 1;
+
+  const itemsPerPage = router.isReady
+    ? Math.max(1, Number(router.query.items_per_page) || DEFAULT_PER_PAGE)
+    : DEFAULT_PER_PAGE;
+
   const [view, setView] = useState({
     filterOpen: false,
-    activeTab: "all",
     search: "",
     discountFilter: "pending",
     statusFilter: { all: "", customer: "" },
@@ -119,11 +144,80 @@ const Quotation = () => {
     activeQuotationId: null,
     sendQuotationId: null,
     sendMode: "quotation",
+    discountQuotationId: null,
   });
   const { showToast } = useToast();
 
   const updateView = (updates) =>
     setView((current) => ({ ...current, ...updates }));
+
+  const updateURL = (updates) => {
+    const query = { ...router.query };
+    delete query.type;
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") {
+        delete query[key];
+      } else {
+        query[key] = String(value);
+      }
+    });
+
+    router.push({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+      scroll: false,
+    });
+  };
+
+  const resetPage = () => {
+    if (page === 1) return;
+    updateURL({
+      filter: activeTab,
+      page_no: 1,
+      items_per_page: itemsPerPage,
+    });
+  };
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const { filter, page_no, items_per_page, type } = router.query;
+    const validFilter = visibleTabs.some((tab) => tab.key === filter);
+
+    if (
+      validFilter &&
+      page_no !== undefined &&
+      items_per_page !== undefined &&
+      type === undefined
+    ) {
+      return;
+    }
+
+    const query = { ...router.query };
+    delete query.type;
+
+    router.replace(
+      {
+        pathname: router.pathname,
+        query: {
+          ...query,
+          filter: validFilter ? filter : activeTab,
+          page_no: page_no ?? page,
+          items_per_page: items_per_page ?? itemsPerPage,
+        },
+      },
+      undefined,
+      { shallow: true, scroll: false },
+    );
+  }, [
+    router.isReady,
+    router.query,
+    router.pathname,
+    activeTab,
+    page,
+    itemsPerPage,
+    canSeeDiscount,
+  ]);
 
   const [downloadQuotation, { isFetching: isDownloading }] =
     useLazyDownloadQuotationQuery();
@@ -179,11 +273,11 @@ const Quotation = () => {
   };
 
   const status =
-    view.activeTab === "discount"
+    activeTab === "discount"
       ? view.discountFilter === "all"
         ? ""
         : view.discountFilter
-      : view.statusFilter[view.activeTab] || "";
+      : view.statusFilter[activeTab] || "";
 
   const {
     data: quotationResponse,
@@ -194,12 +288,12 @@ const Quotation = () => {
   } = useGetAllQuotationsQuery(
     {
       search: view.search,
-      tab: view.activeTab,
+      tab: activeTab,
       status,
       date_type: view.dateType,
       from: view.from,
       to: view.to,
-      page: 1,
+      page,
     },
     { skip: !canSeeQuotations },
   );
@@ -212,7 +306,7 @@ const Quotation = () => {
     to: view.to,
     page: 1,
   };
-  const skipDiscountCounts = !canSeeQuotations || view.activeTab !== "discount";
+  const skipDiscountCounts = !canSeeQuotations || activeTab !== "discount";
 
   const { data: pendingCountResponse } = useGetAllQuotationsQuery(
     { ...discountCountArgs, status: "pending" },
@@ -237,18 +331,42 @@ const Quotation = () => {
     : Array.isArray(quotationResponse?.data)
       ? quotationResponse.data
       : [];
-  const pagination = quotationResponse?.data?.pagination;
-  const total = pagination?.total ?? quotations.length;
+  const pagination = quotationResponse?.data?.pagination || {};
+  const perPage = Number(pagination.per_page) || 10;
+  const total = Number(pagination.total ?? quotations.length) || 0;
+  const currentPage = Number(pagination.current_page ?? page) || 1;
+  const lastPage =
+    Number(pagination.last_page ?? Math.max(1, Math.ceil(total / perPage))) ||
+    1;
+  const rangeFrom = total
+    ? Number(pagination.from ?? (currentPage - 1) * perPage + 1)
+    : 0;
+  const rangeTo = total
+    ? Number(
+        pagination.to ?? Math.min(rangeFrom + quotations.length - 1, total),
+      )
+    : 0;
 
-  const customerTab = view.activeTab === "customer";
+  const customerTab = activeTab === "customer";
   const tableClass = customerTab ? "es-quo-table" : "crm-quo-table";
   const sendQuotation = quotations.find(
     (quotation) => quotation?.id === view.sendQuotationId,
   );
+  const discountQuotation = quotations.find(
+    (quotation) => quotation?.id === view.discountQuotationId,
+  );
 
-  const selectTab = (activeTab) => updateView({ activeTab, filterOpen: false });
+  const selectTab = (tab) => {
+    if (activeTab === tab) return;
+    updateView({ filterOpen: false });
+    updateURL({
+      filter: tab,
+      page_no: 1,
+      items_per_page: itemsPerPage,
+    });
+  };
 
-  const resetFilters = () =>
+  const resetFilters = () => {
     updateView({
       search: "",
       discountFilter: "pending",
@@ -257,6 +375,17 @@ const Quotation = () => {
       from: "",
       to: "",
     });
+    resetPage();
+  };
+
+  const handlePageChange = (nextPage) => {
+    if (nextPage < 1 || nextPage > lastPage || nextPage === page) return;
+    updateURL({
+      filter: activeTab,
+      page_no: nextPage,
+      items_per_page: itemsPerPage,
+    });
+  };
 
   const openQuotationMenu = (quotation, event) => {
     event.stopPropagation();
@@ -328,10 +457,7 @@ const Quotation = () => {
       const company = getCompany(quotation);
       const contact = getContact(quotation);
       const assignee = getAssignee(quotation);
-      const rowStatus =
-        view.activeTab === "discount"
-          ? getDiscountStatus(quotation)
-          : getStatus(quotation);
+      const rowStatus = getStatus(quotation);
       const isMenuOpen = view.activeQuotationId === quotation?.id;
       const approved = isApproved(quotation);
 
@@ -548,16 +674,24 @@ const Quotation = () => {
                         </div>
                       </div>
                     )}
-                    {!approved && canRequestDiscount && (
-                      <button
-                        type="button"
-                        className={styles.discountBtn}
-                        onClick={closeMenu}
-                      >
-                        <LuCornerUpRight size={18} />
-                        <span>Send for more discount</span>
-                      </button>
-                    )}
+                    {view.activeTab !== "discount" &&
+                      !approved &&
+                      canRequestDiscount && (
+                        <button
+                          type="button"
+                          className={styles.discountBtn}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            updateView({
+                              activeQuotationId: null,
+                              discountQuotationId: quotation.id,
+                            });
+                          }}
+                        >
+                          <LuCornerUpRight size={18} />
+                          <span>Send for more discount</span>
+                        </button>
+                      )}
                   </div>
                 )}
               </div>
@@ -605,20 +739,9 @@ const Quotation = () => {
               key={tab.key}
               type="button"
               role="tab"
-              aria-selected={view.activeTab === tab.key}
-              className={view.activeTab === tab.key ? styles.active : ""}
-              onClick={() => {
-                selectTab(tab.key);
-                router.push({
-                  pathname: router.pathname,
-                  query: {
-                    ...router.query,
-                    type: tab.key,
-                    page_no: 1,
-                    items_per_page: 10,
-                  },
-                });
-              }}
+              aria-selected={activeTab === tab.key}
+              className={activeTab === tab.key ? styles.active : ""}
+              onClick={() => selectTab(tab.key)}
             >
               {tab.label}
             </button>
@@ -634,8 +757,11 @@ const Quotation = () => {
           >
             <div className={`${customerTab ? "es" : "crm"}-quo-title`}>
               <p>
-                Showing <strong>{quotations.length}</strong> from{" "}
-                <strong>{total}</strong> Quotations
+                Showing{" "}
+                <strong>
+                  {rangeFrom} - {rangeTo}
+                </strong>{" "}
+                from <strong>{total}</strong> Quotations
               </p>
             </div>
             <form
@@ -646,7 +772,10 @@ const Quotation = () => {
                 type="search"
                 name="search"
                 value={view.search}
-                onChange={(event) => updateView({ search: event.target.value })}
+                onChange={(event) => {
+                  updateView({ search: event.target.value });
+                  resetPage();
+                }}
                 placeholder="Search by Quotation"
                 autoComplete="off"
                 className={styles.searchInput}
@@ -667,9 +796,10 @@ const Quotation = () => {
                 <div className="filter-options">
                   <select
                     value={view.dateType}
-                    onChange={(event) =>
-                      updateView({ dateType: event.target.value })
-                    }
+                    onChange={(event) => {
+                      updateView({ dateType: event.target.value });
+                      resetPage();
+                    }}
                   >
                     <option value="">Select</option>
                     <option value="created_at">Created Date</option>
@@ -687,9 +817,10 @@ const Quotation = () => {
                       aria-label="From date"
                       type="date"
                       value={view.from}
-                      onChange={(event) =>
-                        updateView({ from: event.target.value })
-                      }
+                      onChange={(event) => {
+                        updateView({ from: event.target.value });
+                        resetPage();
+                      }}
                     />
                   </div>
                   <div className="date-input">
@@ -697,9 +828,10 @@ const Quotation = () => {
                       aria-label="To date"
                       type="date"
                       value={view.to}
-                      onChange={(event) =>
-                        updateView({ to: event.target.value })
-                      }
+                      onChange={(event) => {
+                        updateView({ to: event.target.value });
+                        resetPage();
+                      }}
                     />
                   </div>
                 </div>
@@ -707,31 +839,32 @@ const Quotation = () => {
 
               <div className="filter-group">
                 <h6>
-                  {view.activeTab === "discount"
-                    ? "Discount Status :"
-                    : "Status :"}
+                  {activeTab === "discount" ? "Discount Status :" : "Status :"}
                 </h6>
                 <div className="filter-options">
                   <select
                     value={
-                      view.activeTab === "discount"
+                      activeTab === "discount"
                         ? view.discountFilter === "all"
                           ? ""
                           : view.discountFilter
-                        : view.statusFilter[view.activeTab] || ""
+                        : view.statusFilter[activeTab] || ""
                     }
-                    onChange={(event) =>
-                      view.activeTab === "discount"
-                        ? updateView({
-                            discountFilter: event.target.value || "all",
-                          })
-                        : updateView({
-                            statusFilter: {
-                              ...view.statusFilter,
-                              [view.activeTab]: event.target.value,
-                            },
-                          })
-                    }
+                    onChange={(event) => {
+                      if (activeTab === "discount") {
+                        updateView({
+                          discountFilter: event.target.value || "all",
+                        });
+                      } else {
+                        updateView({
+                          statusFilter: {
+                            ...view.statusFilter,
+                            [activeTab]: event.target.value,
+                          },
+                        });
+                      }
+                      resetPage();
+                    }}
                   >
                     <option value="">Select</option>
                     {STATUS_OPTIONS.map((option) => (
@@ -768,7 +901,7 @@ const Quotation = () => {
           </div>
 
           {/* Discount sub-tabs */}
-          {view.activeTab === "discount" && (
+          {activeTab === "discount" && (
             <div className={styles.partnerTabsWrap}>
               <div className={styles.partnerTabs}>
                 {DISCOUNT_TABS.map(([key, label]) => (
@@ -778,10 +911,15 @@ const Quotation = () => {
                     className={`${styles.partnerTab} ${
                       view.discountFilter === key ? styles.active : ""
                     }`}
-                    onClick={() => updateView({ discountFilter: key })}
+                    onClick={() => {
+                      updateView({ discountFilter: key });
+                      resetPage();
+                    }}
                   >
                     {label} (
-                    <span className="tab-count">{discountCounts[key] ?? 0}</span>
+                    <span className="tab-count">
+                      {discountCounts[key] ?? 0}
+                    </span>
                     )
                   </button>
                 ))}
@@ -804,7 +942,16 @@ const Quotation = () => {
             <tbody className="table-body">{renderRows()}</tbody>
           </table>
 
-          <div className="table-pagination">{/* <Pagination /> */}</div>
+          <div className="table-pagination">
+            <Pagination
+              page={currentPage}
+              total={total}
+              perPage={perPage}
+              lastPage={lastPage}
+              onChange={handlePageChange}
+              disabled={isLoading || isFetching}
+            />
+          </div>
         </div>
       </section>
 
@@ -816,6 +963,12 @@ const Quotation = () => {
         quotation={sendQuotation}
         mode={view.sendMode}
         title={view.sendMode === "invoice" ? "Send Invoice" : "Send Quotation"}
+      />
+
+      <DiscountRequestPopup
+        isOpen={view.discountQuotationId !== null && Boolean(discountQuotation)}
+        onClose={() => updateView({ discountQuotationId: null })}
+        quotation={discountQuotation}
       />
     </div>
   );

@@ -4,8 +4,9 @@ import { LuIndianRupee } from "react-icons/lu";
 import { GoTrophy } from "react-icons/go";
 import { AiOutlinePercentage } from "react-icons/ai";
 import { VscGitBranch } from "react-icons/vsc";
-import { FiTarget } from "react-icons/fi";
+import { FiDownload, FiTarget } from "react-icons/fi";
 import styles from "@/components/reports/report-summary/ReportSummary.module.css";
+import { downloadReportPdf } from "@/components/reports/report-summary/downloadReportPdf";
 
 const KPI_FIELDS = [
   { label: "Total Sales", key: "totalSales", tone: "blue", Icon: LuIndianRupee },
@@ -38,15 +39,35 @@ const toneClass = {
   orange: styles.toneOrange,
 };
 
-const ReportSummary = ({ data, isLoading, isError }) => {
+const ReportSummary = ({
+  data,
+  isLoading,
+  isError,
+  from = "",
+  to = "",
+  onRangeChange,
+}) => {
   const kpis = KPI_FIELDS.map((kpi) => ({
     ...kpi,
     value: isLoading ? "…" : isError ? "—" : (data?.[kpi.key] ?? "—"),
   }));
 
+  const handleFromChange = (event) => {
+    onRangeChange?.({ from: event.target.value, to });
+  };
+
+  const handleToChange = (event) => {
+    onRangeChange?.({ from, to: event.target.value });
+  };
+
+  const handleDownload = () => {
+    if (!data || isLoading || isError) return;
+    downloadReportPdf({ data, from, to });
+  };
+
   return (
     <>
-      <div className="page-header">
+      <div className={`page-header ${styles.header}`}>
         <div>
           <div className="breadcrumb welcome-text">
             <p>
@@ -54,6 +75,36 @@ const ReportSummary = ({ data, isLoading, isError }) => {
             </p>
           </div>
           <h2>Reports</h2>
+        </div>
+
+        <div className={styles.headerActions}>
+          <div className={styles.dateRange}>
+            <input
+              type="date"
+              name="from"
+              value={from}
+              max={to || undefined}
+              onChange={handleFromChange}
+              aria-label="From date"
+            />
+            <input
+              type="date"
+              name="to"
+              value={to}
+              min={from || undefined}
+              onChange={handleToChange}
+              aria-label="To date"
+            />
+          </div>
+          <button
+            type="button"
+            className={styles.downloadBtn}
+            onClick={handleDownload}
+            disabled={isLoading || isError || !data}
+          >
+            <FiDownload size={15} aria-hidden="true" />
+            Download Report
+          </button>
         </div>
       </div>
 

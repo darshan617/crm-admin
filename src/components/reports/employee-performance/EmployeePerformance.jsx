@@ -31,7 +31,7 @@ const EmployeePerformance = ({ employees = [] }) => {
   return (
     <section className="common-table-section pt-3">
       <div className="common-table-card rpt-card">
-        <div className="common-table-header">
+        <div className={`common-table-header ${styles.header}`}>
           <div>
             <h3>Employee Performance</h3>
             <p className="rpt-sub">
@@ -40,7 +40,7 @@ const EmployeePerformance = ({ employees = [] }) => {
           </div>
 
           <form
-            className="search-box rpt-search"
+            className={styles.searchWrap}
             onSubmit={(event) => event.preventDefault()}
           >
             <input
@@ -49,14 +49,19 @@ const EmployeePerformance = ({ employees = [] }) => {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search Employee"
+              className={styles.searchInput}
             />
-            <button type="submit" aria-label="Search">
-              <FiSearch size={24} aria-hidden="true" />
+            <button
+              type="submit"
+              className={styles.searchButton}
+              aria-label="Search"
+            >
+              <FiSearch size={16} aria-hidden="true" />
             </button>
           </form>
         </div>
 
-        <div className="crm-lead-table-wrap">
+        <div className={styles.tableWrap}>
           <table className={styles.rptEmpTable}>
             <thead>
               <tr>
@@ -68,7 +73,7 @@ const EmployeePerformance = ({ employees = [] }) => {
             <tbody>
               {filtered.map((employee, index) => (
                 <tr key={`${employee.name}-${employee.role}-${index}`}>
-                  <td>
+                  <td data-label="Employee">
                     <div className={styles.rptEmp}>
                       <span
                         className={`${styles.avatar} ${styles[employee.color] || styles.blue}`}
@@ -81,18 +86,20 @@ const EmployeePerformance = ({ employees = [] }) => {
                       </div>
                     </div>
                   </td>
-                  <td>{employee.leads}</td>
-                  <td>{employee.calls}</td>
-                  <td>{employee.followups}</td>
-                  <td>{employee.opps}</td>
-                  <td>{employee.won}</td>
-                  <td>{employee.revenue}</td>
-                  <td className="rpt-conv">{employee.conv}</td>
+                  <td data-label="Leads">{employee.leads}</td>
+                  <td data-label="Calls">{employee.calls}</td>
+                  <td data-label="Follow-ups">{employee.followups}</td>
+                  <td data-label="Opportunities">{employee.opps}</td>
+                  <td data-label="Won Deals">{employee.won}</td>
+                  <td data-label="Revenue">{employee.revenue}</td>
+                  <td data-label="Conv %" className="rpt-conv">
+                    {employee.conv}
+                  </td>
                 </tr>
               ))}
 
               {filtered.length === 0 && (
-                <tr>
+                <tr className={styles.emptyRow}>
                   <td colSpan={COLUMNS.length}>No employees found.</td>
                 </tr>
               )}

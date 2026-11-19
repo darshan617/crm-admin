@@ -122,7 +122,6 @@
 
 .dateRow {
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
 }
 
@@ -336,5 +335,9 @@
   .showing {
     border-right: 0;
     padding-right: 0;
+  }
+
+  .dateRow {
+    flex-wrap: wrap;
   }
 }

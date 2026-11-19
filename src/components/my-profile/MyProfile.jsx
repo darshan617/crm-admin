@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "@/components/my-profile/MyProfile.module.css";
 import Cookies from "js-cookie";
 import {
@@ -8,11 +8,19 @@ import {
   useUpdateProfileMutation,
 } from "@/redux/apis/authApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { FiUserPlus } from "react-icons/fi";
+
+const MAX_SIZE_MB = 2;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const MyProfile = () => {
   const { data, isLoading, isError, refetch } = useMyProfileQuery();
   const { showToast } = useToast();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
+
+  const fileInputRef = useRef(null);
+  const [preview, setPreview] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [form, setForm] = useState({
     user_name: "",
@@ -34,6 +42,13 @@ const MyProfile = () => {
     }
   }, [data]);
 
+  // cleanup local preview object URL
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -43,6 +58,52 @@ const MyProfile = () => {
     }));
   };
 
+  /* ---------- Avatar upload ---------- */
+  const handleAvatarClick = () => {
+    if (!isUploading) fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow selecting the same file again
+    if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showToast("Only JPG, PNG or WEBP images are allowed.", "error");
+      return;
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      showToast(`Image must be smaller than ${MAX_SIZE_MB}MB.`, "error");
+      return;
+    }
+
+    setPreview(URL.createObjectURL(file));
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file); // <-- field name must match your backend
+
+      const response = await updateProfile({ body: formData }).unwrap();
+
+      // refresh profile so avatar_url comes from the API
+      const result = await refetch();
+      const newUrl = result?.data?.data?.profile?.avatar_url;
+
+      const user = JSON.parse(Cookies.get("CRM_USER") || "{}");
+      Cookies.set("CRM_USER", JSON.stringify({ ...user, avatar_url: newUrl }));
+      window.dispatchEvent(new Event("crm-user-updated"));
+
+      showToast(response?.message || "Profile picture updated.", "success");
+    } catch (error) {
+      showToast(error?.data?.message || "Failed to upload picture.", "error");
+    } finally {
+      setPreview(null);
+      setIsUploading(false);
+    }
+  };
+
+  /* ---------- Name submit ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -83,22 +144,49 @@ const MyProfile = () => {
     );
   }
 
+  const profile = data?.data?.profile;
+  const avatarSrc = preview || profile?.avatar_url;
+
   return (
     <main>
       <div className={styles.crmEmpShell}>
         <div className={styles.mainContent}>
           <div className={`${styles.commonTableCard} ${styles.profileCard}`}>
             <div className={styles.profileHeader}>
-              <div className={styles.avatar}>
-                {data?.data?.profile?.name?.charAt(0).toUpperCase() || "U"}
+              <div className={styles.avatarWrap}>
+                <div
+                  className={styles.avatar}
+                  onClick={handleAvatarClick}
+                  role="button"
+                  tabIndex={0}
+                  title="Click to change profile picture"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") handleAvatarClick();
+                  }}
+                >
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt={profile?.name || "Profile"}
+                      className={styles.avatarImg}
+                    />
+                  ) : (
+                    <FiUserPlus size={24} className={styles.avatarIcon} />
+                  )}
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={handleAvatarChange}
+                  hidden
+                />
               </div>
 
               <div>
-                <h5 className="text-capitalize">
-                  {" "}
-                  {data?.data?.profile?.name || "User"}
-                </h5>
-                <p>{data?.data?.profile?.role_label || "N/A"}</p>
+                <h5 className="text-capitalize">{profile?.name || "User"}</h5>
+                <p>{profile?.role_label || "N/A"}</p>
               </div>
             </div>
 
