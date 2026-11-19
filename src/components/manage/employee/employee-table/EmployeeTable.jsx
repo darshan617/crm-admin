@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useGetEmployeesQuery } from "@/redux/apis/employeeApi";
@@ -9,16 +9,22 @@ import Pagination, {
 } from "@/common-components/pagination/Pagination";
 
 import styles from "./EmployeeTable.module.css";
-const ROLE_OPTIONS = [
-  { label: "All Roles", value: "" },
-  { label: "Super Admin", value: "super_admin" },
-  { label: "Admin (Admin)", value: "admin" },
-  { label: "Manager", value: "manager" },
-  { label: "Sales Executive", value: "sales_executive" },
-  { label: "Marketing Manager", value: "marketing_manager" },
-  { label: "Product Designer", value: "product_designer" },
-  { label: "Customer Support", value: "customer_support" },
-];
+
+const mapFilterOptions = (items, allLabel) => {
+  const mapped = (Array.isArray(items) ? items : [])
+    .map((item) => {
+      const value = item?.id ?? item?.value;
+      if (value == null || value === "") return null;
+
+      return {
+        value: String(value),
+        label: String(item?.name ?? item?.label ?? value),
+      };
+    })
+    .filter(Boolean);
+
+  return [{ label: allLabel, value: "" }, ...mapped];
+};
 
 const getAvatarUrl = (avatar) => {
   if (!avatar || typeof avatar !== "string") return "";
@@ -41,12 +47,6 @@ const getAvatarUrl = (avatar) => {
 
   return `${base}/${avatar.replace(/^\/+/, "")}`;
 };
-
-const STATUS_OPTIONS = [
-  { label: "All Status", value: "" },
-  { label: "Active", value: "active" },
-  { label: "Inactive", value: "inactive" },
-];
 
 /* ---------- Avatar ---------- */
 function EmployeeAvatar({ name, photo, tone = "green" }) {
@@ -71,7 +71,14 @@ function EmployeeAvatar({ name, photo, tone = "green" }) {
 }
 
 /* ---------- Filters ---------- */
-function EmployeeFilters({ status, role, onChange, onClear }) {
+function EmployeeFilters({
+  status,
+  role,
+  statusOptions,
+  roleOptions,
+  onChange,
+  onClear,
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -85,8 +92,8 @@ function EmployeeFilters({ status, role, onChange, onClear }) {
               onChange={(e) => onChange("status", e.target.value)}
               className={styles.select}
             >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
+              {statusOptions.map((o) => (
+                <option key={o.value || "all-status"} value={o.value}>
                   {o.label}
                 </option>
               ))}
@@ -100,8 +107,8 @@ function EmployeeFilters({ status, role, onChange, onClear }) {
               onChange={(e) => onChange("role", e.target.value)}
               className={styles.select}
             >
-              {ROLE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
+              {roleOptions.map((o) => (
+                <option key={o.value || "all-roles"} value={o.value}>
                   {o.label}
                 </option>
               ))}
@@ -230,6 +237,7 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
   const canEditEmployee = ready && canEdit("employees");
   const canSeePermissions = ready && canView("employee_permissions");
   const [filters, setFilters] = useState({ search: "", status: "", role: "" });
+  const [optionLists, setOptionLists] = useState({ roles: [], status: [] });
   const { page, setPage, isReady } = usePageQuery("page");
   const datesReady = useRef(false);
 
@@ -247,6 +255,31 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
 
   const employees = data?.data?.employees || [];
   const pagination = data?.data?.pagination;
+  const responseOptions = data?.data?.options || data?.options;
+
+  useEffect(() => {
+    if (!responseOptions) return;
+
+    setOptionLists((prev) => ({
+      roles:
+        Array.isArray(responseOptions.roles) && responseOptions.roles.length
+          ? responseOptions.roles
+          : prev.roles,
+      status:
+        Array.isArray(responseOptions.status) && responseOptions.status.length
+          ? responseOptions.status
+          : prev.status,
+    }));
+  }, [responseOptions]);
+
+  const roleOptions = useMemo(
+    () => mapFilterOptions(optionLists.roles, "All Roles"),
+    [optionLists.roles],
+  );
+  const statusOptions = useMemo(
+    () => mapFilterOptions(optionLists.status, "All Status"),
+    [optionLists.status],
+  );
   const totalCount = pagination?.total || 0;
   const totalPages = pagination?.last_page || 1;
   const currentPage = pagination?.current_page || page;
@@ -309,6 +342,8 @@ export default function EmployeeTable({ from = "", to = "", onSummary }) {
       <EmployeeFilters
         status={filters.status}
         role={filters.role}
+        statusOptions={statusOptions}
+        roleOptions={roleOptions}
         onChange={handleFilterChange}
         onClear={handleClearFilters}
       />
