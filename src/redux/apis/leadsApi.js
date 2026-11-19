@@ -3,10 +3,28 @@ import { apiSlice } from "../apiSlice";
 const leadsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllLeads: builder.query({
-      query: ({ source, page_no, items_per_page }) => ({
-        url: `/leads?source=${source}&page_no=${page_no}&items_per_page=${items_per_page}`,
-        method: "GET",
-      }),
+      query: ({
+        source,
+        page_no = 1,
+        items_per_page = 10,
+        ...filters
+      } = {}) => {
+        const params = new URLSearchParams();
+
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value == null || value === "") return;
+          params.set(key, String(value));
+        });
+
+        if (source) params.set("source", String(source));
+        params.set("page_no", String(page_no));
+        params.set("items_per_page", String(items_per_page));
+
+        return {
+          url: `/leads?${params.toString()}`,
+          method: "GET",
+        };
+      },
       providesTags: ["leads"],
     }),
     getDdData: builder.query({

@@ -19,14 +19,16 @@ import {
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import SendQuotationPopup from "../send-quotation-popupo/SendQuotationPopup";
+import DiscountRequestPopup from "../discount-request-popup/DiscountRequestPopup";
 
-function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
+function QuotationCard({ quotation, isOpen, onToggle }) {
   const router = useRouter();
   const { canEdit, canAdd, loginAs } = usePermissions();
   const canEditQuotation = canEdit("quotations");
   const isAdminUser = loginAs === "Admin" || loginAs === "super_admin";
   const canRequestDiscount = canAdd("discount_approval") && !isAdminUser;
   const [isSendOpen, setIsSendOpen] = useState(false);
+  const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const { showToast } = useToast();
   const [downloadQuotation, { isFetching: isDownloading }] =
     useLazyDownloadQuotationQuery();
@@ -116,9 +118,7 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
     })}`;
   };
 
-  const handleSendForDiscount = () => {
-    if (onOpenModal) onOpenModal("sendDiscountModal");
-  };
+  const handleSendForDiscount = () => setIsDiscountOpen(true);
 
   const handleSend = () => setIsSendOpen(true);
 
@@ -418,11 +418,17 @@ function QuotationCard({ quotation, onOpenModal, isOpen, onToggle }) {
         quotation={popupQuotation}
         mode="quotation"
       />
+
+      <DiscountRequestPopup
+        isOpen={isDiscountOpen}
+        onClose={() => setIsDiscountOpen(false)}
+        quotation={quotation}
+      />
     </div>
   );
 }
 
-function QuotationDetail({ badge = "New", onOpenModal }) {
+function QuotationDetail({ badge = "New" }) {
   const router = useRouter();
   const { canView } = usePermissions();
   const canSeeQuotations = canView("quotations");
@@ -502,7 +508,6 @@ function QuotationDetail({ badge = "New", onOpenModal }) {
               <QuotationCard
                 key={quotation?.id}
                 quotation={quotation}
-                onOpenModal={onOpenModal}
                 isOpen={isOpen}
                 onToggle={() =>
                   setOpenQuotationId(isOpen ? null : quotation?.id)
