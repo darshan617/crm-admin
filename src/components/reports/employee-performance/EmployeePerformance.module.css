@@ -1,5 +1,9 @@
 .header {
+  display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .searchWrap {
@@ -28,6 +32,7 @@
 
 .searchInput:focus {
   border-color: #0355ac;
+  outline: none;
 }
 
 .searchButton {
@@ -45,12 +50,19 @@
   cursor: pointer;
 }
 
-.rptEmpTable {
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableWrap .rptEmpTable {
   width: 100%;
   min-width: 860px;
   border-collapse: collapse;
 }
-.rptEmpTable th {
+
+.tableWrap .rptEmpTable th {
   text-align: left;
   font-size: 12px;
   color: #94a3b8;
@@ -60,29 +72,26 @@
   white-space: nowrap;
 }
 
-.rptEmpTable td {
+.tableWrap .rptEmpTable td {
   padding: 14px 10px;
   font-size: 14px;
   color: #334155;
   border-bottom: 1px solid #e6edf5;
-  transition: background 0.2s ease;
   white-space: nowrap;
 }
+
 .rptEmp {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.rptEmp .avatar.purple {
-  background: #6750a4;
-  color: #fff;
-}
 .rptEmp h5 {
   margin: 0;
   font-size: 14px;
   color: #1e293b;
 }
+
 .rptEmp p {
   margin: 2px 0 0;
   font-size: 12px;
@@ -105,63 +114,36 @@
 .purple {
   background: #6750a4;
 }
-
 .teal {
   background: #009688;
 }
-
 .blue {
   background: #2196f3;
 }
-
 .orange {
   background: #ff9800;
 }
-
 .green {
   background: #4caf50;
 }
-
 .pink {
   background: #e91e63;
 }
 
-/* ============================================
-   RESPONSIVE (desktop-first, max-width)
-   ============================================ */
-
-/* Large laptops / small desktops */
-@media (max-width: 1399px) {
-  .rptEmpTable {
-    min-width: 820px;
-  }
-}
-
-/* Laptops / tablets landscape */
-@media (max-width: 1199px) {
-  .rptEmpTable {
-    min-width: 780px;
-  }
-  .rptEmpTable th,
-  .rptEmpTable td {
-    padding: 12px 8px;
-  }
-}
-
-/* Tablets */
 @media (max-width: 991px) {
-  .rptEmpTable {
+  .tableWrap .rptEmpTable {
     min-width: 740px;
   }
-  .rptEmpTable td {
+
+  .tableWrap .rptEmpTable td {
     font-size: 13px;
+    padding: 12px 8px;
   }
-  .rptEmp {
-    gap: 10px;
-  }
+
   .rptEmp h5 {
     font-size: 13px;
   }
+
   .avatar {
     width: 34px;
     height: 34px;
@@ -170,76 +152,84 @@
   }
 }
 
-/* Large phones / small tablets: table scrolls sideways, first column stays pinned */
 @media (max-width: 767px) {
   .searchWrap {
     flex: 1 1 100%;
     width: 100%;
   }
 
-  .rptEmpTable {
-    min-width: 680px;
+  .tableWrap {
+    overflow-x: visible;
   }
-  .rptEmpTable th {
-    font-size: 11px;
-    padding: 10px 8px;
+
+  .tableWrap .rptEmpTable,
+  .tableWrap .rptEmpTable tbody {
+    display: block;
+    min-width: 0;
+    width: 100%;
   }
-  .rptEmpTable td {
-    padding: 10px 8px;
-    font-size: 13px;
+
+  .tableWrap .rptEmpTable thead {
+    display: none;
   }
-  .rptEmpTable th:first-child,
-  .rptEmpTable td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 1;
+
+  .tableWrap .rptEmpTable tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
     background: #fff;
-    box-shadow: 2px 0 4px -2px rgba(15, 23, 42, 0.12);
+    border: 1px solid #e6edf5;
+    border-radius: 12px;
   }
-  .rptEmp p {
+
+  .tableWrap .rptEmpTable td {
+    display: block;
+    padding: 0;
+    border: 0;
+    font-size: 14px;
+    white-space: normal;
+  }
+
+  .tableWrap .rptEmpTable td:first-child {
+    grid-column: 1 / -1;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e6edf5;
+  }
+
+  .tableWrap .rptEmpTable td[data-label]:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
     font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  /* "No employees found" row */
+  .tableWrap .rptEmpTable .emptyRow {
+    display: block;
+    text-align: center;
+  }
+
+  .tableWrap .rptEmpTable .emptyRow td:first-child {
+    border-bottom: 0;
+    padding-bottom: 0;
   }
 }
 
-/* Phones */
-@media (max-width: 575px) {
-  .rptEmpTable {
-    min-width: 620px;
+/* ---------- Small phones ---------- */
+@media (max-width: 399px) {
+  .tableWrap .rptEmpTable tr {
+    padding: 12px;
+    gap: 10px;
   }
-  .rptEmpTable th,
-  .rptEmpTable td {
-    padding: 10px 6px;
-  }
-  .rptEmp {
-    gap: 8px;
-  }
-  .rptEmp h5 {
-    font-size: 12px;
-  }
-  .rptEmp p {
-    font-size: 10.5px;
-  }
+
   .avatar {
     width: 30px;
     height: 30px;
     min-width: 30px;
     font-size: 12px;
-  }
-}
-
-@media (max-width: 399px) {
-  .rptEmpTable {
-    min-width: 580px;
-  }
-  .rptEmpTable th {
-    font-size: 10.5px;
-  }
-  .rptEmpTable td {
-    font-size: 12px;
-  }
-  .avatar {
-    width: 28px;
-    height: 28px;
-    min-width: 28px;
   }
 }

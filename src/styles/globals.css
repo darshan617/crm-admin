@@ -483,9 +483,27 @@ table {
   color: #fff;
 }
 
+.crm-lead-table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.crm-lead-table thead,
+.crm-lead-table tbody {
+  display: block;
+  width: 100%;
+  min-width: 920px;
+}
+
 .crm-lead-table .table-head,
 .crm-lead-table .crm-lead-row {
-  grid-template-columns: 35px 1.5fr 1.5fr 0.65fr 1.2fr;
+  grid-template-columns: 35px minmax(180px, 1.5fr) minmax(200px, 1.5fr) minmax(120px, 0.7fr) minmax(220px, 1.2fr);
+  width: 100%;
+  min-width: 920px;
+  box-sizing: border-box;
 }
 
 .table-filter {
@@ -626,6 +644,33 @@ table {
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+}
+
+.crm-quo-table,
+.es-quo-table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.crm-quo-table thead,
+.crm-quo-table tbody,
+.es-quo-table thead,
+.es-quo-table tbody {
+  display: block;
+  width: 100%;
+  min-width: 1100px;
+}
+
+.crm-quo-table .table-head,
+.crm-quo-table .crm-quo-row,
+.es-quo-table .table-head,
+.es-quo-table .es-quo-row {
+  width: 100%;
+  min-width: 1100px;
+  box-sizing: border-box;
 }
 
 .crm-quo-table .table-head,
@@ -1101,14 +1146,25 @@ table {
   .crm-quo-list .crm-quo-table,
   .crm-quo-list .es-quo-table,
   .crm-quo-list .crm-quo-table tbody,
-  .crm-quo-list .es-quo-table tbody {
+  .crm-quo-list .es-quo-table tbody,
+  .crm-quo-list .crm-quo-table thead,
+  .crm-quo-list .es-quo-table thead {
     display: block;
     width: 100%;
+    min-width: 0;
+    overflow-x: visible;
   }
 
   .crm-quo-list .crm-quo-table thead,
   .crm-quo-list .es-quo-table thead {
     display: none;
+  }
+
+  .crm-quo-list .crm-quo-table .table-head,
+  .crm-quo-list .es-quo-table .table-head,
+  .crm-quo-list .crm-quo-table .crm-quo-row,
+  .crm-quo-list .es-quo-table .es-quo-row {
+    min-width: 0;
   }
 
   .crm-quo-list .crm-quo-table .crm-quo-row,
@@ -1254,13 +1310,22 @@ table {
     min-width: 0;
   }
 
-  /* grid rows need room, so let the card scroll sideways */
-  .crm-page .common-table-card {
-    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .crm-lead-table {
+    overflow-x: visible;
   }
 
-  .crm-page .crm-lead-table {
-    min-width: 760px;
+  .crm-lead-table thead,
+  .crm-lead-table tbody {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .crm-lead-table .table-head,
+  .crm-lead-table .crm-lead-row {
+    min-width: 0;
   }
 }
 
