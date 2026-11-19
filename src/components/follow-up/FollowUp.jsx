@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { LuSearch, LuChevronRight } from "react-icons/lu";
+import {
+  LuSearch,
+  LuChevronRight,
+  LuCalendarDays,
+  LuX,
+  LuRotateCcw,
+} from "react-icons/lu";
 import { useRouter } from "next/router";
 import styles from "@/components/follow-up/FollowUp.module.css";
 import Pagination from "@/common-components/pagination/Pagination";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
-import {
- 
-  useGetFollowUpsQuery,
-} from "@/redux/apis/followUpApi";
+import { useGetFollowUpsQuery } from "@/redux/apis/followUpApi";
 
 const TABS = [
   { label: "All Follow-Ups", value: "all" },
@@ -162,13 +165,38 @@ const Followup = () => {
   const search = router.isReady ? String(router.query.search || "") : "";
 
   const [searchInput, setSearchInput] = useState("");
+  const [querySearch, setQuerySearch] = useState("");
   const [selected, setSelected] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [employeeFilter, setEmployeeFilter] = useState("");
 
   useEffect(() => {
-    if (router.isReady) {
-      setSearchInput(search);
-    }
+    if (!router.isReady) return;
+    setSearchInput(search);
+    setQuerySearch(search);
   }, [router.isReady, search]);
+
+  useEffect(() => {
+    if (!router.isReady) return undefined;
+
+    const value = searchInput.trim();
+    if (value === search) return undefined;
+
+    const timer = setTimeout(() => {
+      setQuerySearch(value);
+      updateURL({
+        filter: activeTab,
+        page_no: 1,
+        items_per_page: itemsPerPage,
+        search: value,
+      });
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, router.isReady, search, activeTab, itemsPerPage]);
 
   // Ensure URL contains default parameters
   useEffect(() => {
@@ -216,7 +244,7 @@ const Followup = () => {
         filter: activeTab,
         page,
         items_per_page: itemsPerPage,
-        search,
+        search: querySearch.trim(),
       },
       {
         skip: !router.isReady || !canSeeFollowUps,
@@ -237,56 +265,105 @@ const Followup = () => {
             ? response.results
             : [];
 
-  const followups = useMemo(
-    () => rawFollowups.map(normalizeFollowUp),
-    [rawFollowups],
-  );
-
   const pagination = response.pagination || response.meta || {};
 
-  const total = Number(pagination.total ?? response.total ?? followups.length);
+  const total = Number(
+    pagination.total ?? response.total ?? rawFollowups.length,
+  ) || 0;
 
-  const currentPage = Number(
-    pagination.current_page ?? response.current_page ?? page,
-  );
+  const apiLastPage = Number(pagination.last_page ?? response.last_page) || 0;
+  const returnedWholeList =
+    rawFollowups.length > itemsPerPage &&
+    (apiLastPage <= 1 || rawFollowups.length >= total);
 
-  const lastPage = Number(
-    pagination.last_page ??
-      response.last_page ??
-      Math.max(1, Math.ceil(total / itemsPerPage)),
-  );
+  const followups = useMemo(() => {
+    const start = returnedWholeList ? (page - 1) * itemsPerPage : 0;
+    return rawFollowups
+      .slice(start, start + itemsPerPage)
+      .map(normalizeFollowUp);
+  }, [rawFollowups, returnedWholeList, page, itemsPerPage]);
 
-  const from = Number(
-    pagination.from ??
-      response.from ??
-      (followups.length ? (currentPage - 1) * itemsPerPage + 1 : 0),
-  );
+  const employeeOptions = useMemo(() => {
+    const source = data?.data ?? data ?? {};
+    const list = Array.isArray(source?.filters?.employees)
+      ? source?.filters?.employees
+      : Array.isArray(source?.employees)
+        ? source?.employees
+        : [];
 
-  const to = Number(
-    pagination.to ??
-      response.to ??
-      (followups.length ? from + followups.length - 1 : 0),
-  );
+    return (
+      list
+        ?.map((employee) => {
+          if (typeof employee === "string") {
+            return { value: employee, label: employee };
+          }
+
+          const label = employee?.name || employee?.label || "";
+          if (!label) return null;
+
+          const id = employee?.id ?? employee?.value;
+          return {
+            value:
+              id === null || id === undefined || id === "" ? label : String(id),
+            label,
+          };
+        })
+        ?.filter(Boolean) ?? []
+    );
+  }, [data]);
+
+  const statusOptions = useMemo(() => {
+    const source = data?.data ?? data ?? {};
+    const list =
+      source?.filters?.inputs?.statuses ??
+      source?.filters?.statuses ??
+      source?.statuses ??
+      [];
+
+    if (!Array.isArray(list)) return [];
+
+    return (
+      list
+        ?.map((status) => {
+          if (typeof status === "string" || typeof status === "number") {
+            return { value: String(status), label: String(status) };
+          }
+
+          const label = status?.label || status?.name || status?.status || "";
+          if (!label) return null;
+
+          const value = status?.value ?? status?.id ?? label;
+          return { value: String(value), label: String(label) };
+        })
+        ?.filter(Boolean) ?? []
+    );
+  }, [data]);
+
+  const perPage = itemsPerPage;
+  const currentPage = page;
+  const lastPage = Math.max(1, Math.ceil(total / perPage) || 1);
+  const from = followups.length ? (currentPage - 1) * perPage + 1 : 0;
+  const to = followups.length ? from + followups.length - 1 : 0;
 
   // Update URL
   const updateURL = (updates) => {
-    const params = new URLSearchParams(window.location.search);
+    const query = { ...router.query };
 
     Object.entries(updates).forEach(([key, value]) => {
       if (value === null || value === undefined || value === "") {
-        params.delete(key);
+        delete query[key];
       } else {
-        params.set(key, String(value));
+        query[key] = String(value);
       }
     });
 
-    router.push(`${router.pathname}?${params.toString()}`, undefined, {
-      shallow: true,
-      scroll: false,
-    });
+    router.push(
+      { pathname: router.pathname, query },
+      undefined,
+      { shallow: true, scroll: false },
+    );
   };
 
-  // Clear selection when data context changes
   useEffect(() => {
     setSelected([]);
   }, [activeTab, page, search]);
@@ -310,7 +387,6 @@ const Followup = () => {
     );
   };
 
-  // Tab switching
   const handleTabChange = (tab) => {
     if (activeTab === tab) return;
 
@@ -323,17 +399,27 @@ const Followup = () => {
     });
   };
 
+  const resetFilters = () => {
+    setDateFrom("");
+    setDateTo("");
+    setStatusFilter("");
+    setEmployeeFilter("");
+  };
+
   // Search
   const handleSearch = (e) => {
     e.preventDefault();
 
+    const value = searchInput.trim();
+    setSearchInput(value);
+    setQuerySearch(value);
     setSelected([]);
 
     updateURL({
       filter: activeTab,
       page_no: 1,
       items_per_page: itemsPerPage,
-      search: searchInput.trim(),
+      search: value,
     });
   };
 
@@ -458,29 +544,135 @@ const Followup = () => {
               </form>
             </div>
 
-            {/* Filter */}
-            <div className="table-filter">
+            {filterOpen && (
+              <div className={styles.filterPanel} id="filterPanel">
+                <div className={styles.filterGrid}>
+                  <div className={styles.filterGroup}>
+                    <h6>Follow Up Date :</h6>
+                    <div className={styles.dateRange}>
+                      <div className={styles.dateInput}>
+                        <input
+                          type="date"
+                          aria-label="Follow up from date"
+                          value={dateFrom}
+                          onChange={(event) => setDateFrom(event.target.value)}
+                          className={dateFrom ? "" : styles.dateEmpty}
+                        />
+                        {!dateFrom && (
+                          <span className={styles.datePlaceholder}>
+                            dd-mm-yyyy
+                          </span>
+                        )}
+                        <LuCalendarDays size={16} aria-hidden="true" />
+                      </div>
+                      <div className={styles.dateInput}>
+                        <input
+                          type="date"
+                          aria-label="Follow up to date"
+                          value={dateTo}
+                          onChange={(event) => setDateTo(event.target.value)}
+                          className={dateTo ? "" : styles.dateEmpty}
+                        />
+                        {!dateTo && (
+                          <span className={styles.datePlaceholder}>
+                            dd-mm-yyyy
+                          </span>
+                        )}
+                        <LuCalendarDays size={16} aria-hidden="true" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.filterGroup}>
+                    <h6>Status :</h6>
+                    <div className={styles.filterOptions}>
+                      <select
+                        aria-label="Status"
+                        value={statusFilter}
+                        onChange={(event) =>
+                          setStatusFilter(event.target.value)
+                        }
+                      >
+                        <option value="">Select</option>
+                        {statusOptions?.map((option) => (
+                          <option key={option?.value} value={option?.value}>
+                            {option?.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className={styles.filterGroup}>
+                    <h6>Employee :</h6>
+                    <div className={styles.filterOptions}>
+                      <select
+                        aria-label="Employee"
+                        value={employeeFilter}
+                        onChange={(event) =>
+                          setEmployeeFilter(event.target.value)
+                        }
+                      >
+                        <option value="">Select</option>
+                        {employeeOptions?.map((option) => (
+                          <option key={option?.value} value={option?.value}>
+                            {option?.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className={`table-filter ${styles.filterBar}`}>
               <div className="border-line"></div>
 
-              <button className="filter-btn" id="toggleFilter" type="button">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="9"
-                  viewBox="0 0 12 9"
-                  fill="none"
+              {filterOpen ? (
+                <>
+                  <button
+                    className="filter-btn"
+                    type="button"
+                    onClick={() => setFilterOpen(false)}
+                  >
+                    <LuX size={14} aria-hidden="true" />
+                    <span>Close</span>
+                  </button>
+                  <button
+                    className="filter-btn"
+                    type="button"
+                    onClick={resetFilters}
+                  >
+                    <LuRotateCcw size={14} aria-hidden="true" />
+                    <span>Reset</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="filter-btn"
+                  id="toggleFilter"
+                  type="button"
+                  onClick={() => setFilterOpen(true)}
                 >
-                  <path
-                    d="M0.75 0.75H10.75M2.75 4.25H8.75M4.25 7.75H7.25"
-                    stroke="white"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-
-                <span>Filters</span>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="9"
+                    viewBox="0 0 12 9"
+                    fill="none"
+                  >
+                    <path
+                      d="M0.75 0.75H10.75M2.75 4.25H8.75M4.25 7.75H7.25"
+                      stroke="white"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>Filters</span>
+                </button>
+              )}
             </div>
 
             {/* Table */}
@@ -616,9 +808,11 @@ const Followup = () => {
 
             <Pagination
               page={currentPage}
-              totalPages={lastPage}
+              total={total}
+              perPage={perPage}
+              lastPage={lastPage}
               onChange={handlePageChange}
-              disabled={isFetching}
+              disabled={isLoading || isFetching}
             />
           </div>
         </section>

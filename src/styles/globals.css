@@ -796,6 +796,7 @@ table {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px 20px;
   align-items: start;
+  padding: 0 0 20px;
 }
 
 #filterPanel .date-range {
