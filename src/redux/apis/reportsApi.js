@@ -10,7 +10,7 @@ const reportsApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["reports"],
     }),
-    report: builder.query({
+    reportDetail: builder.query({
       query: (report) => ({
         url: `/reports/${report}`,
         method: "GET",
@@ -20,4 +20,4 @@ const reportsApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useReportsQuery, useReportQuery } = reportsApi;
+export const { useReportsQuery, useReportDetailQuery } = reportsApi;

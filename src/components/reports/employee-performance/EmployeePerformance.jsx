@@ -31,7 +31,7 @@ const EmployeePerformance = ({ employees = [] }) => {
   return (
     <section className="common-table-section pt-3">
       <div className="common-table-card rpt-card">
-        <div className="common-table-header">
+        <div className={`common-table-header ${styles.header}`}>
           <div>
             <h3>Employee Performance</h3>
             <p className="rpt-sub">
@@ -40,7 +40,7 @@ const EmployeePerformance = ({ employees = [] }) => {
           </div>
 
           <form
-            className="search-box rpt-search"
+            className={styles.searchWrap}
             onSubmit={(event) => event.preventDefault()}
           >
             <input
@@ -49,9 +49,10 @@ const EmployeePerformance = ({ employees = [] }) => {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search Employee"
+              className={styles.searchInput}
             />
-            <button type="submit" aria-label="Search">
-              <FiSearch size={24} aria-hidden="true" />
+            <button type="submit" className={styles.searchButton} aria-label="Search">
+              <FiSearch size={16} aria-hidden="true" />
             </button>
           </form>
         </div>
