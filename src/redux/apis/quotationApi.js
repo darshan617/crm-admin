@@ -126,12 +126,20 @@ const quotationApi = apiSlice.injectEndpoints({
       invalidatesTags: ["quotation"],
     }),
     requestDiscount: builder.mutation({
-      query: ({ quotation_id, discount }) => ({
+      query: ({ quotation_id, employee, requested_discount, remark }) => ({
         url: `/quotations/${quotation_id}/discount-request`,
         method: "POST",
-        body: { discount },
+        body: { employee, requested_discount, remark },
       }),
       invalidatesTags: ["quotation"],
+    }),
+
+    requestDiscountEmployee: builder.query({
+      query: ({ quotation_id }) => ({
+        url: `/quotations/${quotation_id}/discount-request`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
     }),
   }),
 });
@@ -154,4 +162,5 @@ export const {
   useLazyDownloadInvoiceQuery,
   useSendInvoiceMutation,
   useRequestDiscountMutation,
+  useRequestDiscountEmployeeQuery,
 } = quotationApi;
