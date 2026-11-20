@@ -1,21 +1,60 @@
 import React, { useRef, useState } from "react";
 import Link from "next/link";
 import styles from "@/components/dashboard/upload-leads/UploadLeads.module.css";
-import { LuFileDown } from "react-icons/lu";
+import { LuCloudUpload, LuFileDown } from "react-icons/lu";
 import { RxCross2 } from "react-icons/rx";
 import { useUploadLeadsMutation } from "@/redux/apis/leadsApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { BsDownload } from "react-icons/bs";
+
+const STEPS = [
+  { id: "upload", label: "Upload" },
+  { id: "match", label: "Match" },
+  { id: "import", label: "Import" },
+];
+
+const ACCEPTED_EXTENSIONS = [".csv", ".xls", ".xlsx"];
+
+const isAcceptedFile = (selectedFile) => {
+  const name = selectedFile?.name?.toLowerCase() || "";
+  return ACCEPTED_EXTENSIONS.some((extension) => name.endsWith(extension));
+};
 
 const UploaadLeads = () => {
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [uploadLeads, { isLoading }] = useUploadLeadsMutation();
   const { showToast } = useToast();
 
+  const selectFile = (selectedFile) => {
+    if (!selectedFile) return;
+    if (!isAcceptedFile(selectedFile)) {
+      showToast("Please choose a .csv, .xls, or .xlsx file.", "warning");
+      return;
+    }
+    setFile(selectedFile);
+  };
+
   const handleFileChange = (event) => {
-    const selectedFile = event.target.files?.[0];
-    if (selectedFile) setFile(selectedFile);
+    selectFile(event.target.files?.[0]);
     event.target.value = "";
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+    selectFile(event.dataTransfer.files?.[0]);
   };
 
   const handleUpload = async (event) => {
@@ -51,16 +90,24 @@ const UploaadLeads = () => {
   };
 
   return (
-    <div className="content">
+    <div
+      className="content"
+      style={{
+        maxWidth: "900px",
+        justifyContent: "space-between",
+        margin: "auto",
+      }}
+    >
       <div className="page-header">
         <div>
           <div className="breadcrumb welcome-text">
             <p>
               <Link href="/dashboard">Dashboard</Link> <span>/</span>
-              <Link href="/leads">Leads</Link>
+              <Link href="/leads">Leads</Link> <span>/</span>
+              <span>Upload</span>
             </p>
           </div>
-          <h2>Upload Lead</h2>
+          <h2>Upload Leads</h2>
         </div>
         <div className="d-flex gap-2 align-items-center">
           <Link
@@ -68,8 +115,8 @@ const UploaadLeads = () => {
             download="leads_sample.csv"
             className={styles.downloadSampleBtn}
           >
-            <LuFileDown size={20} />
-            <span>Download Sample File</span>
+            <BsDownload size={18} />
+            <span>Sample CSV</span>
           </Link>
           <div className="back">
             <Link href="/leads" className="back-btn">
@@ -93,19 +140,37 @@ const UploaadLeads = () => {
         </div>
       </div>
       <section className={styles.uploadLeadPage}>
+        <div className={styles.stepper} aria-label="Lead import progress">
+          {STEPS.map((step, index) => (
+            <div
+              key={step.id}
+              className={`${styles.step} ${index === 0 ? styles.stepActive : ""}`}
+              aria-current={index === 0 ? "step" : undefined}
+            >
+              <span className={styles.stepNumber}>{index + 1}</span>
+              <span>{step.label}</span>
+            </div>
+          ))}
+        </div>
         <form className={styles.uploadLeadCard} onSubmit={handleUpload}>
-          <h3>UPLOAD CUSTOMER LEADS</h3>
+          <h3>Upload leads</h3>
+          <p className={styles.uploadLeadHint}>
+            Upload CSV/Excel, then match columns like Phone → Mobile
+          </p>
           <button
-            className={styles.uploadLeadBox}
+            className={`${styles.uploadLeadBox} ${isDragging ? styles.uploadLeadBoxActive : ""}`}
             type="button"
             onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
             aria-label="Select a CSV, XLS, or XLSX leads file"
           >
             <div className={styles.uploadLeadIcon}>
-              <LuFileDown size={30} />
+              <LuCloudUpload size={28} />
             </div>
-            <div className={styles.uploadLeadText}>Click to Upload</div>
-            <div className={styles.uploadLeadFormat}>(.csv, .xls or .xlsx)</div>
+            <div className={styles.uploadLeadText}>Click or drag file here</div>
+            <div className={styles.uploadLeadFormat}>.csv, .xls, .xlsx</div>
           </button>
           <input
             ref={fileInputRef}
@@ -139,7 +204,7 @@ const UploaadLeads = () => {
               className={styles.submitBtn}
               disabled={isLoading}
             >
-              {isLoading ? "Uploading..." : "Submit"}
+              {isLoading ? "Uploading..." : "Next"}
             </button>
           </div>
         </form>
