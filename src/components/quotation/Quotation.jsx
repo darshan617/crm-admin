@@ -711,14 +711,21 @@ const Quotation = () => {
                         </div>
                       </div>
                     )}
-                    {view.activeTab !== "discount" &&
+                    {activeTab !== "discount" &&
                       !approved &&
                       canRequestDiscount && (
                         <button
                           type="button"
                           className={styles.discountBtn}
+                          disabled={Boolean(quotation.discount_sent)}
+                          title={
+                            quotation.discount_sent
+                              ? "Discount request already sent"
+                              : undefined
+                          }
                           onClick={(event) => {
                             event.stopPropagation();
+                            if (quotation.discount_sent) return;
                             updateView({
                               activeQuotationId: null,
                               discountQuotationId: quotation.id,
