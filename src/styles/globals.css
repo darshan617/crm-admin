@@ -1276,8 +1276,8 @@ table {
     gap: 8px;
   }
 
-  .crm-quo-list tbody tr.table-row:not .crm-quo-row:not .es-quo-row,
-  .crm-quo-list tbody tr.table-row:not.crm-quo-row:not.es-quo-row td {
+  .crm-quo-list tbody tr.table-row:not(.crm-quo-row):not(.es-quo-row),
+  .crm-quo-list tbody tr.table-row:not(.crm-quo-row):not(.es-quo-row) td {
     display: block;
     width: 100%;
   }

@@ -67,6 +67,117 @@ const formatDate = (value) => {
   }).format(date);
 };
 
+const formatActivityTime = (value) => {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const diffInSeconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  if (diffInSeconds < 60) return "Just now";
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes === 1 ? "" : "s"} ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours === 1 ? "" : "s"} ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) {
+    return `${diffInDays} day${diffInDays === 1 ? "" : "s"} ago`;
+  }
+
+  const diffInMonths = Math.floor(diffInDays / 30);
+  if (diffInMonths < 12) {
+    return `${diffInMonths} month${diffInMonths === 1 ? "" : "s"} ago`;
+  }
+
+  const diffInYears = Math.floor(diffInMonths / 12);
+  return `${diffInYears} year${diffInYears === 1 ? "" : "s"} ago`;
+};
+
+const activityText = (value) =>
+  typeof value === "string" ? value.trim() : "";
+
+const activityTitle = (activity) => {
+  const display = activityText(activity?.display);
+  const title = activityText(activity?.title);
+  const text = activityText(activity?.text);
+  const highlight = activityText(activity?.highlight);
+  let primary =
+    display ||
+    text ||
+    title ||
+    String(activity?.type || "")
+      .replace(/[_-]+/g, " ")
+      .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  if (highlight && primary.endsWith(highlight)) {
+    primary = primary.slice(0, -highlight.length).replace(/[\s,]+$/, "");
+  }
+
+  return primary || "Activity";
+};
+
+const getActivityDetail = (activity) => {
+  const highlight = activityText(activity?.highlight);
+  if (highlight) return highlight;
+  if (typeof activity?.detail === "string") return activity.detail;
+  if (typeof activity?.description === "string") return activity.description;
+  if (typeof activity?.details === "string") return activity.details;
+
+  if (activity?.details && typeof activity.details === "object") {
+    const values = Object.values(activity.details).filter(
+      (value) => value !== null && value !== undefined && value !== "",
+    );
+    return values.join(", ");
+  }
+
+  return "";
+};
+
+const getActivityTime = (activity) => {
+  const timeAgo = activityText(activity?.time_ago);
+  if (timeAgo) return timeAgo;
+  return formatActivityTime(activity?.at || activity?.created_at);
+};
+
+const ActivityIcon = ({ icon, type }) => {
+  const iconName = String(icon || type || "").toLowerCase();
+
+  if (iconName.includes("phone") || iconName.includes("follow")) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.08 3h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L9 10.94a16 16 0 0 0 6.06 6.06l1.31-1.31a2 2 0 0 1 2.11-.45c.9.33 1.84.56 2.8.69A2 2 0 0 1 22 16.92z"></path>
+      </svg>
+    );
+  }
+
+  if (
+    iconName.includes("user") ||
+    iconName.includes("contact") ||
+    iconName.includes("created")
+  ) {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M19 8v6M16 11h6"></path>
+      </svg>
+    );
+  }
+
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5"></path>
+    </svg>
+  );
+};
+
 const formatDateTimeInput = (value) => {
   if (!value) return "";
 
@@ -324,6 +435,12 @@ export default function LeadDetail() {
   const canCreateQuotation = canAdd("create_quotations");
   const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
   const services = Array.isArray(leadData.services) ? leadData.services : [];
+  const responseData = getLeadDeatils?.data || {};
+  const recentActivities = [
+    leadData.recent_activities,
+    responseData.recent_activities,
+    getLeadDeatils?.recent_activities,
+  ].find((items) => Array.isArray(items)) || [];
 
   const currentServices = services.filter(
     (service) =>
@@ -1432,193 +1549,53 @@ export default function LeadDetail() {
             <div className={styles.activityColumn} style={{ width: "100%" }}>
               <div className={styles.commonTableHeader}>
                 <h3>Recent Activities</h3>
-                <a href="#" className={styles.viewAll}>
-                  View All
-                </a>
+                {recentActivities.length > 0 && (
+                  <span className={styles.viewAll}>View All</span>
+                )}
               </div>
 
               <div className={styles.activityCard}>
-                <div className={styles.activityItem}>
-                  <div className={`${styles.activityIcon}  ${styles.teal}`}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="check"
-                      aria-hidden="true"
-                      className="lucide lucide-check"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                  </div>
+                {recentActivities.length > 0 ? (
+                  recentActivities.map((activity, index) => {
+                    const tone = String(
+                      activity?.tone || activity?.icon_meta?.tone || "",
+                    ).toLowerCase();
+                    const toneClass =
+                      tone === "blue"
+                        ? styles.blue
+                        : tone === "purple"
+                          ? styles.purple
+                          : styles.teal;
+                    const detail = getActivityDetail(activity);
+                    const title = activityTitle(activity);
+                    const time = getActivityTime(activity);
 
+                    return (
+                      <div
+                        className={styles.activityItem}
+                        key={`${activity?.type || "activity"}-${activity?.at || activity?.created_at || index}`}
+                      >
+                        <div className={`${styles.activityIcon} ${toneClass}`}>
+                          <ActivityIcon
+                            icon={activity?.icon || activity?.icon_meta?.name}
+                            type={activity?.type}
+                          />
+                        </div>
+                        <div className={styles.activityContent}>
+                          <p>
+                            {title}
+                            {detail && <span>{detail}</span>}
+                          </p>
+                          {time && <small>{time}</small>}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
                   <div className={styles.activityContent}>
-                    <p>
-                      Service added
-                      <span>Google Workspace Business Standard</span>
-                    </p>
-                    <small>27 minutes ago</small>
+                    <p>No recent activities</p>
                   </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={`${styles.activityIcon} ${styles.teal}  `}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="check"
-                      aria-hidden="true"
-                      className="lucide lucide-check"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                  </div>
-
-                  <div className={styles.activityContent}>
-                    <p>
-                      Service added
-                      <span>Google Workspace Business Standard</span>
-                    </p>
-                    <small>27 minutes ago</small>
-                  </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={`${styles.activityIcon}  ${styles.blue} `}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="phone-call"
-                      aria-hidden="true"
-                      className="lucide lucide-phone-call"
-                    >
-                      <path d="M13 2a9 9 0 0 1 9 9"></path>
-                      <path d="M13 6a5 5 0 0 1 5 5"></path>
-                      <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"></path>
-                    </svg>
-                  </div>
-
-                  <div className={styles.activityContent}>
-                    <p>
-                      Follow-up set for 06 Oct 2026, 12
-                      <span>00 AM</span>
-                    </p>
-                    <small>27 minutes ago</small>
-                  </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={`${styles.activityIcon}  ${styles.purple} `}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="user-round-plus"
-                      aria-hidden="true"
-                      className="lucide lucide-user-round-plus"
-                    >
-                      <path d="M2 21a8 8 0 0 1 13.292-6"></path>
-                      <circle cx="10" cy="8" r="5"></circle>
-                      <path d="M19 16v6"></path>
-                      <path d="M22 19h-6"></path>
-                    </svg>
-                  </div>
-
-                  <div className={styles.activityContent}>
-                    <p>
-                      Lead created from
-                      <span>Website</span>
-                    </p>
-                    <small>1 day ago</small>
-                  </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={`${styles.activityIcon} ${styles.purple}`}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="user-round-plus"
-                      aria-hidden="true"
-                      className="lucide lucide-user-round-plus"
-                    >
-                      <path d="M2 21a8 8 0 0 1 13.292-6"></path>
-                      <circle cx="10" cy="8" r="5"></circle>
-                      <path d="M19 16v6"></path>
-                      <path d="M22 19h-6"></path>
-                    </svg>
-                  </div>
-
-                  <div className={styles.activityContent}>
-                    <p>
-                      Contact added
-                      <span>Janvi Singh</span>
-                    </p>
-                    <small>1 day ago</small>
-                  </div>
-                </div>
-
-                <div className={styles.activityItem}>
-                  <div className={`${styles.activityIcon} ${styles.teal}`}>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      data-lucide="check"
-                      aria-hidden="true"
-                      className="lucide lucide-check"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                  </div>
-
-                  <div className={styles.activityContent}>
-                    <p>
-                      Service added
-                      <span>Microsoft 365 Apps for business</span>
-                    </p>
-                    <small>1 day ago</small>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </aside>

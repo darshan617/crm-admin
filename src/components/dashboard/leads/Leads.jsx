@@ -11,6 +11,27 @@ import {
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 
+const ALLOWED_DOCUMENT_EXTENSIONS = ["pdf", "doc", "docx", "jpg", "jpeg", "png"];
+const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+
+const fieldErrorMessage = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean).join(" ");
+  if (value == null || value === "") return "";
+  return String(value);
+};
+
+const mapApiFieldErrors = (errors) => {
+  if (!errors || typeof errors !== "object") return {};
+
+  return Object.entries(errors).reduce((mapped, [key, value]) => {
+    const message = fieldErrorMessage(value);
+    if (!message) return mapped;
+
+    mapped[key.split(".").pop()] = message;
+    return mapped;
+  }, {});
+};
+
 const Leads = () => {
   const { showToast } = useToast();
   const router = useRouter();
@@ -175,13 +196,39 @@ const Leads = () => {
 
   const handleDocumentSelect = (event) => {
     const selectedFiles = Array.from(event.target.files ?? []);
+    event.target.value = "";
     if (selectedFiles.length === 0) return;
+
+    const accepted = [];
+    let rejectedMessage = "";
+
+    selectedFiles.forEach((file) => {
+      const extension = file.name.split(".").pop()?.toLowerCase();
+      const typeAllowed = ALLOWED_DOCUMENT_EXTENSIONS.includes(extension);
+
+      if (!typeAllowed) {
+        rejectedMessage = `${file.name} is not allowed. Use PDF, Word, JPG, or PNG.`;
+        return;
+      }
+
+      if (file.size > MAX_DOCUMENT_SIZE) {
+        rejectedMessage = `${file.name} is larger than 10 MB.`;
+        return;
+      }
+
+      accepted.push(file);
+    });
+
+    if (rejectedMessage) {
+      showToast(rejectedMessage, "error");
+    }
+
+    if (accepted.length === 0) return;
 
     setFormData((prev) => ({
       ...prev,
-      documents: [...prev.documents, ...selectedFiles],
+      documents: [...prev.documents, ...accepted],
     }));
-    event.target.value = "";
   };
 
   const handleDocumentRemove = (index) => {
@@ -286,7 +333,24 @@ const Leads = () => {
       const res = await createLead({
         body: formBody,
       });
-      console.log(res);
+      const errorBody = res?.error?.data;
+
+      if (res?.error || errorBody?.errors || res?.data?.success === false) {
+        const body = errorBody || res?.data || {};
+        const fieldErrors = mapApiFieldErrors(body.errors);
+
+        if (Object.keys(fieldErrors).length) {
+          setError(fieldErrors);
+          const firstField = Object.keys(fieldErrors)[0];
+          document
+            .querySelector(`[name="${firstField}"]`)
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        showToast(body.message || "Unable to create lead.", "error");
+        return;
+      }
+
       if (res?.data?.success) {
         showToast(res?.data?.message, "success");
         router?.push("/leads");
@@ -425,7 +489,9 @@ const Leads = () => {
             <div className={styles.formGrid}>
               {/* Name */}
               <div className="form-group">
-                <label>Name</label>
+                <label>
+                  Name <span>*</span>
+                </label>
                 <div className={styles.nameInputGroup}>
                   <select
                     aria-label="Title"
@@ -488,7 +554,9 @@ const Leads = () => {
 
               {/* Email */}
               <div className="form-group">
-                <label>Email</label>
+                <label>
+                  Email <span>*</span>
+                </label>
                 <input
                   type="email"
                   value={formData?.customer_detail?.email}
@@ -502,23 +570,28 @@ const Leads = () => {
 
               {/* Mobile */}
               <div className="form-group">
-                <label>Mobile No.</label>
+                <label>
+                  Mobile No. <span>*</span>
+                </label>
                 <div className="phone-group">
                   <select
-                    value={formData?.customer_detail?.mobile_code}
+                    value="91"
                     name="mobile_code"
-                    onChange={(e) => handleFormChange(e, "customer_detail")}
+                    aria-label="Country code"
+                    disabled
                   >
-                    <option>91</option>
-                    <option>1</option>
-                    <option>44</option>
-                    <option>971</option>
+                    <option value="91">91</option>
                   </select>
                   <input
                     type="tel"
+                    inputMode="numeric"
                     value={formData?.customer_detail?.mobile}
                     name="mobile"
-                    onChange={(e) => handleFormChange(e, "customer_detail")}
+                    onChange={(e) => {
+                      e.target.value = e.target.value.replace(/\D/g, "");
+                      handleFormChange(e, "customer_detail");
+                    }}
+                    maxLength={10}
                   />
                 </div>
                 {error?.mobile && (
@@ -1211,10 +1284,10 @@ const Leads = () => {
 
               {/* Follow Up Date */}
               <div className="form-group">
-                <label>Follow Up Date</label>
+                <label>Follow Up Date &amp; Time</label>
                 <div className="date-input">
                   <input
-                    type="date"
+                    type="datetime-local"
                     name="follow_up_date"
                     value={formData.follow_up_detail.follow_up_date}
                     onChange={(e) => handleFormChange(e, "follow_up_detail")}
@@ -1278,7 +1351,9 @@ const Leads = () => {
 
               {/* Lead Status */}
               <div className={`${styles.formGroup} form-group`}>
-                <label>Lead Status</label>
+                <label>
+                  Lead Status <span>*</span>
+                </label>
                 <div className={styles.selectWrap}>
                   <select
                     name="lead_status"
@@ -1347,6 +1422,7 @@ const Leads = () => {
                 ref={documentInputRef}
                 type="file"
                 multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"
                 className={styles.hiddenFileInput}
                 onChange={handleDocumentSelect}
               />
@@ -1359,6 +1435,9 @@ const Leads = () => {
                   <LuFileDown size={24} />
                 </div>
                 <p>Click to Upload</p>
+                <span className={styles.uploadFormats}>
+                  PDF, Word, JPG, and PNG. Max size 10 MB.
+                </span>
               </button>
 
               {formData?.documents?.length > 0 && (
