@@ -41,15 +41,28 @@ const DISCOUNT_TABS = [
   ["all", "All Requests"],
 ];
 
-const STATUS_OPTIONS = [
-  "pending",
-  "approved",
-  "rejected",
-  "expired",
-  "accepted",
-];
-
 const DEFAULT_PER_PAGE = 10;
+
+const toFilterOptions = (items) =>
+  (Array.isArray(items) ? items : [])
+    .map((item) => {
+      if (item == null) return null;
+
+      if (typeof item === "string" || typeof item === "number") {
+        const value = String(item);
+        return value ? { value, label: value } : null;
+      }
+
+      const value = item.value ?? item.id ?? "";
+      const label = item.label ?? item.name ?? value;
+
+      if (value === "" || value == null || label == null || label === "") {
+        return null;
+      }
+
+      return { value: String(value), label: String(label) };
+    })
+    .filter(Boolean);
 
 const formatStatusLabel = (value) =>
   String(value || "")
@@ -325,6 +338,30 @@ const Quotation = () => {
     approved: listTotal(approvedCountResponse),
     all: listTotal(allCountResponse),
   };
+
+  const responseFilters =
+    quotationResponse?.data?.filters || quotationResponse?.filters;
+  const [savedFilters, setSavedFilters] = useState({
+    dateTypes: [],
+    statusesByTab: {},
+  });
+
+  useEffect(() => {
+    if (!responseFilters) return;
+
+    const dateTypes = toFilterOptions(responseFilters.date_types);
+    const statuses = toFilterOptions(responseFilters.statuses);
+
+    setSavedFilters((current) => ({
+      dateTypes: dateTypes.length ? dateTypes : current.dateTypes,
+      statusesByTab: statuses.length
+        ? { ...current.statusesByTab, [activeTab]: statuses }
+        : current.statusesByTab,
+    }));
+  }, [responseFilters, activeTab]);
+
+  const dateTypeOptions = savedFilters.dateTypes;
+  const statusOptions = savedFilters.statusesByTab[activeTab] || [];
 
   const quotations = Array.isArray(quotationResponse?.data?.quotations)
     ? quotationResponse.data.quotations
@@ -802,9 +839,11 @@ const Quotation = () => {
                     }}
                   >
                     <option value="">Select</option>
-                    <option value="created_at">Created Date</option>
-                    <option value="sent">Shared Date</option>
-                    <option value="follow_up">Follow Up Date</option>
+                    {dateTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -867,9 +906,9 @@ const Quotation = () => {
                     }}
                   >
                     <option value="">Select</option>
-                    {STATUS_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                    {statusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
                       </option>
                     ))}
                   </select>

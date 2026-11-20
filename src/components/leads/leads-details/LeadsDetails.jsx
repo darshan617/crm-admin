@@ -1521,7 +1521,7 @@ export default function LeadDetail() {
                   <div className={styles.activityContent}>
                     <p>
                       Follow-up set for 06 Oct 2026, 12
-                      <span>00 AM</span>
+                      <spimage.pngan>00 AM</spimage.pngan>
                     </p>
                     <small>27 minutes ago</small>
                   </div>
@@ -1531,7 +1531,7 @@ export default function LeadDetail() {
                   <div className={`${styles.activityIcon}  ${styles.purple} `}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="24"
+                      width="24 "
                       height="24"
                       viewBox="0 0 24 24"
                       fill="none"
