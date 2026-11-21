@@ -133,6 +133,34 @@ const quotationApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["quotation"],
     }),
+    decideDiscountRequest: builder.mutation({
+      query: ({ id, action }) => ({
+        url: `/quotations/${id}/discount-request/respond`,
+        method: "POST",
+        body: { action },
+      }),
+      invalidatesTags: ["quotation"],
+    }),
+    getDiscountRequests: builder.query({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value == null || value === "") return;
+          searchParams.set(key, String(value));
+        });
+
+        const query = searchParams.toString();
+
+        return {
+          url: query
+            ? `/quotations/discount-requests?${query}`
+            : `/quotations/discount-requests`,
+          method: "GET",
+        };
+      },
+      providesTags: ["quotation"],
+    }),
 
     requestDiscountEmployee: builder.query({
       query: ({ quotation_id }) => ({
@@ -162,5 +190,7 @@ export const {
   useLazyDownloadInvoiceQuery,
   useSendInvoiceMutation,
   useRequestDiscountMutation,
+  useGetDiscountRequestsQuery,
+  useDecideDiscountRequestMutation,
   useRequestDiscountEmployeeQuery,
 } = quotationApi;
