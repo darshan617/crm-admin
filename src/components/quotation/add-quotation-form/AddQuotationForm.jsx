@@ -14,6 +14,7 @@ import { BiX } from "react-icons/bi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import { useRouter } from "next/router";
+import { useEmailSuggestionsQuery } from "@/redux/apis/quotationApi";
 
 const countryCodes = [
   ["91", "India"],
@@ -39,6 +40,8 @@ export default function Page() {
   const { canAdd } = usePermissions();
   const canCreateQuotation =
     canAdd("quotations") || canAdd("create_quotations");
+  const [debouncedEmail, setDebouncedEmail] = useState("");
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [formData, setFormData] = useState({
     lead: "",
     company_name: "",
@@ -82,6 +85,68 @@ export default function Page() {
     { skip: !canCreateQuotation || formData?.lead === "" },
   );
   console.log(getLeadDeatils, "getLeadDeatils");
+
+  // Debounce the typed email so we don't hit the API on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(
+      () => setDebouncedEmail(formData.email?.trim() || ""),
+      300,
+    );
+    return () => clearTimeout(timer);
+  }, [formData.email]);
+
+  // GET /quotations/email-suggestions?q=<typed text>
+  const { data: emailSuggestionData } = useEmailSuggestionsQuery(
+    { q: debouncedEmail },
+    { skip: !canCreateQuotation || debouncedEmail.length < 2 },
+  );
+
+  // Normalise the response (array of strings or objects) into { email, label }
+  const emailSuggestions = (() => {
+    const raw = emailSuggestionData?.data;
+    const list = Array.isArray(raw)
+      ? raw
+      : (raw?.emails ?? raw?.suggestions ?? []);
+    return list
+      .map((item) =>
+        typeof item === "string"
+          ? { email: item, label: "" }
+          : {
+              ...item,
+              email: item?.email ?? item?.value ?? "",
+              label: item?.name ?? "",
+            },
+      )
+      .filter(
+        (item) =>
+          item.email &&
+          item.email.toLowerCase() !== formData.email?.trim().toLowerCase(),
+      );
+  })();
+
+  // Fill the form from the selected suggestion (API data only, no extra call)
+  const applyEmailSuggestion = (item) => {
+    setFormData((current) => ({
+      ...current,
+      email: item.email || current.email,
+      company_name: item.company_name || current.company_name,
+      gstin: item.gstin || current.gstin,
+      salutation: item.salutation || current.salutation,
+      name: item.name || current.name,
+      mobile_code: item.mobile_code || current.mobile_code,
+      mobile: item.mobile || current.mobile,
+    }));
+    setError((current) => ({
+      ...current,
+      email: null,
+      company_name: null,
+      gstin: null,
+      salutation: null,
+      name: null,
+      mobile: null,
+    }));
+    setShowEmailSuggestions(false);
+  };
 
   const setField = (name, value) => {
     setFormData((current) => ({ ...current, [name]: value }));
@@ -401,7 +466,10 @@ export default function Page() {
               <label>
                 Email <span>*</span>
               </label>
-              <div className={styles.locSelect}>
+              <div
+                className={styles.locSelect}
+                style={{ position: "relative" }}
+              >
                 <input
                   type="email"
                   name="email"
@@ -411,8 +479,54 @@ export default function Page() {
                   required
                   autoComplete="off"
                   placeholder="Type email"
-                  onChange={(e) => setField("email", e.target.value)}
+                  onChange={(e) => {
+                    setField("email", e.target.value);
+                    setShowEmailSuggestions(true);
+                  }}
+                  onFocus={() => setShowEmailSuggestions(true)}
+                  onBlur={() => setShowEmailSuggestions(false)}
                 />
+                {showEmailSuggestions && emailSuggestions.length > 0 && (
+                  <ul
+                    role="listbox"
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      zIndex: 20,
+                      margin: 0,
+                      padding: 0,
+                      listStyle: "none",
+                      maxHeight: 220,
+                      overflowY: "auto",
+                      background: "#fff",
+                      border: "1px solid #d9d9d9",
+                      borderRadius: 6,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                    }}
+                  >
+                    {emailSuggestions.map((item) => (
+                      <li
+                        key={item.email}
+                        role="option"
+                        style={{ padding: "8px 12px", cursor: "pointer" }}
+                        // mouseDown fires before the input's blur closes the list
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          applyEmailSuggestion(item);
+                        }}
+                      >
+                        {item.email}
+                        {item.label && (
+                          <span style={{ color: "#888", marginLeft: 8 }}>
+                            {item.label}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
               {error?.email && (
                 <p className={styles.errorMessage}>{error.email}</p>
