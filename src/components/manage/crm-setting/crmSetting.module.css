@@ -566,6 +566,234 @@
   box-shadow: none;
 }
 
+/* ---------- company profile PDF ---------- */
+.profileCard {
+  background: #fff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 28px 32px 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  box-sizing: border-box;
+  max-width: 640px;
+}
+
+.profileHint {
+  margin: 0 0 18px;
+  color: #9aa3b2;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.profileEmpty {
+  width: 100%;
+  min-height: 88px;
+  margin-bottom: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #94a3b8;
+  font-size: 13.5px;
+  text-align: center;
+}
+
+.profileEmpty button {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profileCurrent {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f3f8fd;
+  border: 1px solid #d7e6f5;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.profileCurrentIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #0068c9;
+  border: 1px solid #d7e6f5;
+  flex-shrink: 0;
+}
+
+.profileCurrentMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.profileCurrentMeta strong {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileCurrentMeta span {
+  color: #9aa3b2;
+  font-size: 12.5px;
+}
+
+.profileViewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #d7e6f5;
+  color: #0068c9;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.profileDropzone {
+  position: relative;
+  width: 100%;
+  min-height: 148px;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f3f8fd;
+  border: 1px solid #d7e6f5;
+  border-radius: 8px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.profileDropzoneActive {
+  background: #e8f2fc;
+  border-color: #2563eb;
+}
+
+.profileDropIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0068c9;
+  margin-bottom: 3px;
+}
+
+.profileDropText {
+  color: #374151;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.profileDropFormat {
+  margin-top: 2px;
+  color: #9aa3b2;
+  font-size: 14px;
+}
+
+.profileSelected {
+  width: 100%;
+  margin-top: 13px;
+}
+
+.profileSelectedTitle {
+  margin-bottom: 5px;
+  color: #252b34;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profileSelectedRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid #e1e4e9;
+  border-radius: 5px;
+  box-sizing: border-box;
+  color: #555b65;
+  font-size: 14px;
+}
+
+.profileSelectedRow span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileRemoveBtn {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #e5e8eb;
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.profileActions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.profileSaveBtn {
+  background: #0056b3;
+  color: #fff;
+  border: none;
+  min-width: 220px;
+  padding: 11px 28px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+}
+
+.profileSaveBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 @media (min-width: 1600px) {
   .shell {
     grid-template-columns: 250px minmax(0, 1fr);
@@ -886,6 +1114,21 @@
     width: calc(100vw - 32px);
     max-width: 420px;
     padding: 18px;
+  }
+
+  .profileCard {
+    padding: 20px 16px 18px;
+    border-radius: 10px;
+    max-width: none;
+  }
+
+  .profileCurrent {
+    flex-wrap: wrap;
+  }
+
+  .profileSaveBtn {
+    width: 100%;
+    min-width: 0;
   }
 }
 

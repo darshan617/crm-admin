@@ -81,6 +81,21 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["leads"],
     }),
+    previewLeadsUpload: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/uploads/preview",
+        method: "POST",
+        body,
+      }),
+    }),
+    confirmLeadsUpload: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/uploads/confirm",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
     checkLeadDomain: builder.query({
       query: ({ domain }) => ({
         url: `/leads/check-domain?domain=${domain}`,
@@ -159,6 +174,8 @@ export const {
   useContactandServicePlanDeleteMutation,
   useLeadDocumentDeleteMutation,
   useUploadLeadsMutation,
+  usePreviewLeadsUploadMutation,
+  useConfirmLeadsUploadMutation,
   useCheckLeadDomainQuery,
   useCheckGstMutation,
   useGetCountryStateCityQuery,

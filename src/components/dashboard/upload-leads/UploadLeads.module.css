@@ -63,6 +63,15 @@
   color: #ffffff;
 }
 
+.stepDone {
+  color: #64748b;
+}
+
+.stepDone .stepNumber {
+  background: #bae6fd;
+  color: #0369a1;
+}
+
 .uploadLeadCard h3 {
   margin: 0;
   text-align: center;
@@ -193,6 +202,11 @@
   margin: 0 auto;
   cursor: pointer;
   transition: 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
 .submitBtn:disabled {
@@ -228,8 +242,158 @@
   text-decoration: none;
 }
 
+.matchCard {
+  width: min(760px, 100%);
+}
+
+.matchField label {
+  margin-bottom: 6px;
+  color: #374151;
+  font-size: var(--font-size-14px);
+  font-weight: 500;
+}
+
+.requiredGrid {
+  margin-top: 8px;
+  gap: 16px 20px;
+}
+
+.moreFieldsTitle {
+  margin: 22px 0 14px;
+  color: #0284c7;
+  font-size: var(--font-size-15px);
+  font-weight: 600;
+}
+
+.optionalGrid {
+  gap: 16px 24px;
+}
+
+.previewSection {
+  margin-top: 24px;
+}
+
+.previewTitle {
+  margin-bottom: 10px;
+  color: #1f2937;
+  font-size: var(--font-size-15px);
+  font-weight: 600;
+}
+
+.previewTableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.previewTable {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.previewTable th,
+.previewTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  white-space: nowrap;
+  font-size: var(--font-size-13px);
+  color: #374151;
+}
+
+.previewTable th {
+  background: #f8fafc;
+  color: #111827;
+  font-weight: 600;
+}
+
+.previewTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.matchActions {
+  width: 100%;
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.matchActions .submitBtn {
+  margin: 0;
+}
+
+.secondaryBtn {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  min-width: 132px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-family: "Baloo Bhai 2";
+  font-size: var(--font-size-15px);
+  font-weight: 600;
+  line-height: normal;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.secondaryBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.importSummary {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin: 8px 0 4px;
+}
+
+.importStat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  text-transform: capitalize;
+  color: #4b5563;
+  font-size: var(--font-size-14px);
+}
+
+.importStat strong {
+  color: #111827;
+}
+
 @media (max-width: 768px) {
   .uploadLeadCard {
     width: 100%;
+  }
+
+  .matchCard {
+    width: 100%;
+  }
+
+  .requiredGrid,
+  .optionalGrid,
+  .importSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .matchActions {
+    flex-direction: column-reverse;
+  }
+
+  .secondaryBtn,
+  .submitBtn {
+    width: 100%;
+    text-align: center;
   }
 }
