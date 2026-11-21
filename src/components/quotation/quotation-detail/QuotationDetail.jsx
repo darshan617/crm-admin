@@ -118,7 +118,10 @@ function QuotationCard({ quotation, isOpen, onToggle }) {
     })}`;
   };
 
-  const handleSendForDiscount = () => setIsDiscountOpen(true);
+  const handleSendForDiscount = () => {
+    if (quotation?.discount_sent) return;
+    setIsDiscountOpen(true);
+  };
 
   const handleSend = () => setIsSendOpen(true);
 
@@ -363,7 +366,16 @@ function QuotationCard({ quotation, isOpen, onToggle }) {
 
         <div className={styles.quotationActions}>
           {!isApproved && canRequestDiscount && (
-            <button type="button" onClick={handleSendForDiscount}>
+            <button
+              type="button"
+              onClick={handleSendForDiscount}
+              disabled={Boolean(quotation?.discount_sent)}
+              title={
+                quotation?.discount_sent
+                  ? "Discount request already sent"
+                  : undefined
+              }
+            >
               <MdOutlineTurnRight size={18} />
               Send For More Discount
             </button>

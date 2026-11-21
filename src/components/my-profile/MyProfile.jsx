@@ -8,7 +8,6 @@ import {
   useUpdateProfileMutation,
 } from "@/redux/apis/authApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
-import { FiUserPlus } from "react-icons/fi";
 
 const MAX_SIZE_MB = 2;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -88,7 +87,11 @@ const MyProfile = () => {
 
       // refresh profile so avatar_url comes from the API
       const result = await refetch();
-      const newUrl = result?.data?.data?.profile?.avatar_url;
+      const newUrl =
+        result?.data?.data?.profile?.avatar_url ||
+        response?.data?.profile?.avatar_url ||
+        response?.data?.avatar_url ||
+        response?.data?.user?.avatar_url;
 
       const user = JSON.parse(Cookies.get("CRM_USER") || "{}");
       Cookies.set("CRM_USER", JSON.stringify({ ...user, avatar_url: newUrl }));
@@ -146,6 +149,10 @@ const MyProfile = () => {
 
   const profile = data?.data?.profile;
   const avatarSrc = preview || profile?.avatar_url;
+  const nameInitial = (profile?.name || form.user_name || "U")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
 
   return (
     <main>
@@ -171,7 +178,7 @@ const MyProfile = () => {
                       className={styles.avatarImg}
                     />
                   ) : (
-                    <FiUserPlus size={24} className={styles.avatarIcon} />
+                    <span>{nameInitial}</span>
                   )}
                 </div>
 

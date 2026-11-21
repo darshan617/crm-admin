@@ -1,6 +1,7 @@
 import {
   FiBarChart2,
   FiFileText,
+  FiPercent,
   FiPhone,
   FiRefreshCw,
   FiSettings,
@@ -41,6 +42,13 @@ export const SIDEBAR_SECTIONS = [
         name: "Quotations",
         url: "/quotations",
         icon: FiFileText,
+      },
+      {
+        key: "discount-approval",
+        moduleKey: "discount_approval",
+        name: "Discount Approval",
+        url: "/discount-approval",
+        icon: FiPercent,
       },
       {
         key: "crm-deals",

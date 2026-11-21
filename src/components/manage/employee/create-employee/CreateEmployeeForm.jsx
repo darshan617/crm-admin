@@ -36,7 +36,8 @@ const matchOptionValue = (value, options) => {
 
   const match = options.find(
     (option) =>
-      option.value === text || option.label.toLowerCase() === text.toLowerCase(),
+      option.value === text ||
+      option.label.toLowerCase() === text.toLowerCase(),
   );
 
   return match ? match.value : text;

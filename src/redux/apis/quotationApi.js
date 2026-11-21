@@ -96,8 +96,9 @@ const quotationApi = apiSlice.injectEndpoints({
       invalidatesTags: ["quotation"],
     }),
     getSuggestMail: builder.query({
-      query: () => ({
-        url: `/quotations/email-suggestions`,
+      // GET /quotations/email-suggestions?q=
+      query: ({ q = "" } = {}) => ({
+        url: `/quotations/email-suggestions?q=${encodeURIComponent(q)}`,
         method: "GET",
       }),
       providesTags: ["quotation"],
@@ -126,12 +127,55 @@ const quotationApi = apiSlice.injectEndpoints({
       invalidatesTags: ["quotation"],
     }),
     requestDiscount: builder.mutation({
-      query: ({ quotation_id, discount }) => ({
+      query: ({ quotation_id, employee, requested_discount, remark }) => ({
         url: `/quotations/${quotation_id}/discount-request`,
         method: "POST",
-        body: { discount },
+        body: { employee, requested_discount, remark },
       }),
       invalidatesTags: ["quotation"],
+    }),
+    decideDiscountRequest: builder.mutation({
+      query: ({ id, action }) => ({
+        url: `/quotations/${id}/discount-request/respond`,
+        method: "POST",
+        body: { action },
+      }),
+      invalidatesTags: ["quotation"],
+    }),
+    getDiscountRequests: builder.query({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value == null || value === "") return;
+          searchParams.set(key, String(value));
+        });
+
+        const query = searchParams.toString();
+
+        return {
+          url: query
+            ? `/quotations/discount-requests?${query}`
+            : `/quotations/discount-requests`,
+          method: "GET",
+        };
+      },
+      providesTags: ["quotation"],
+    }),
+
+    requestDiscountEmployee: builder.query({
+      query: ({ quotation_id }) => ({
+        url: `/quotations/${quotation_id}/discount-request`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
+    emailSuggestions: builder.query({
+      query: ({ q = "" } = {}) => ({
+        url: `/quotations/email-suggestions?q=${encodeURIComponent(q)}`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
     }),
   }),
 });
@@ -154,4 +198,8 @@ export const {
   useLazyDownloadInvoiceQuery,
   useSendInvoiceMutation,
   useRequestDiscountMutation,
+  useGetDiscountRequestsQuery,
+  useDecideDiscountRequestMutation,
+  useRequestDiscountEmployeeQuery,
+  useEmailSuggestionsQuery,
 } = quotationApi;

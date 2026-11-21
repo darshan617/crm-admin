@@ -270,6 +270,11 @@
   left: -4%;
 }
 
+.quotationActions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .quotationActions button {
   position: relative;
   overflow: hidden;

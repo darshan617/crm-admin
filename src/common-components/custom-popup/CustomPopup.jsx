@@ -13,7 +13,8 @@ const CustomPopup = ({
   wide = false,
   closeIcon = true,
   maxWidth,
-  title
+  title,
+  className,
 }) => {
   const handleClose = onclose || onClose || (() => {});
 
@@ -60,7 +61,7 @@ const CustomPopup = ({
     <div className={styles.root}>
       <div className={styles.overlay} onClick={handleClose}>
         <div
-          className={`${styles.popup} ${wide ? styles.popupWide : ""}`}
+          className={`${styles.popup} ${wide ? styles.popupWide : ""} ${className || ""}`}
           style={maxWidth ? { maxWidth } : undefined}
           role="dialog"
           aria-modal="true"

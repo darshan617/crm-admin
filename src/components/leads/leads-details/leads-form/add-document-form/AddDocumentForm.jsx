@@ -3,6 +3,18 @@ import styles from "@/components/dashboard/leads/Leads.module.css";
 import { LuFileDown } from "react-icons/lu";
 import { FaRegTrashAlt } from "react-icons/fa";
 
+const ALLOWED_DOCUMENT_EXTENSIONS = [
+  "pdf",
+  "doc",
+  "docx",
+  "jpg",
+  "jpeg",
+  "png",
+];
+
+const fileTypeError = (fileName) =>
+  `${fileName} must be a file of type: pdf, doc, docx, jpg, jpeg, png.`;
+
 const AddDocumentForm = ({
   csrfToken,
   formData,
@@ -12,7 +24,7 @@ const AddDocumentForm = ({
 }) => {
   const documentInputRef = useRef(null);
   const [uploadedDoc, setUploadedDocs] = useState([]);
-  console.log(uploadedDoc);
+  const [fileError, setFileError] = useState("");
 
   return (
     <div className={styles.creditModalBox}>
@@ -39,17 +51,36 @@ const AddDocumentForm = ({
             ref={documentInputRef}
             type="file"
             multiple
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
             className={styles.hiddenFileInput}
             onChange={(event) => {
               const selectedFiles = Array.from(event.target.files ?? []);
+              event.target.value = "";
 
               if (selectedFiles.length === 0) return;
 
-              setUploadedDocs((prev) => [...prev, ...selectedFiles]);
+              const accepted = [];
+              const rejected = [];
 
-              handleDocumentSelect(event);
+              selectedFiles.forEach((file) => {
+                const extension = file.name.split(".").pop()?.toLowerCase();
+                if (ALLOWED_DOCUMENT_EXTENSIONS.includes(extension)) {
+                  accepted.push(file);
+                } else {
+                  rejected.push(file.name);
+                }
+              });
 
-              event.target.value = "";
+              if (rejected.length > 0) {
+                setFileError(fileTypeError(rejected.join(", ")));
+              } else {
+                setFileError("");
+              }
+
+              if (accepted.length === 0) return;
+
+              setUploadedDocs((prev) => [...prev, ...accepted]);
+              handleDocumentSelect(accepted);
             }}
           />
           <button
@@ -61,7 +92,13 @@ const AddDocumentForm = ({
               <LuFileDown size={24} />
             </div>
             <p>Click to Upload</p>
+            <span className={styles.uploadFormats}>
+              pdf, doc, docx, jpg, jpeg, png
+            </span>
           </button>
+          {fileError && (
+            <span className={styles.errorMessage}>{fileError}</span>
+          )}
 
           {uploadedDoc.length > 0 && (
             <div className={styles.uploadedStatus}>

@@ -81,6 +81,21 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["leads"],
     }),
+    previewLeadsUpload: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/uploads/preview",
+        method: "POST",
+        body,
+      }),
+    }),
+    confirmLeadsUpload: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/uploads/confirm",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
     checkLeadDomain: builder.query({
       query: ({ domain }) => ({
         url: `/leads/check-domain?domain=${domain}`,
@@ -88,8 +103,67 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["quotation"],
     }),
+    checkGst: builder.mutation({
+      query: ({ body }) => ({
+        url: "/quotations/gstin",
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
+    getCountryStateCity: builder.query({
+      query: ({ country, state, city } = {}) => {
+        const params = new URLSearchParams();
+        if (country) params.set("country", country);
+        if (state) params.set("state", state);
+        if (city) params.set("city", city);
+        const query = params.toString();
+
+        return {
+          url: query ? `/locations?${query}` : "/locations",
+          method: "GET",
+        };
+      },
+      providesTags: ["leads"],
+    }),
   }),
 });
+
+export const locationNames = (payload, key) => {
+  const list = payload?.data?.[key];
+  if (!Array.isArray(list)) return [];
+
+  return list
+    .map((item) =>
+      typeof item === "string" ? item : item?.name || item?.label || "",
+    )
+    .map((name) => name.trim())
+    .filter(Boolean);
+};
+
+export const normalizedLocation = (payload) => {
+  const data = payload?.data ?? {};
+  const labeled =
+    data.label && typeof data.label === "object" ? data.label : null;
+  const source =
+    (data.normalized && typeof data.normalized === "object" && data.normalized) ||
+    labeled ||
+    data;
+  const name = (value) =>
+    (typeof value === "string" ? value : value?.name || value?.label || "").trim();
+
+  return {
+    valid: payload?.success !== false && data.valid !== false,
+    country: name(source.country),
+    state: name(source.state),
+    city: name(source.city),
+    label:
+      (typeof source.label === "string" && source.label.trim()) ||
+      (typeof data.label === "string" && data.label.trim()) ||
+      "",
+    message: payload?.message || data.message || "",
+  };
+};
 
 export const {
   useGetAllLeadsQuery,
@@ -100,5 +174,9 @@ export const {
   useContactandServicePlanDeleteMutation,
   useLeadDocumentDeleteMutation,
   useUploadLeadsMutation,
+  usePreviewLeadsUploadMutation,
+  useConfirmLeadsUploadMutation,
   useCheckLeadDomainQuery,
+  useCheckGstMutation,
+  useGetCountryStateCityQuery,
 } = leadsApi;

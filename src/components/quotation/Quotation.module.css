@@ -217,8 +217,13 @@
   transition: background 0.2s ease;
 }
 
-.discountBtn:hover {
+.discountBtn:hover:not(:disabled) {
   background: #054f94;
+}
+
+.discountBtn:disabled {
+  background: #9bb8d4;
+  cursor: not-allowed;
 }
 
 .discountBtn svg {

@@ -17,11 +17,13 @@ import {
   FiTrendingUp,
   FiUserPlus,
   FiUserCheck,
+  FiFileText,
 } from "react-icons/fi";
 
 import styles from "@/components/manage/crm-setting/crmSetting.module.css";
 
 import CustomPopup from "@/common-components/custom-popup/CustomPopup";
+import CompanyProfilePdf from "@/components/manage/crm-setting/CompanyProfilePdf";
 
 import {
   useLeadsSourceQuery,
@@ -180,6 +182,18 @@ const TABS = [
     hasDescription: true,
 
     isCompact: true,
+  },
+
+  {
+    key: "company-profile",
+
+    label: "Company Profile PDF",
+
+    singular: "Company Profile PDF",
+
+    icon: FiFileText,
+
+    isUploadPanel: true,
   },
 ];
 
@@ -367,6 +381,8 @@ export default function CrmSetting() {
   const isPriority = activeKey === "lead-priority";
 
   const isDesignation = activeKey === "designation";
+
+  const isCompanyProfile = activeKey === "company-profile";
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -654,7 +670,7 @@ export default function CrmSetting() {
             <h2 className={styles.title}>{activeTab.label}</h2>
           </div>
 
-          {canAddSetting && (
+          {canAddSetting && !isCompanyProfile && (
             <button
               type="button"
               onClick={() => openPopup()}
@@ -667,178 +683,193 @@ export default function CrmSetting() {
           )}
         </div>
 
-        {summaryCards.length > 0 && (
-          <div className={styles.summaryGrid} data-cards={summaryCards.length}>
-            {summaryCards.map(({ label, value, icon: Icon, tone }) => (
-              <div key={label} className={styles.summaryCard}>
-                <div className={`${styles.summaryIcon} ${styles[tone]}`}>
-                  <Icon size={18} />
-                </div>
+        {isCompanyProfile ? (
+          <CompanyProfilePdf canEdit={canEditSetting} />
+        ) : (
+          <>
+            {summaryCards.length > 0 && (
+              <div
+                className={styles.summaryGrid}
+                data-cards={summaryCards.length}
+              >
+                {summaryCards.map(({ label, value, icon: Icon, tone }) => (
+                  <div key={label} className={styles.summaryCard}>
+                    <div className={`${styles.summaryIcon} ${styles[tone]}`}>
+                      <Icon size={18} />
+                    </div>
 
-                <small className={styles.summaryLabel}>{label}</small>
+                    <small className={styles.summaryLabel}>{label}</small>
 
-                <h3 className={styles.summaryValue}>
-                  {showLoading ? "..." : value}
-                </h3>
+                    <h3 className={styles.summaryValue}>
+                      {showLoading ? "..." : value}
+                    </h3>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        <div className={styles.tableCard}>
-          <div className={styles.tableTop}>
-            <p className={styles.showing}>
-              Showing{" "}
-              <strong>
-                {filteredItems.length ? `1 - ${filteredItems.length}` : "0"}
-              </strong>{" "}
-              from <strong>{items.length}</strong> {activeTab.label}
-            </p>
+            <div className={styles.tableCard}>
+              <div className={styles.tableTop}>
+                <p className={styles.showing}>
+                  Showing{" "}
+                  <strong>
+                    {filteredItems.length ? `1 - ${filteredItems.length}` : "0"}
+                  </strong>{" "}
+                  from <strong>{items.length}</strong> {activeTab.label}
+                </p>
 
-            <form
-              onSubmit={(event) => event.preventDefault()}
-              className={styles.searchWrap}
-            >
-              <input
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={`Search ${activeTab.label.toLowerCase()}`}
-                className={styles.searchInput}
-              />
+                <form
+                  onSubmit={(event) => event.preventDefault()}
+                  className={styles.searchWrap}
+                >
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder={`Search ${activeTab.label.toLowerCase()}`}
+                    className={styles.searchInput}
+                  />
 
-              <FiSearch size={15} className={styles.searchIcon} />
-            </form>
-          </div>
+                  <FiSearch size={15} className={styles.searchIcon} />
+                </form>
+              </div>
 
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.th}>Id</th>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th className={styles.th}>Id</th>
 
-                <th className={styles.th}>
-                  {activeTab.columnLabel ||
-                    (activeTab.hasLogo ? "Sources" : "Name")}
-                </th>
-
-                {activeTab.showDescription && (
-                  <th className={styles.th}>Description</th>
-                )}
-
-                {activeTab.hasLeads && <th className={styles.th}>Leads</th>}
-
-                <th className={styles.th}>Created on</th>
-
-                {showActions && (
-                  <th className={`${styles.th} ${styles.center}`}>Action</th>
-                )}
-              </tr>
-            </thead>
-
-            <tbody>
-              {showLoading ? (
-                <tr>
-                  <td colSpan={columnCount} className={styles.empty}>
-                    Loading {activeTab.label.toLowerCase()}...
-                  </td>
-                </tr>
-              ) : showError ? (
-                <tr>
-                  <td colSpan={columnCount} className={styles.empty}>
-                    <p>Unable to fetch {activeTab.label.toLowerCase()}.</p>
-
-                    <button type="button" onClick={() => query.refetch()}>
-                      Try Again
-                    </button>
-                  </td>
-                </tr>
-              ) : filteredItems.length > 0 ? (
-                filteredItems.map((item) => (
-                  <tr key={item.id}>
-                    <td className={styles.td}>
-                      <span className={styles.badge}>{item.code}</span>
-                    </td>
-
-                    <td className={styles.td}>
-                      <div className={styles.sourceCell}>
-                        {activeTab.hasLogo && (
-                          <div className={styles.avatar}>
-                            {item.logo ? (
-                              <Image
-                                src={item.logo}
-                                alt={`${item.name} logo`}
-                                width={32}
-                                height={32}
-                                unoptimized
-                                className={styles.avatarImg}
-                              />
-                            ) : (
-                              <FiGlobe size={18} color="#0284c7" />
-                            )}
-                          </div>
-                        )}
-
-                        <span className={styles.sourceName}>{item.name}</span>
-                      </div>
-                    </td>
+                    <th className={styles.th}>
+                      {activeTab.columnLabel ||
+                        (activeTab.hasLogo ? "Sources" : "Name")}
+                    </th>
 
                     {activeTab.showDescription && (
-                      <td className={styles.td}>{item.description || "-"}</td>
+                      <th className={styles.th}>Description</th>
                     )}
 
-                    {activeTab.hasLeads && (
-                      <td className={`${styles.td} ${styles.tdLeads}`}>
-                        {item.leads ?? "-"}
-                      </td>
-                    )}
+                    {activeTab.hasLeads && <th className={styles.th}>Leads</th>}
 
-                    <td className={`${styles.td} ${styles.tdDate}`}>
-                      {formatDate(item.createdOn)}
-                    </td>
+                    <th className={styles.th}>Created on</th>
 
                     {showActions && (
-                      <td className={`${styles.td} ${styles.center}`}>
-                        <div className={styles.actions}>
-                          {canEditSetting && (
-                            <button
-                              type="button"
-                              title="Edit"
-                              onClick={() => openPopup(item)}
-                              className={`${styles.actionBtn} ${styles.actionEdit}`}
-                            >
-                              <FiEdit size={16} />
-                            </button>
-                          )}
-
-                          {canDeleteSetting && (
-                            <button
-                              type="button"
-                              title="Delete"
-                              onClick={() => handleDelete(item.id)}
-                              className={`${styles.actionBtn} ${styles.actionDelete}`}
-                            >
-                              <FiTrash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
+                      <th className={`${styles.th} ${styles.center}`}>
+                        Action
+                      </th>
                     )}
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={columnCount} className={styles.empty}>
-                    No {activeTab.label.toLowerCase()} found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+
+                <tbody>
+                  {showLoading ? (
+                    <tr>
+                      <td colSpan={columnCount} className={styles.empty}>
+                        Loading {activeTab.label.toLowerCase()}...
+                      </td>
+                    </tr>
+                  ) : showError ? (
+                    <tr>
+                      <td colSpan={columnCount} className={styles.empty}>
+                        <p>Unable to fetch {activeTab.label.toLowerCase()}.</p>
+
+                        <button type="button" onClick={() => query.refetch()}>
+                          Try Again
+                        </button>
+                      </td>
+                    </tr>
+                  ) : filteredItems.length > 0 ? (
+                    filteredItems.map((item) => (
+                      <tr key={item.id}>
+                        <td className={styles.td}>
+                          <span className={styles.badge}>{item.code}</span>
+                        </td>
+
+                        <td className={styles.td}>
+                          <div className={styles.sourceCell}>
+                            {activeTab.hasLogo && (
+                              <div className={styles.avatar}>
+                                {item.logo ? (
+                                  <Image
+                                    src={item.logo}
+                                    alt={`${item.name} logo`}
+                                    width={32}
+                                    height={32}
+                                    unoptimized
+                                    className={styles.avatarImg}
+                                  />
+                                ) : (
+                                  <FiGlobe size={18} color="#0284c7" />
+                                )}
+                              </div>
+                            )}
+
+                            <span className={styles.sourceName}>
+                              {item.name}
+                            </span>
+                          </div>
+                        </td>
+
+                        {activeTab.showDescription && (
+                          <td className={styles.td}>
+                            {item.description || "-"}
+                          </td>
+                        )}
+
+                        {activeTab.hasLeads && (
+                          <td className={`${styles.td} ${styles.tdLeads}`}>
+                            {item.leads ?? "-"}
+                          </td>
+                        )}
+
+                        <td className={`${styles.td} ${styles.tdDate}`}>
+                          {formatDate(item.createdOn)}
+                        </td>
+
+                        {showActions && (
+                          <td className={`${styles.td} ${styles.center}`}>
+                            <div className={styles.actions}>
+                              {canEditSetting && (
+                                <button
+                                  type="button"
+                                  title="Edit"
+                                  onClick={() => openPopup(item)}
+                                  className={`${styles.actionBtn} ${styles.actionEdit}`}
+                                >
+                                  <FiEdit size={16} />
+                                </button>
+                              )}
+
+                              {canDeleteSetting && (
+                                <button
+                                  type="button"
+                                  title="Delete"
+                                  onClick={() => handleDelete(item.id)}
+                                  className={`${styles.actionBtn} ${styles.actionDelete}`}
+                                >
+                                  <FiTrash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={columnCount} className={styles.empty}>
+                        No {activeTab.label.toLowerCase()} found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </div>
 
       <CustomPopup
-        isOpen={popupOpen}
+        isOpen={popupOpen && !isCompanyProfile}
         onClose={closePopup}
         maxWidth={activeTab.popupWidth}
       >

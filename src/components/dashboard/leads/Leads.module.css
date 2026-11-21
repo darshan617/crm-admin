@@ -496,9 +496,9 @@
 
 .uploadBox {
   width: 100%;
-  height: 100px;
+  min-height: 100px;
   margin-bottom: 20px;
-  padding: 0;
+  padding: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -612,7 +612,7 @@
 
 .uploadBox {
   width: 100%;
-  height: 100px;
+  min-height: 100px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
