@@ -10,7 +10,7 @@ import {
   useUploadCompanyProfileMutation,
 } from "@/redux/apis/crmSettingsApi";
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const MAX_SIZE_BYTES = 30 * 1024 * 1024;
 
 const getPdfUrl = (url) => {
   if (!url || typeof url !== "string") return null;
@@ -68,7 +68,7 @@ export default function CompanyProfilePdf({ canEdit }) {
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      showToast("PDF must be 10MB or smaller.", "error");
+      showToast("PDF must be 30MB or smaller.", "error");
       return;
     }
 
@@ -187,7 +187,7 @@ export default function CompanyProfilePdf({ canEdit }) {
             <div className={styles.profileDropText}>
               Click or drag PDF here
             </div>
-            <div className={styles.profileDropFormat}>PDF only, max 10MB</div>
+            <div className={styles.profileDropFormat}>PDF only, max 30MB</div>
           </button>
 
           <input
