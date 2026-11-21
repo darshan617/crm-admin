@@ -4,15 +4,49 @@ import { LuFileDown } from "react-icons/lu";
 import { IoMdArrowBack } from "react-icons/io";
 import { FaRegTrashAlt } from "react-icons/fa";
 import {
+  locationNames,
+  normalizedLocation,
+  useCheckGstMutation,
   useCheckLeadDomainQuery,
   useCreateLeadMutation,
+  useGetCountryStateCityQuery,
   useGetDdDataQuery,
 } from "@/redux/apis/leadsApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 
-const ALLOWED_DOCUMENT_EXTENSIONS = ["pdf", "doc", "docx", "jpg", "jpeg", "png"];
+const ALLOWED_DOCUMENT_EXTENSIONS = [
+  "pdf",
+  "doc",
+  "docx",
+  "jpg",
+  "jpeg",
+  "png",
+];
 const MAX_DOCUMENT_SIZE = 10 * 1024 * 1024;
+const GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+const GST_CUSTOMER_FIELDS = ["company_name"];
+const GST_ADDRESS_FIELDS = [
+  "mailing_address",
+  "country",
+  "state",
+  "city",
+  "pincode",
+];
+
+const pickFilledFields = (source, keys) =>
+  keys.reduce((picked, key) => {
+    const value = source?.[key];
+    if (value == null || String(value).trim() === "") return picked;
+    picked[key] = String(value).trim();
+    return picked;
+  }, {});
+
+const withCurrentOption = (options = [], current) => {
+  if (!current || options.includes(current)) return options;
+  return [current, ...options];
+};
 
 const fieldErrorMessage = (value) => {
   if (Array.isArray(value)) return value.filter(Boolean).join(" ");
@@ -128,6 +162,11 @@ const Leads = () => {
     if (!formData?.customer_detail?.mobile) {
       newError.mobile = "Please enter mobile";
     }
+    const gstin = formData?.customer_detail?.gstin?.trim();
+    if (gstin && !GSTIN_REGEX.test(gstin)) {
+      newError.gstin =
+        "Invalid GSTIN (must be 15 characters, e.g. 27ABCDE1234F1Z5)";
+    }
     setError(newError);
     if (Object.keys(newError).length > 0) {
       showToast("Please fill all required fields in the form.", "error");
@@ -144,7 +183,117 @@ const Leads = () => {
       },
       { skip: !formData?.domain?.domain },
     );
+  const [checkGst, { isLoading: isCheckingGst }] = useCheckGstMutation();
+  const selectedCountry = formData.address_information.country;
+  const selectedState = formData.address_information.state;
+  const selectedCity = formData.address_information.city;
+  const { data: countriesData } = useGetCountryStateCityQuery();
+  const { data: statesData } = useGetCountryStateCityQuery(
+    { country: selectedCountry },
+    { skip: !selectedCountry },
+  );
+  const { data: citiesData } = useGetCountryStateCityQuery(
+    { country: selectedCountry, state: selectedState },
+    { skip: !selectedCountry || !selectedState },
+  );
+  const { data: locationCheck } = useGetCountryStateCityQuery(
+    {
+      country: selectedCountry,
+      state: selectedState,
+      city: selectedCity,
+    },
+    { skip: !selectedCountry || !selectedState || !selectedCity },
+  );
+  const countryOptions = locationNames(countriesData, "countries");
+  const stateOptions = locationNames(statesData, "states");
+  const cityOptions = locationNames(citiesData, "cities");
 
+  useEffect(() => {
+    if (!selectedCountry || !selectedState || !selectedCity || !locationCheck) {
+      return;
+    }
+
+    const normalized = normalizedLocation(locationCheck);
+    if (!normalized.valid) {
+      setError((prev) => ({
+        ...prev,
+        city: normalized.message || "Select a valid country, state, and city.",
+      }));
+      return;
+    }
+
+    if (!normalized.country && !normalized.state && !normalized.city) return;
+
+    setError((prev) => {
+      if (!prev?.city) return prev;
+      const nextError = { ...prev };
+      delete nextError.city;
+      return nextError;
+    });
+
+    setFormData((prev) => {
+      const address = prev.address_information;
+      if (
+        address.country !== selectedCountry ||
+        address.state !== selectedState ||
+        address.city !== selectedCity
+      ) {
+        return prev;
+      }
+
+      const country = normalized.country || address.country;
+      const state = normalized.state || address.state;
+      const city = normalized.city || address.city;
+      if (
+        country === address.country &&
+        state === address.state &&
+        city === address.city
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        address_information: {
+          ...address,
+          country,
+          state,
+          city,
+        },
+      };
+    });
+  }, [locationCheck, selectedCountry, selectedState, selectedCity]);
+
+  const handleAddressChange = (e) => {
+    const { name, value } = e.target;
+
+    setError((prev) => {
+      if (!prev?.[name]) return prev;
+      const nextError = { ...prev };
+      delete nextError[name];
+      return nextError;
+    });
+
+    setFormData((prev) => {
+      const address = {
+        ...prev.address_information,
+        [name]: value,
+      };
+
+      if (name === "country") {
+        address.state = "";
+        address.city = "";
+      }
+      if (name === "state") {
+        address.city = "";
+      }
+
+      return {
+        ...prev,
+        address_information: address,
+      };
+    });
+  };
   const handleFormChange = (e, section, index = null) => {
     const { name } = e.target;
     const value =
@@ -192,6 +341,86 @@ const Leads = () => {
         [field]: value,
       },
     }));
+  };
+
+  const [gstStatus, setGstStatus] = useState(null); // { type: "success" | "error", message }
+
+  const handleGstCheck = async (value) => {
+    const gstin = (value ?? formData?.customer_detail?.gstin ?? "")
+      .trim()
+      .toUpperCase();
+    setGstStatus(null);
+    if (!gstin) return;
+
+    // Same 15-char pattern validation as web, before hitting the API
+    if (!GSTIN_REGEX.test(gstin)) {
+      setError((prev) => ({
+        ...prev,
+        gstin: "Invalid GSTIN (must be 15 characters, e.g. 27ABCDE1234F1Z5)",
+      }));
+      return;
+    }
+
+    try {
+      // POST /api/crm/quotations/gstin  { gstin }
+      const res = await checkGst({ body: { gstin } });
+      const errorBody = res?.error?.data;
+
+      if (res?.error || errorBody?.errors || res?.data?.success === false) {
+        const body = errorBody || res?.data || {};
+        const fieldErrors = mapApiFieldErrors(body.errors);
+        setError((prev) => ({
+          ...prev,
+          gstin:
+            fieldErrors.gstin || body.message || "GSTIN validation failed.",
+        }));
+        return;
+      }
+
+      const gst = res?.data?.data;
+      if (!gst || gst.valid === false) {
+        setError((prev) => ({
+          ...prev,
+          gstin: res?.data?.message || "GSTIN is not valid.",
+        }));
+        return;
+      }
+
+      const customerPatch = pickFilledFields(gst, GST_CUSTOMER_FIELDS);
+      const addressPatch = pickFilledFields(gst, GST_ADDRESS_FIELDS);
+      if (!addressPatch.mailing_address && gst.company_address) {
+        addressPatch.mailing_address = String(gst.company_address).trim();
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        customer_detail: {
+          ...prev.customer_detail,
+          ...customerPatch,
+        },
+        address_information: {
+          ...prev.address_information,
+          ...addressPatch,
+        },
+      }));
+
+      setError((prev) => {
+        if (!prev?.gstin) return prev;
+        const nextError = { ...prev };
+        delete nextError.gstin;
+        return nextError;
+      });
+
+      setGstStatus({
+        type: "success",
+        message: gst.gst_status
+          ? `GSTIN is valid (${gst.gst_status})`
+          : res?.data?.message || "GSTIN is valid",
+      });
+    } catch (err) {
+      console.log(err);
+      setGstStatus({ type: "error", message: "Unable to verify GSTIN." });
+    }
   };
 
   const handleDocumentSelect = (event) => {
@@ -639,8 +868,27 @@ const Leads = () => {
                   type="text"
                   value={formData?.customer_detail?.gstin}
                   name="gstin"
-                  onChange={(e) => handleFormChange(e, "customer_detail")}
+                  maxLength={15}
+                  placeholder="27ABCDE1234F1Z5"
+                  onChange={(e) => {
+                    e.target.value = e.target.value
+                      .toUpperCase()
+                      .replace(/[^0-9A-Z]/g, "");
+                    setGstStatus(null);
+                    handleFormChange(e, "customer_detail");
+                    // Call the API only once all 15 characters are typed
+                    if (e.target.value.length === 15) {
+                      handleGstCheck(e.target.value);
+                    }
+                  }}
                 />
+                {isCheckingGst && <small>Verifying GSTIN...</small>}
+                {!isCheckingGst && gstStatus?.type === "success" && (
+                  <small>{gstStatus.message}</small>
+                )}
+                {error?.gstin && (
+                  <span className={styles.errorMessage}>{error.gstin}</span>
+                )}
               </div>
             </div>
 
@@ -665,12 +913,17 @@ const Leads = () => {
                 <select
                   name="country"
                   value={formData.address_information.country}
-                  onChange={(e) => handleFormChange(e, "address_information")}
+                  onChange={handleAddressChange}
                 >
-                  <option>India</option>
-                  <option>United States</option>
-                  <option>United Kingdom</option>
-                  <option>United Arab Emirates</option>
+                  <option value="">Select Country</option>
+                  {withCurrentOption(
+                    countryOptions,
+                    formData.address_information.country,
+                  ).map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -680,25 +933,43 @@ const Leads = () => {
                 <select
                   name="state"
                   value={formData.address_information.state}
-                  onChange={(e) => handleFormChange(e, "address_information")}
+                  onChange={handleAddressChange}
+                  disabled={!formData.address_information.country}
                 >
-                  <option>Maharashtra</option>
-                  <option>Gujarat</option>
-                  <option>Goa</option>
-                  <option>Karnataka</option>
-                  <option>Delhi</option>
+                  <option value="">Select State</option>
+                  {withCurrentOption(
+                    stateOptions,
+                    formData.address_information.state,
+                  ).map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               {/* City */}
               <div className="form-group">
                 <label>City</label>
-                <input
-                  type="text"
+                <select
                   name="city"
                   value={formData.address_information.city}
-                  onChange={(e) => handleFormChange(e, "address_information")}
-                />
+                  onChange={handleAddressChange}
+                  disabled={!formData.address_information.state}
+                >
+                  <option value="">Select City</option>
+                  {withCurrentOption(
+                    cityOptions,
+                    formData.address_information.city,
+                  ).map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+                {error?.city && (
+                  <span className={styles.errorMessage}>{error.city}</span>
+                )}
               </div>
 
               {/* Pincode */}
