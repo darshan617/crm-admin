@@ -14,14 +14,12 @@ const AddCurrentServiceForm = ({
   const isEditing = Boolean(initialData?.id);
   const providers = apiDropdownData?.data?.options?.providers || [];
   const service = formData?.[formSection]?.[formIndex] || {};
-  const plans = Object.values(
-    apiDropdownData?.data?.options?.plans || {},
-  ).flat();
-  // .filter(
-  //   (plan) =>
-  //     !service.provider_id ||
-  //     String(plan.provider_id) === String(service.provider_id),
-  // );
+  const plansByProvider = apiDropdownData?.data?.options?.plans || {};
+  const plans = [
+    ...(plansByProvider[service.provider_id] ||
+      plansByProvider[String(service.provider_id)] ||
+      []),
+  ];
   if (
     initialData?.plan &&
     !plans.some((plan) => String(plan.id) === String(initialData.plan_id))

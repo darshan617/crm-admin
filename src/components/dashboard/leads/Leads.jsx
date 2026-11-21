@@ -302,6 +302,14 @@ const Leads = () => {
           ? null
           : Number(e.target.value)
         : e.target.value;
+    const serviceSections = ["current_service_info", "our_service_plan_detail"];
+    const plansByProvider = apiDropdownData?.data?.options?.plans || {};
+    const selectedPlan =
+      name === "plan_id"
+        ? Object.values(plansByProvider)
+            .flat()
+            .find((plan) => String(plan.id) === String(value))
+        : null;
 
     setError((prev) => {
       if (!prev?.[name]) return prev;
@@ -317,7 +325,25 @@ const Leads = () => {
         return {
           ...prev,
           [section]: prev[section].map((item, i) =>
-            i === index ? { ...item, [name]: value } : item,
+            i === index
+              ? {
+                  ...item,
+                  [name]: value,
+                  ...(serviceSections.includes(section) &&
+                  name === "provider_id"
+                    ? { plan_id: "", sku: "", rate: "" }
+                    : {}),
+                  ...(serviceSections.includes(section) && name === "plan_id"
+                    ? {
+                        sku: selectedPlan?.sku || selectedPlan?.slug || "",
+                        rate:
+                          selectedPlan?.rate ??
+                          selectedPlan?.actual_price ??
+                          item.rate,
+                      }
+                    : {}),
+                }
+              : item,
           ),
         };
       }
@@ -1097,15 +1123,19 @@ const Leads = () => {
                               <option value="" disabled>
                                 Plan Name
                               </option>
-                              {Object.values(
-                                apiDropdownData?.data?.options?.plans || {},
-                              )
-                                .flat()
-                                .map((item) => (
-                                  <option key={item.id} value={item.id}>
-                                    {item.name}
-                                  </option>
-                                ))}
+                              {(
+                                apiDropdownData?.data?.options?.plans?.[
+                                  item.provider_id
+                                ] ||
+                                apiDropdownData?.data?.options?.plans?.[
+                                  String(item.provider_id)
+                                ] ||
+                                []
+                              ).map((plan) => (
+                                <option key={plan.id} value={plan.id}>
+                                  {plan.name}
+                                </option>
+                              ))}
                             </select>
                           </div>
                         </div>
@@ -1394,15 +1424,19 @@ const Leads = () => {
                         }
                       >
                         <option value="">Select Service</option>
-                        {Object.values(
-                          apiDropdownData?.data?.options?.plans || {},
-                        )
-                          .flat()
-                          .map((item) => (
-                            <option key={item.id} value={item.id}>
-                              {item.name}
-                            </option>
-                          ))}
+                        {(
+                          apiDropdownData?.data?.options?.plans?.[
+                            item.provider_id
+                          ] ||
+                          apiDropdownData?.data?.options?.plans?.[
+                            String(item.provider_id)
+                          ] ||
+                          []
+                        ).map((plan) => (
+                          <option key={plan.id} value={plan.id}>
+                            {plan.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
