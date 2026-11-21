@@ -17,10 +17,36 @@ import Cookies from "js-cookie";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { useMyProfileQuery } from "@/redux/apis/authApi";
 
-const subscribeToUserCookie = () => () => {};
+const subscribeToUserCookie = (onStoreChange) => {
+  window.addEventListener("crm-user-updated", onStoreChange);
+  return () => window.removeEventListener("crm-user-updated", onStoreChange);
+};
 const getUserCookieSnapshot = () => Cookies.get("CRM_USER") || null;
 const getServerUserCookieSnapshot = () => null;
+
+const resolveAvatarUrl = (avatar) => {
+  if (!avatar || typeof avatar !== "string") return "";
+
+  if (
+    avatar.startsWith("http://") ||
+    avatar.startsWith("https://") ||
+    avatar.startsWith("blob:") ||
+    avatar.startsWith("data:")
+  ) {
+    return avatar;
+  }
+
+  const base = (process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "").replace(
+    /\/+$/,
+    "",
+  );
+
+  if (!base) return avatar;
+
+  return `${base}/${avatar.replace(/^\/+/, "")}`;
+};
 
 const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { showToast } = useToast();
@@ -79,7 +105,21 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
       return {};
     }
   }, [userCookie]);
+  const { data: profileResponse } = useMyProfileQuery(undefined, {
+    skip: !userCookie,
+  });
+  const profile = profileResponse?.data?.profile;
+  const displayName = profile?.name || userData?.name || "";
+  const nameInitial = displayName.trim().charAt(0).toUpperCase() || "-";
+  const avatarSrc = resolveAvatarUrl(
+    profile?.avatar_url || userData?.avatar_url,
+  );
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const profileRef = useRef(null);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [avatarSrc]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -180,11 +220,20 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
               onClick={() => setProfileOpen((o) => !o)}
             >
               <div className={styles.avatar}>
-                {userData?.name?.charAt(0) || "-"}
+                {avatarSrc && !avatarFailed ? (
+                  <img
+                    src={avatarSrc}
+                    alt={displayName || "Profile"}
+                    className={styles.avatarImg}
+                    onError={() => setAvatarFailed(true)}
+                  />
+                ) : (
+                  nameInitial
+                )}
               </div>
               <div className={styles.profileInfo}>
-                <h5 className="text-capitalize">{userData?.name || "-"}</h5>
-                <small>{userData?.role || "-"}</small>
+                <h5 className="text-capitalize">{displayName || "-"}</h5>
+                <small>{userData?.role || profile?.role_label || "-"}</small>
               </div>
               <FiChevronDown
                 className={`${styles.profileArrow} ${
@@ -201,12 +250,22 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
               <div className={styles.profileCard}>
                 <div className={styles.profilePattern}></div>
                 <div className={styles.profileContent}>
-                  <div className={styles.profileAvatar}>
-                    <span className="text-capitalize">
-                      {userData?.name?.charAt(0) || "-"}
-                    </span>
+                  <div
+                    className={`${styles.profileAvatar} ${
+                      avatarSrc && !avatarFailed ? styles.profileAvatarPhoto : ""
+                    }`}
+                  >
+                    {avatarSrc && !avatarFailed ? (
+                      <img
+                        src={avatarSrc}
+                        alt={displayName || "Profile"}
+                        className={styles.avatarImg}
+                      />
+                    ) : (
+                      <span className="text-capitalize">{nameInitial}</span>
+                    )}
                   </div>
-                  <h2 className="text-capitalize">{userData?.name || "-"}</h2>
+                  <h2 className="text-capitalize">{displayName || "-"}</h2>
                   <div className={styles.profileMeta}>
                     <span>Partner ID : {userData?.id || "-"}</span>
                     <span className={styles.adminBadge}>
