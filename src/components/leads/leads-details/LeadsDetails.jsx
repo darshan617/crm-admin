@@ -73,7 +73,10 @@ const formatActivityTime = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
 
-  const diffInSeconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  const diffInSeconds = Math.max(
+    0,
+    Math.floor((Date.now() - date.getTime()) / 1000),
+  );
   if (diffInSeconds < 60) return "Just now";
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
@@ -100,8 +103,7 @@ const formatActivityTime = (value) => {
   return `${diffInYears} year${diffInYears === 1 ? "" : "s"} ago`;
 };
 
-const activityText = (value) =>
-  typeof value === "string" ? value.trim() : "";
+const activityText = (value) => (typeof value === "string" ? value.trim() : "");
 
 const activityTitle = (activity) => {
   const display = activityText(activity?.display);
@@ -151,7 +153,13 @@ const ActivityIcon = ({ icon, type }) => {
 
   if (iconName.includes("phone") || iconName.includes("follow")) {
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        aria-hidden="true"
+      >
         <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 3.09 5.18 2 2 0 0 1 5.08 3h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.8a2 2 0 0 1-.45 2.11L9 10.94a16 16 0 0 0 6.06 6.06l1.31-1.31a2 2 0 0 1 2.11-.45c.9.33 1.84.56 2.8.69A2 2 0 0 1 22 16.92z"></path>
       </svg>
     );
@@ -163,7 +171,13 @@ const ActivityIcon = ({ icon, type }) => {
     iconName.includes("created")
   ) {
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        aria-hidden="true"
+      >
         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
         <circle cx="9" cy="7" r="4"></circle>
         <path d="M19 8v6M16 11h6"></path>
@@ -172,7 +186,13 @@ const ActivityIcon = ({ icon, type }) => {
   }
 
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden="true"
+    >
       <path d="M20 6 9 17l-5-5"></path>
     </svg>
   );
@@ -436,11 +456,12 @@ export default function LeadDetail() {
   const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
   const services = Array.isArray(leadData.services) ? leadData.services : [];
   const responseData = getLeadDeatils?.data || {};
-  const recentActivities = [
-    leadData.recent_activities,
-    responseData.recent_activities,
-    getLeadDeatils?.recent_activities,
-  ].find((items) => Array.isArray(items)) || [];
+  const recentActivities =
+    [
+      leadData.recent_activities,
+      responseData.recent_activities,
+      getLeadDeatils?.recent_activities,
+    ].find((items) => Array.isArray(items)) || [];
 
   const currentServices = services.filter(
     (service) =>
@@ -517,8 +538,10 @@ export default function LeadDetail() {
     }
   };
 
-  const handleDocumentSelect = (event) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
+  const handleDocumentSelect = (files) => {
+    const selectedFiles = Array.isArray(files)
+      ? files
+      : Array.from(files?.target?.files ?? []);
     if (selectedFiles.length === 0) return;
 
     selectedFiles.forEach(rememberDocumentFile);
@@ -530,7 +553,6 @@ export default function LeadDetail() {
         ...selectedFiles,
       ],
     }));
-    event.target.value = "";
   };
 
   const handleDocumentRemove = (index) => {
@@ -749,13 +771,37 @@ export default function LeadDetail() {
         body: formBody,
       });
       console.log(res);
+      if (res?.error) {
+        const validationErrors = res.error?.data?.errors;
+        const firstError = validationErrors
+          ? Object.values(validationErrors).flat()[0]
+          : null;
+
+        showToast(
+          firstError ||
+            res.error?.data?.message ||
+            "Could not save the lead documents",
+          "error",
+        );
+        return;
+      }
       if (res?.data?.success) {
         showToast(res?.data?.message, "success");
         dispatch(setIsPopupVisible(""));
       }
     } catch (error) {
       console.log(error);
-      showToast(error?.message || "Could not save the lead documents", "error");
+      const validationErrors = error?.data?.errors;
+      const firstError = validationErrors
+        ? Object.values(validationErrors).flat()[0]
+        : null;
+      showToast(
+        firstError ||
+          error?.data?.message ||
+          error?.message ||
+          "Could not save the lead documents",
+        "error",
+      );
     }
   };
 
@@ -1361,15 +1407,7 @@ export default function LeadDetail() {
             </section>
           </main>
 
-          {/* =================================================
-              RIGHT SIDEBAR
-          ================================================== */}
-
           <aside className={styles.customerInfo}>
-            {/* =========================
-                SCHEDULE FOLLOW UP
-            ========================== */}
-
             <section className="common-table-section">
               <div className={`${styles.commonTableCard} p-16`}>
                 <div className={styles.cardHeader}>

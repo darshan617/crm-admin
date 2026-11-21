@@ -96,8 +96,9 @@ const quotationApi = apiSlice.injectEndpoints({
       invalidatesTags: ["quotation"],
     }),
     getSuggestMail: builder.query({
-      query: () => ({
-        url: `/quotations/email-suggestions`,
+      // GET /quotations/email-suggestions?q=
+      query: ({ q = "" } = {}) => ({
+        url: `/quotations/email-suggestions?q=${encodeURIComponent(q)}`,
         method: "GET",
       }),
       providesTags: ["quotation"],
@@ -169,6 +170,13 @@ const quotationApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["quotation"],
     }),
+    emailSuggestions: builder.query({
+      query: ({ q = "" } = {}) => ({
+        url: `/quotations/email-suggestions?q=${encodeURIComponent(q)}`,
+        method: "GET",
+      }),
+      providesTags: ["quotation"],
+    }),
   }),
 });
 
@@ -193,4 +201,5 @@ export const {
   useGetDiscountRequestsQuery,
   useDecideDiscountRequestMutation,
   useRequestDiscountEmployeeQuery,
+  useEmailSuggestionsQuery,
 } = quotationApi;
