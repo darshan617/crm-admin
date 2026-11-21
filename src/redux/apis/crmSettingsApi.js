@@ -169,6 +169,23 @@ const crmSettingsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["crmLeads"],
     }),
+
+    companyProfile: builder.query({
+      query: () => ({
+        url: "/settings/company-profile",
+        method: "GET",
+      }),
+      providesTags: ["crmLeads"],
+    }),
+
+    uploadCompanyProfile: builder.mutation({
+      query: ({ body }) => ({
+        url: "/settings/company-profile",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["crmLeads"],
+    }),
   }),
 });
 
@@ -194,4 +211,6 @@ export const {
   useUpdateDesignationMutation,
   useDeleteLeadsDesignationMutation,
   useLeadsDesignationSearchQuery,
+  useCompanyProfileQuery,
+  useUploadCompanyProfileMutation,
 } = crmSettingsApi;
