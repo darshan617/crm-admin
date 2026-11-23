@@ -9,6 +9,7 @@ import {
 } from "@/redux/apis/leadsApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { BsDownload } from "react-icons/bs";
+import { IoMdArrowBack } from "react-icons/io";
 
 const STEPS = [
   { id: "upload", label: "Upload" },
@@ -470,9 +471,7 @@ const UploaadLeads = () => {
         value={mapping?.[field.key] || ""}
         onChange={(event) => handleMappingChange(field.key, event.target.value)}
       >
-        <option value="">
-          {required ? "Select column" : "Skip"}
-        </option>
+        <option value="">{required ? "Select column" : "Skip"}</option>
         {previewColumns.map((column) => (
           <option key={`${field.key}-${column}`} value={column}>
             {column}
@@ -513,20 +512,7 @@ const UploaadLeads = () => {
           </Link>
           <div className="back">
             <Link href="/leads" className="back-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5" />
-                <path d="M12 19l-7-7 7-7" />
-              </svg>
+              <IoMdArrowBack />
               <span>Back</span>
             </Link>
           </div>
@@ -569,7 +555,9 @@ const UploaadLeads = () => {
               <div className={styles.uploadLeadIcon}>
                 <LuCloudUpload size={28} />
               </div>
-              <div className={styles.uploadLeadText}>Click or drag file here</div>
+              <div className={styles.uploadLeadText}>
+                Click or drag file here
+              </div>
               <div className={styles.uploadLeadFormat}>.csv, .xls, .xlsx</div>
             </button>
             <input

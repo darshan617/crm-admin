@@ -1569,6 +1569,7 @@ const Leads = () => {
                         <input
                           type="tel"
                           name="mobile"
+                          maxLength={10}
                           value={item.mobile}
                           onChange={(e) =>
                             handleFormChange(e, "additional_contact", idx)

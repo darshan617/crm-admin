@@ -156,12 +156,42 @@ export default function Page() {
     }));
   };
 
+  const plansForProvider = (providerId) =>
+    (ddData?.data?.plans ?? []).filter(
+      (plan) => String(plan.provider_id) === String(providerId),
+    );
+
   const onRowInput = (i, field, value) => {
     setFormData((current) => ({
       ...current,
-      plans: current.plans.map((row, idx) =>
-        idx === i ? { ...row, [field]: value } : row,
-      ),
+      plans: current.plans.map((row, idx) => {
+        if (idx !== i) return row;
+
+        if (field === "provider_id") {
+          const stillValid = plansForProvider(value).some(
+            (plan) => String(plan.id) === String(row.plan_id),
+          );
+          return {
+            ...row,
+            provider_id: value,
+            ...(stillValid ? {} : { plan_id: "", sku: "", rate: "" }),
+          };
+        }
+
+        if (field === "plan_id") {
+          const selected = plansForProvider(row.provider_id).find(
+            (plan) => String(plan.id) === String(value),
+          );
+          return {
+            ...row,
+            plan_id: value,
+            sku: selected?.sku ?? "",
+            rate: selected?.rate ?? "",
+          };
+        }
+
+        return { ...row, [field]: value };
+      }),
     }));
     setError((current) => ({
       ...current,
@@ -809,12 +839,15 @@ export default function Page() {
                       name={pname(i, "plan_id")}
                       value={row?.plan_id}
                       onChange={(e) => onRowInput(i, "plan_id", e.target.value)}
+                      disabled={!row?.provider_id}
                       required
                     >
-                      <option value="" disabled selected>
-                        Select Plan
+                      <option value="">
+                        {row?.provider_id
+                          ? "Select Plan"
+                          : "Select a provider first"}
                       </option>
-                      {ddData?.data?.plans?.map((p) => (
+                      {plansForProvider(row?.provider_id).map((p) => (
                         <option key={p?.id} value={p?.id}>
                           {p?.name}
                         </option>

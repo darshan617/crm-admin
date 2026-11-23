@@ -279,10 +279,6 @@ const CreateEmployeeForm = ({ employeeId }) => {
       newError.role = "Please select a role.";
     }
 
-    if (!formState?.manager) {
-      newError.manager = "Please select a manager.";
-    }
-
     if (!formState?.max_quot_discount?.trim()) {
       newError.max_quot_discount = "Please enter max quot discount.";
     }
@@ -544,9 +540,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
           </label>
 
           <label className={styles.field}>
-            <span className={styles.label}>
-              Manager <span className={styles.required}>*</span>
-            </span>
+            <span className={styles.label}>Manager</span>
             <select
               className={`${styles.select} ${formState?.manager ? "" : styles.placeholder}`}
               name="manager"

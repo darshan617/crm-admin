@@ -131,13 +131,16 @@
 
 .actionMenu {
   position: relative;
+  z-index: 1;
+}
+
+.actionMenuOpen {
+  z-index: 40;
 }
 
 .quotationPopup {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 4;
+  position: fixed;
+  z-index: 1000;
   width: 260px;
   padding: 18px 16px 16px;
   background: #fff;
@@ -146,9 +149,9 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16);
   color: #333;
 }
-:global(.table-body) tr:nth-last-child(-n + 2) .quotationPopup {
-  top: auto;
-  bottom: calc(100% + 8px);
+
+.popupUp {
+  transform-origin: bottom right;
 }
 .popupTitle {
   margin-bottom: 16px;
