@@ -108,5 +108,5 @@ export const SIDEBAR_SECTIONS = [
 export const SIDEBAR_CHAT = {
   key: "crm-chat",
   name: "CRM Chat",
-  url: "/crm-chat",
+  url: "/crm-chats",
 };
