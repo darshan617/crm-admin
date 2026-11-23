@@ -123,6 +123,7 @@ const normalizeFollowUp = (item, index) => {
     letter: getInitial(company),
     company,
     contact,
+    salutation: item.salutation || customer.salutation || "",
     role: getText(item.role || item.designation || customer.designation, ""),
     email: getText(item.email || customer.email),
     phone: getText(
@@ -267,9 +268,8 @@ const Followup = () => {
 
   const pagination = response.pagination || response.meta || {};
 
-  const total = Number(
-    pagination.total ?? response.total ?? rawFollowups.length,
-  ) || 0;
+  const total =
+    Number(pagination.total ?? response.total ?? rawFollowups.length) || 0;
 
   const apiLastPage = Number(pagination.last_page ?? response.last_page) || 0;
   const returnedWholeList =
@@ -357,11 +357,10 @@ const Followup = () => {
       }
     });
 
-    router.push(
-      { pathname: router.pathname, query },
-      undefined,
-      { shallow: true, scroll: false },
-    );
+    router.push({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+      scroll: false,
+    });
   };
 
   useEffect(() => {
@@ -676,135 +675,138 @@ const Followup = () => {
             </div>
 
             {/* Table */}
-            <table className="crm-lead-table">
-              <thead>
-                <tr className="table-head">
-                  <td className="select-col">
-                    <input
-                      type="checkbox"
-                      id="selectAllTable"
-                      checked={allSelected}
-                      onChange={toggleAll}
-                      disabled={!followups.length}
-                    />
-                  </td>
-
-                  <td>Customer Name</td>
-                  <td>Contact Information</td>
-                  <td className={styles.statusCol}>Status</td>
-                  <td>Follow Up Date</td>
-                </tr>
-              </thead>
-
-              <tbody className="table-body">
-                {isLoading || isFetching ? (
-                  <tr>
-                    <td colSpan={5} className="text-center py-5">
-                      Loading follow-ups...
+            <div className={styles.tableResponsive}>
+              <table className="crm-lead-table">
+                <thead>
+                  <tr className="table-head">
+                    <td className="select-col">
+                      <input
+                        type="checkbox"
+                        id="selectAllTable"
+                        checked={allSelected}
+                        onChange={toggleAll}
+                        disabled={!followups.length}
+                      />
                     </td>
+
+                    <td>Customer Name</td>
+                    <td>Contact Information</td>
+                    <td className={styles.statusCol}>Status</td>
+                    <td>Follow Up Date</td>
                   </tr>
-                ) : isError ? (
-                  <tr>
-                    <td colSpan={5} className="text-center py-5">
-                      <p>{errorMessage}</p>
+                </thead>
 
-                      <button type="button" onClick={refetch}>
-                        Try Again
-                      </button>
-                    </td>
-                  </tr>
-                ) : followups.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center py-5">
-                      No follow-ups found.
-                    </td>
-                  </tr>
-                ) : (
-                  followups.map((f) => (
-                    <tr
-                      key={f.id}
-                      className="crm-lead-row table-row"
-                      style={{ cursor: "pointer" }}
-                    >
-                      {/* Checkbox */}
-                      <td className="select-col" data-label="">
-                        <input
-                          type="checkbox"
-                          name="selected_leads[]"
-                          value={f.id}
-                          checked={selected.includes(f.id)}
-                          onChange={() => toggleOne(f.id)}
-                        />
-                      </td>
-
-                      {/* Customer */}
-                      <td className="customer" data-label="Customer">
-                        <div className="avatar primary">{f.letter}</div>
-
-                        <div>
-                          <h5>{f.company}</h5>
-
-                          <p>
-                            {f.contact}
-                            {f.role && f.role !== "-" ? ` - ${f.role}` : ""}
-                          </p>
-                        </div>
-                      </td>
-
-                      {/* Contact */}
-                      <td className={styles.contactInfo} data-label="Contact">
-                        <div>
-                          <h5>{f.email}</h5>
-                          <p>{f.phone}</p>
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className={styles.statusCol} data-label="Status">
-                        <span className={`badge ${f.status.type}`}>
-                          {f.status.label}
-                        </span>
-                      </td>
-
-                      {/* Follow Up Date */}
-                      <td className="plan-action" data-label="Follow Up Date">
-                        <div className={styles.assignedUser}>
-                          <div className={styles.userInfo}>
-                            <div className={styles.avatarFlex}>
-                              <div className="mini-avatar primary">
-                                {f.assignee.letter}
-                              </div>
-
-                              <h5>{f.assignee.name}</h5>
-                            </div>
-
-                            <small>
-                              Follow up on&nbsp;
-                              <strong>{f.date}</strong>
-                            </small>
-                          </div>
-
-                          <div className="actions">
-                            <button
-                              type="button"
-                              className="action-btn"
-                              onClick={() => handleDetails(f.id)}
-                              aria-label="View follow-up details"
-                            >
-                              <LuChevronRight
-                                size={24}
-                                aria-hidden="true"
-                                className="lucide lucide-chevron-right"
-                              />
-                            </button>
-                          </div>
-                        </div>
+                <tbody className="table-body">
+                  {isLoading || isFetching ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-5">
+                        Loading follow-ups...
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : isError ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-5">
+                        <p>{errorMessage}</p>
+
+                        <button type="button" onClick={refetch}>
+                          Try Again
+                        </button>
+                      </td>
+                    </tr>
+                  ) : followups.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="text-center py-5">
+                        No follow-ups found.
+                      </td>
+                    </tr>
+                  ) : (
+                    followups.map((f) => (
+                      <tr
+                        key={f.id}
+                        className="crm-lead-row table-row"
+                        style={{ cursor: "pointer" }}
+                      >
+                        {/* Checkbox */}
+                        <td className="select-col" data-label="">
+                          <input
+                            type="checkbox"
+                            name="selected_leads[]"
+                            value={f?.id}
+                            checked={selected.includes(f?.id)}
+                            onChange={() => toggleOne(f?.id)}
+                          />
+                        </td>
+
+                        {/* Customer */}
+                        <td className="customer" data-label="Customer">
+                          <div className="avatar primary">{f?.letter}</div>
+
+                          <div>
+                            <h5>{f?.company}</h5>
+
+                            <p>
+                              {f?.salutation ? `${f.salutation}. ` : ""}
+                              {f?.contact || "-"}
+                              {f?.role && f.role !== "-" ? ` - ${f.role}` : ""}
+                            </p>
+                          </div>
+                        </td>
+
+                        {/* Contact */}
+                        <td className={styles.contactInfo} data-label="Contact">
+                          <div>
+                            <h5>{f?.email}</h5>
+                            <p>{f?.phone}</p>
+                          </div>
+                        </td>
+
+                        {/* Status */}
+                        <td className={styles.statusCol} data-label="Status">
+                          <span className={`badge ${f?.status?.type}`}>
+                            {f?.status?.label}
+                          </span>
+                        </td>
+
+                        {/* Follow Up Date */}
+                        <td className="plan-action" data-label="Follow Up Date">
+                          <div className={styles.assignedUser}>
+                            <div className={styles.userInfo}>
+                              <div className={styles.avatarFlex}>
+                                <div className="mini-avatar primary">
+                                  {f?.assignee?.letter}
+                                </div>
+
+                                <h5>{f?.assignee?.name}</h5>
+                              </div>
+
+                              <small>
+                                Follow up on&nbsp;
+                                <strong>{f?.date}</strong>
+                              </small>
+                            </div>
+
+                            <div className="actions">
+                              <button
+                                type="button"
+                                className="action-btn"
+                                onClick={() => handleDetails(f?.id)}
+                                aria-label="View follow-up details"
+                              >
+                                <LuChevronRight
+                                  size={24}
+                                  aria-hidden="true"
+                                  className="lucide lucide-chevron-right"
+                                />
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
             <Pagination
               page={currentPage}

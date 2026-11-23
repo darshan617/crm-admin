@@ -91,12 +91,27 @@ const getStatusClass = (status) =>
 
 const isApproved = (quotation) =>
   String(
-    quotation?.quotation_status || quotation?.status || "",
-  ).toLowerCase() === "approved";
+    quotation?.quotation_status_label ||
+      quotation?.quotation_status ||
+      quotation?.status ||
+      "",
+  )
+    .toLowerCase()
+    .trim() === "approved";
 
 const getCompany = (quotation) => quotation.company_name || "-";
-const getContact = (quotation) =>
-  quotation.contact_name || quotation.name || quotation.email || "-";
+const getContact = (quotation) => {
+  const name =
+    quotation.contact_name || quotation.name || quotation.email || "";
+  if (!name) return "-";
+
+  const salutation = quotation.salutation?.trim();
+  const designation =
+    quotation.designation?.trim() || quotation.lead?.designation?.trim() || "";
+
+  const withSalutation = salutation ? `${salutation} ${name}` : name;
+  return designation ? `${withSalutation} - ${designation}` : withSalutation;
+};
 const getAssignee = (quotation) =>
   quotation.assigned_to?.name ||
   quotation.assigned_to ||
@@ -159,6 +174,7 @@ const Quotation = () => {
     sendMode: "quotation",
     discountQuotationId: null,
   });
+  const [menuPos, setMenuPos] = useState(null);
   const { showToast } = useToast();
 
   const updateView = (updates) =>
@@ -424,22 +440,41 @@ const Quotation = () => {
     });
   };
 
-  const openQuotationMenu = (quotation, event) => {
-    event.stopPropagation();
-    setView((current) => ({
-      ...current,
-      activeQuotationId:
-        current.activeQuotationId === quotation.id ? null : quotation.id,
-    }));
+  const closeMenu = () => {
+    setMenuPos(null);
+    updateView({ activeQuotationId: null });
   };
 
-  const closeMenu = () => updateView({ activeQuotationId: null });
+  const openQuotationMenu = (quotation, event) => {
+    event.stopPropagation();
+
+    if (view.activeQuotationId === quotation.id) {
+      closeMenu();
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const popupHeight = 260;
+    const gap = 8;
+    const openUp =
+      rect.bottom + gap + popupHeight > window.innerHeight &&
+      rect.top > popupHeight + gap;
+
+    setMenuPos({
+      openUp,
+      top: openUp ? undefined : rect.bottom + gap,
+      bottom: openUp ? window.innerHeight - rect.top + gap : undefined,
+      right: Math.max(8, window.innerWidth - rect.right),
+    });
+    updateView({ activeQuotationId: quotation.id });
+  };
 
   useEffect(() => {
     if (view.activeQuotationId === null) return;
 
     const handleOutsideClick = (event) => {
       if (!popupRef.current?.contains(event.target)) {
+        setMenuPos(null);
         setView((current) =>
           current.activeQuotationId === null
             ? current
@@ -448,9 +483,16 @@ const Quotation = () => {
       }
     };
 
+    const handleRepositionClose = () => closeMenu();
+
     document.addEventListener("pointerdown", handleOutsideClick);
-    return () =>
+    window.addEventListener("resize", handleRepositionClose);
+    window.addEventListener("scroll", handleRepositionClose, true);
+    return () => {
       document.removeEventListener("pointerdown", handleOutsideClick);
+      window.removeEventListener("resize", handleRepositionClose);
+      window.removeEventListener("scroll", handleRepositionClose, true);
+    };
   }, [view.activeQuotationId]);
 
   const getInvoiceStatus = (invoiceStatus) => {
@@ -591,7 +633,9 @@ const Quotation = () => {
               </div>
 
               <div
-                className={`${styles.actionMenu} actions`}
+                className={`${styles.actionMenu} actions ${
+                  isMenuOpen ? styles.actionMenuOpen : ""
+                }`}
                 ref={isMenuOpen ? popupRef : null}
               >
                 <button
@@ -603,9 +647,18 @@ const Quotation = () => {
                   <LuChevronRight size={24} aria-hidden="true" />
                 </button>
 
-                {isMenuOpen && (
+                {isMenuOpen && menuPos && (
                   <div
-                    className={styles.quotationPopup}
+                    className={`${styles.quotationPopup} ${
+                      menuPos.openUp ? styles.popupUp : ""
+                    }`}
+                    style={{
+                      position: "fixed",
+                      top: menuPos.top,
+                      bottom: menuPos.bottom,
+                      right: menuPos.right,
+                      left: "auto",
+                    }}
                     onClick={(event) => event.stopPropagation()}
                   >
                     <div className={styles.popupTitle}>Quotation</div>
@@ -657,6 +710,7 @@ const Quotation = () => {
                         className={styles.popupAction}
                         onClick={(event) => {
                           event.stopPropagation();
+                          setMenuPos(null);
                           updateView({
                             activeQuotationId: null,
                             sendQuotationId: quotation.id,
@@ -698,6 +752,7 @@ const Quotation = () => {
                             className={styles.popupAction}
                             onClick={(event) => {
                               event.stopPropagation();
+                              setMenuPos(null);
                               updateView({
                                 activeQuotationId: null,
                                 sendQuotationId: quotation.id,
@@ -726,6 +781,7 @@ const Quotation = () => {
                           onClick={(event) => {
                             event.stopPropagation();
                             if (quotation.discount_sent) return;
+                            setMenuPos(null);
                             updateView({
                               activeQuotationId: null,
                               discountQuotationId: quotation.id,

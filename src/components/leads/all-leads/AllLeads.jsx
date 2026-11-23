@@ -643,7 +643,11 @@ export default function AllLeads({
 
                   <div>
                     <h5>{lead?.company_name || "-"}</h5>
-                    <p>{lead?.name || "-"}</p>
+                    <p>
+                      {lead?.salutation ? `${lead.salutation}. ` : ""}
+                      {lead?.name || "-"}
+                      {lead?.designation ? ` - ${lead.designation}` : ""}
+                    </p>
                   </div>
                 </td>
 
@@ -657,7 +661,9 @@ export default function AllLeads({
 
                 {/* Status */}
                 <td className={styles.statusCol}>
-                  <span className={`badge ${styles.statusText} ${lead?.lead_status}`}>
+                  <span
+                    className={`badge ${styles.statusText} ${lead?.lead_status}`}
+                  >
                     {lead?.lead_status || "-"}
                   </span>
                 </td>
@@ -676,7 +682,7 @@ export default function AllLeads({
 
                       <small>
                         Follow up on&nbsp;
-                        <strong>{lead?.follow_up_date || "-"}</strong>
+                        <span>{lead?.follow_up_date || "-"}</span>
                       </small>
                     </div>
 

@@ -10,6 +10,7 @@ import {
 } from "@/redux/apis/quotationApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
+import { IoMdArrowBack } from "react-icons/io";
 
 const History = () => {
   const router = useRouter();
@@ -18,9 +19,7 @@ const History = () => {
   const { showToast } = useToast();
   const { canView, canEdit } = usePermissions();
   const canSeeQuotations = canView("quotations");
-  const canUpdateStatus = canEdit(
-    "update_status_of_invoice_and_quotation",
-  );
+  const canUpdateStatus = canEdit("update_status_of_invoice_and_quotation");
 
   const [status, setStatus] = useState({
     quotation: "not_shared",
@@ -160,6 +159,7 @@ const History = () => {
             onClick={() => router.back()}
             className="back-btn"
           >
+            <IoMdArrowBack />
             <span>Back</span>
           </button>
         </div>
