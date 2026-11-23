@@ -18,6 +18,7 @@ import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useMyProfileQuery } from "@/redux/apis/authApi";
+import { useNotificationQuery } from "@/redux/apis/notificationApi";
 
 const subscribeToUserCookie = (onStoreChange) => {
   window.addEventListener("crm-user-updated", onStoreChange);
@@ -53,48 +54,41 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New Support Ticket",
-      message: "A new support ticket has been created.",
-      time: "5 minutes ago",
-      unread: true,
-    },
-    {
-      id: 2,
-      title: "Payment Received",
-      message: "Payment of ₹12,500 received successfully.",
-      time: "20 minutes ago",
-      unread: true,
-    },
-    {
-      id: 3,
-      title: "Invoice Pending",
-      message: "Invoice #INV1025 is pending payment.",
-      time: "1 hour ago",
-      unread: true,
-    },
-    {
-      id: 4,
-      title: "New Customer",
-      message: "A new customer has been registered.",
-      time: "2 hours ago",
-      unread: false,
-    },
-    {
-      id: 5,
-      title: "Ticket Escalated",
-      message: "Support ticket SUP0011 has been escalated.",
-      time: "3 hours ago",
-      unread: false,
-    },
-  ]);
+  // ids of notifications the user has opened in this session
+  const [readIds, setReadIds] = useState([]);
+
+  // userCookie must be declared before any hook that uses it
   const userCookie = useSyncExternalStore(
     subscribeToUserCookie,
     getUserCookieSnapshot,
     getServerUserCookieSnapshot,
   );
+
+  const { data: notificationResponse } = useNotificationQuery(undefined, {
+    skip: !userCookie,
+  });
+
+  const notificationData = notificationResponse?.data || {};
+
+  const notifications = useMemo(() => {
+    const items = Array.isArray(notificationData.items)
+      ? notificationData.items
+      : [];
+
+    return items.map((item) => ({
+      id: item.id,
+      title: item.title || "-",
+      label: item.label || "",
+      status: item.lead_status || "",
+      meta: item.meta || item.follow_up_label || "",
+      bucket: item.bucket,
+      isOverdue: Boolean(item.is_overdue),
+      unread: !item.is_read && !readIds.includes(item.id),
+    }));
+  }, [notificationData.items, readIds]);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
   const userData = useMemo(() => {
     if (!userCookie) return {};
 
@@ -121,12 +115,28 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     setAvatarFailed(false);
   }, [avatarSrc]);
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
   const markOneRead = (id) =>
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, unread: false } : n)),
-    );
+    setReadIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+
+  // Open a notification: mark it read, close the panel, go to follow-up details
+  const handleNotificationClick = (id) => {
+    markOneRead(id);
+    setNotificationOpen(false);
+    router.push(`/follow-up/follow-up-details?id=${encodeURIComponent(id)}`);
+  };
+
+  // Footer links: open the follow-up list with the matching filter
+  const goToFollowUps = (filter) => {
+    setNotificationOpen(false);
+    router.push({
+      pathname: "/follow-up",
+      query: {
+        filter,
+        page_no: 1,
+        items_per_page: 10,
+      },
+    });
+  };
 
   const handleLogout = () => {
     try {
@@ -252,7 +262,9 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
                 <div className={styles.profileContent}>
                   <div
                     className={`${styles.profileAvatar} ${
-                      avatarSrc && !avatarFailed ? styles.profileAvatarPhoto : ""
+                      avatarSrc && !avatarFailed
+                        ? styles.profileAvatarPhoto
+                        : ""
                     }`}
                   >
                     {avatarSrc && !avatarFailed ? (
@@ -326,23 +338,42 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
         </div>
 
         <div className={styles.notifBody}>
-          {notifications.map((item) => (
-            <button
-              type="button"
-              key={item.id}
-              className={`${styles.sideNotification} ${
-                item.unread ? styles.unread : ""
-              }`}
-              onClick={() => markOneRead(item.id)}
-            >
-              <div className={styles.sideNotificationTop}>
-                <h4>{item.title}</h4>
-                {item.unread && <span className={styles.sideDot} />}
-              </div>
-              <p>{item.message}</p>
-              <small>{item.time}</small>
-            </button>
-          ))}
+          {notifications.length === 0 ? (
+            <p className={styles.notifEmpty}>No notifications</p>
+          ) : (
+            notifications.map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                className={`${styles.sideNotification} ${
+                  item.unread ? styles.unread : ""
+                }`}
+                onClick={() => handleNotificationClick(item.id)}
+              >
+                <div className={styles.sideNotificationTop}>
+                  <h4>{item.title}</h4>
+                  {item.unread && <span className={styles.sideDot} />}
+                </div>
+                <p>
+                  {item.label}
+                  {item.status ? ` · ${item.status}` : ""}
+                </p>
+                <small>{item.meta}</small>
+              </button>
+            ))
+          )}
+        </div>
+
+        <div className={styles.notifFooter}>
+          <button type="button" onClick={() => goToFollowUps("today")}>
+            Today
+          </button>
+          <button type="button" onClick={() => goToFollowUps("overdue")}>
+            Overdue
+          </button>
+          <button type="button" onClick={() => goToFollowUps("all")}>
+            View all
+          </button>
         </div>
       </aside>
     </>

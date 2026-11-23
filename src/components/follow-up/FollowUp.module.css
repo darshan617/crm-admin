@@ -104,7 +104,10 @@
 
 .filterGrid {
   display: grid;
-  grid-template-columns: minmax(280px, 1.5fr) minmax(160px, 1fr) minmax(160px, 1fr);
+  grid-template-columns: minmax(280px, 1.5fr) minmax(160px, 1fr) minmax(
+      160px,
+      1fr
+    );
   align-items: start;
   gap: 22px 28px;
 }
@@ -208,6 +211,17 @@
   gap: 10px;
 }
 
+.tableResponsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .tableResponsive > table {
+    min-width: 900px;
+  }
+}
 @media (max-width: 991px) {
   .crmLeadTabs {
     overflow-x: auto;
