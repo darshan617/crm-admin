@@ -361,6 +361,10 @@
   line-height: normal;
   cursor: pointer;
   transition: 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 /* ---------- Documents ---------- */

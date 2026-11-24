@@ -67,7 +67,9 @@ const toOptions = (list) => {
 };
 
 const firstList = (meta, keys) =>
-  keys.map((key) => meta?.[key]).find((list) => Array.isArray(list) && list.length);
+  keys
+    .map((key) => meta?.[key])
+    .find((list) => Array.isArray(list) && list.length);
 
 const personOptions = (list) =>
   toOptions(
@@ -92,7 +94,10 @@ function FilterSelect({ label, value, options, onChange }) {
     <div className="filter-group">
       <h6>{label} :</h6>
       <div className="filter-options">
-        <select value={value} onChange={(event) => onChange(event.target.value)}>
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        >
           <option value="">Select</option>
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -170,7 +175,8 @@ export default function CrmDeals() {
   const filtersMeta = data?.data?.filters || data?.filters || {};
   const total = Number(pagination.total ?? deals.length) || 0;
   const perPage = Number(pagination.item_per_page || pagination.per_page) || 10;
-  const currentPage = Number(pagination.page_no || pagination.current_page) || page;
+  const currentPage =
+    Number(pagination.page_no || pagination.current_page) || page;
   const rangeFrom = total
     ? Number(pagination.from) || (currentPage - 1) * perPage + 1
     : 0;
@@ -303,12 +309,19 @@ export default function CrmDeals() {
                   const value = event.target.value;
                   setSearchInput(value);
                   clearTimeout(searchTimer.current);
-                  searchTimer.current = setTimeout(() => applySearch(value), 400);
+                  searchTimer.current = setTimeout(
+                    () => applySearch(value),
+                    400,
+                  );
                 }}
                 placeholder="Search company, quote, employee"
                 autoComplete="off"
               />
-              <button type="submit" className={styles.searchButton} aria-label="Search">
+              <button
+                type="submit"
+                className={styles.searchButton}
+                aria-label="Search"
+              >
                 <IoSearch />
               </button>
             </form>
@@ -335,7 +348,9 @@ export default function CrmDeals() {
                       aria-label="From date"
                       type="date"
                       value={filters.from}
-                      onChange={(event) => updateFilter("from", event.target.value)}
+                      onChange={(event) =>
+                        updateFilter("from", event.target.value)
+                      }
                     />
                   </div>
                   <div className="date-input">
@@ -343,7 +358,9 @@ export default function CrmDeals() {
                       aria-label="To date"
                       type="date"
                       value={filters.to}
-                      onChange={(event) => updateFilter("to", event.target.value)}
+                      onChange={(event) =>
+                        updateFilter("to", event.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -398,7 +415,11 @@ export default function CrmDeals() {
               <span>{filtersOpen ? "Close" : "Filters"}</span>
             </button>
             {(filtersOpen || hasActiveFilters) && (
-              <button className="filter-btn" type="button" onClick={clearFilters}>
+              <button
+                className="filter-btn"
+                type="button"
+                onClick={clearFilters}
+              >
                 <span>Clear</span>
               </button>
             )}
@@ -410,7 +431,7 @@ export default function CrmDeals() {
                 <td className="order-id">Id</td>
                 <td className="order-id">Contact Information</td>
                 <td className="order-id">Plan</td>
-                <td className="status-col">Status</td>
+                <td className="status-col text-center">Status</td>
                 <td className="status-col">Assigned To</td>
               </tr>
             </thead>
@@ -477,8 +498,13 @@ export default function CrmDeals() {
                       </div>
                     </td>
 
-                    <td className="status-col" data-label="Status">
-                      <span className="badge approved">
+                    <td className="status-col text-center" data-label="Status">
+                      <span
+                        className={`badge ${deal?.status_label === "Active" ? "approved" : "pending"} mb-1 me-2`}
+                      >
+                        {deal?.status_label}
+                      </span>{" "}
+                      <span className="badge grayBadge">
                         {deal?.crm_order_no}
                       </span>
                     </td>

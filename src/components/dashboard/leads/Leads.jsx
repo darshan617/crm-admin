@@ -127,6 +127,7 @@ const Leads = () => {
         designation: "",
         email: "",
         mobile: "",
+        mobile_code: "91",
       },
     ],
     lead_specification: {
@@ -534,6 +535,7 @@ const Leads = () => {
             designation: "",
             email: "",
             mobile: "",
+            mobile_code: "91",
           },
         ],
       }));
@@ -666,6 +668,7 @@ const Leads = () => {
               designation: "",
               email: "",
               mobile: "",
+              mobile_code: "91",
             },
           ],
           lead_specification: {
@@ -833,7 +836,6 @@ const Leads = () => {
                     value="91"
                     name="mobile_code"
                     aria-label="Country code"
-                    disabled
                   >
                     <option value="91">91</option>
                   </select>
@@ -1566,15 +1568,29 @@ const Leads = () => {
                       {/* Mobile */}
                       <div className="form-group">
                         <label>Mobile No.</label>
-                        <input
-                          type="tel"
-                          name="mobile"
-                          maxLength={10}
-                          value={item.mobile}
-                          onChange={(e) =>
-                            handleFormChange(e, "additional_contact", idx)
-                          }
-                        />
+                        <div className="phone-group">
+                          <select
+                            name="mobile_code"
+                            aria-label="Country code"
+                            value={item.mobile_code || "91"}
+                            onChange={(e) =>
+                              handleFormChange(e, "additional_contact", idx)
+                            }
+                          >
+                            <option value="91">91</option>
+                          </select>
+                          <input
+                            type="tel"
+                            inputMode="numeric"
+                            name="mobile"
+                            maxLength={10}
+                            value={item.mobile}
+                            onChange={(e) => {
+                              e.target.value = e.target.value.replace(/\D/g, "");
+                              handleFormChange(e, "additional_contact", idx);
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
