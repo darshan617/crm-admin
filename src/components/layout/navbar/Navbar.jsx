@@ -5,7 +5,14 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import { FiBell, FiSearch, FiChevronDown, FiX, FiUser } from "react-icons/fi";
+import {
+  FiBell,
+  FiSearch,
+  FiChevronDown,
+  FiX,
+  FiUser,
+  FiTrash2,
+} from "react-icons/fi";
 import styles from "./Navbar.module.css";
 import {
   TbLayoutSidebarLeftExpand,
@@ -18,7 +25,11 @@ import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useMyProfileQuery } from "@/redux/apis/authApi";
-import { useNotificationQuery } from "@/redux/apis/notificationApi";
+import {
+  useNotificationQuery,
+  useNotificationReadMutation,
+  useNotificationDeleteMutation,
+} from "@/redux/apis/notificationApi";
 
 const subscribeToUserCookie = (onStoreChange) => {
   window.addEventListener("crm-user-updated", onStoreChange);
@@ -49,15 +60,34 @@ const resolveAvatarUrl = (avatar) => {
   return `${base}/${avatar.replace(/^\/+/, "")}`;
 };
 
+// The backend's expected body key is unknown, so the id is sent under every
+// common name. Once the Network tab shows which key the server reads, keep
+// only that one and delete the others.
+const buildBody = (list) => ({
+  ids: list,
+  notification_ids: list,
+  id: list[0],
+  notification_id: list[0],
+});
+
+// Reads the first non-empty value among possible field names
+const pick = (item, keys) => {
+  for (const key of keys) {
+    if (item?.[key]) return item[key];
+  }
+  return null;
+};
+
 const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { showToast } = useToast();
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  // ids of notifications the user has opened in this session
+  // ids marked read in this session (instant UI feedback)
   const [readIds, setReadIds] = useState([]);
+  // ids deleted with the bin icon in this session (instant UI feedback)
+  const [dismissedIds, setDismissedIds] = useState([]);
 
-  // userCookie must be declared before any hook that uses it
   const userCookie = useSyncExternalStore(
     subscribeToUserCookie,
     getUserCookieSnapshot,
@@ -67,6 +97,8 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   const { data: notificationResponse } = useNotificationQuery(undefined, {
     skip: !userCookie,
   });
+  const [notificationReadMutation] = useNotificationReadMutation();
+  const [notificationDeleteMutation] = useNotificationDeleteMutation();
 
   const notificationData = notificationResponse?.data || {};
 
@@ -75,17 +107,25 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
       ? notificationData.items
       : [];
 
-    return items.map((item) => ({
-      id: item.id,
-      title: item.title || "-",
-      label: item.label || "",
-      status: item.lead_status || "",
-      meta: item.meta || item.follow_up_label || "",
-      bucket: item.bucket,
-      isOverdue: Boolean(item.is_overdue),
-      unread: !item.is_read && !readIds.includes(item.id),
-    }));
-  }, [notificationData.items, readIds]);
+    return items
+      .filter(
+        (item) =>
+          !dismissedIds.includes(item.id) &&
+          !pick(item, ["is_dismissed", "dismissed", "dismissed_at"]),
+      )
+      .map((item) => ({
+        id: item.id,
+        title: item.title || "-",
+        label: item.label || "",
+        status: item.lead_status || "",
+        meta: item.meta || item.follow_up_label || "",
+        bucket: item.bucket,
+        isOverdue: Boolean(item.is_overdue),
+        unread:
+          !pick(item, ["is_read", "read", "read_at"]) &&
+          !readIds.includes(item.id),
+      }));
+  }, [notificationData.items, readIds, dismissedIds]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -115,12 +155,59 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     setAvatarFailed(false);
   }, [avatarSrc]);
 
-  const markOneRead = (id) =>
-    setReadIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  // POST /api/crm/notifications/read -> { success, message, data: { dismissed } }
+  const handleNotificationRead = async (ids) => {
+    const list = Array.isArray(ids) ? ids : [ids];
+    const body = buildBody(list);
+
+    setReadIds((prev) => [...new Set([...prev, ...list])]);
+
+    try {
+      // DEBUG: remove these two logs once it works
+      console.log("[notification read] sent:", body);
+      const res = await notificationReadMutation(body).unwrap();
+      console.log("[notification read] received:", res);
+
+      if (!res?.success || !res?.data?.dismissed) {
+        setReadIds((prev) => prev.filter((id) => !list.includes(id)));
+        if (res?.message) showToast(res.message, "error");
+      }
+    } catch (error) {
+      setReadIds((prev) => prev.filter((id) => !list.includes(id)));
+      const msg = error?.data?.message;
+      if (msg) showToast(msg, "error");
+    }
+  };
+
+  // POST /api/crm/notifications/delete -> { success, message, data: { deleted } }
+  const handleNotificationDelete = async (id) => {
+    const body = buildBody([id]);
+
+    setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+
+    try {
+      // DEBUG: remove these two logs once it works
+      console.log("[notification delete] sent:", body);
+      const res = await notificationDeleteMutation(body).unwrap();
+      console.log("[notification delete] received:", res);
+
+      if (!res?.success || !res?.data?.deleted) {
+        setDismissedIds((prev) => prev.filter((x) => x !== id));
+        if (res?.message) showToast(res.message, "error");
+        return;
+      }
+
+      if (res?.message) showToast(res.message, "success");
+    } catch (error) {
+      setDismissedIds((prev) => prev.filter((x) => x !== id));
+      const msg = error?.data?.message;
+      if (msg) showToast(msg, "error");
+    }
+  };
 
   // Open a notification: mark it read, close the panel, go to follow-up details
   const handleNotificationClick = (id) => {
-    markOneRead(id);
+    handleNotificationRead(id); // fire and forget, don't block navigation
     setNotificationOpen(false);
     router.push(`/follow-up/follow-up-details?id=${encodeURIComponent(id)}`);
   };
@@ -342,24 +429,36 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
             <p className={styles.notifEmpty}>No notifications</p>
           ) : (
             notifications.map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                className={`${styles.sideNotification} ${
-                  item.unread ? styles.unread : ""
-                }`}
-                onClick={() => handleNotificationClick(item.id)}
-              >
-                <div className={styles.sideNotificationTop}>
-                  <h4>{item.title}</h4>
-                  {item.unread && <span className={styles.sideDot} />}
-                </div>
-                <p>
-                  {item.label}
-                  {item.status ? ` · ${item.status}` : ""}
-                </p>
-                <small>{item.meta}</small>
-              </button>
+              <div className={styles.sideNotificationItem} key={item.id}>
+                <button
+                  type="button"
+                  className={`${styles.sideNotification} ${
+                    item.unread ? styles.unread : ""
+                  }`}
+                  onClick={() => handleNotificationClick(item.id)}
+                >
+                  <div className={styles.sideNotificationTop}>
+                    <h4>{item.title}</h4>
+                    {item.unread && <span className={styles.sideDot} />}
+                  </div>
+                  <p>
+                    {item.label}
+                    {item.status ? ` · ${item.status}` : ""}
+                  </p>
+                  <small>{item.meta}</small>
+                </button>
+
+                {/* Bin icon: bottom-right corner of the notification */}
+                <button
+                  type="button"
+                  className={styles.notifDelete}
+                  aria-label="Delete notification"
+                  title="Delete"
+                  onClick={() => handleNotificationDelete(item.id)}
+                >
+                  <FiTrash2 />
+                </button>
+              </div>
             ))
           )}
         </div>
