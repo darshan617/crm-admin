@@ -303,7 +303,7 @@ const CrmOrderView = () => {
             ["Type", deal.deal_type || "-"],
             ["Billing Cycle", order.period || deal.quotation_period || "-"],
             ["Start Date", converted ? defaultStart : "—"],
-            ["Next Renewal", deal.next_renewal || "—"],
+            ["Next Renewal", deal.renewal_date || "—"],
             [
               "Amount",
               `₹${Number(order.total_amount ?? deal.total_amount ?? 0).toLocaleString("en-IN")}`,

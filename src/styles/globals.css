@@ -754,6 +754,11 @@ table {
   color: #fff;
 }
 
+.grayBadge {
+  background: #e3e3e3;
+  color: #060606;
+}
+
 .common-table-header.crm-quo-header,
 .common-table-header.es-quo-header {
   display: flex;

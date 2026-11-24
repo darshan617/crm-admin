@@ -155,22 +155,19 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     setAvatarFailed(false);
   }, [avatarSrc]);
 
-  // POST /api/crm/notifications/read -> { success, message, data: { dismissed } }
   const handleNotificationRead = async (ids) => {
     const list = Array.isArray(ids) ? ids : [ids];
-    const body = buildBody(list);
+    const body = {
+      id: ids,
+    };
 
     setReadIds((prev) => [...new Set([...prev, ...list])]);
 
     try {
-      // DEBUG: remove these two logs once it works
-      console.log("[notification read] sent:", body);
       const res = await notificationReadMutation(body).unwrap();
-      console.log("[notification read] received:", res);
-
+      if (res?.message) showToast(res.message, "success");
       if (!res?.success || !res?.data?.dismissed) {
         setReadIds((prev) => prev.filter((id) => !list.includes(id)));
-        if (res?.message) showToast(res.message, "error");
       }
     } catch (error) {
       setReadIds((prev) => prev.filter((id) => !list.includes(id)));
@@ -179,17 +176,13 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
     }
   };
 
-  // POST /api/crm/notifications/delete -> { success, message, data: { deleted } }
   const handleNotificationDelete = async (id) => {
     const body = buildBody([id]);
 
     setDismissedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
 
     try {
-      // DEBUG: remove these two logs once it works
-      console.log("[notification delete] sent:", body);
       const res = await notificationDeleteMutation(body).unwrap();
-      console.log("[notification delete] received:", res);
 
       if (!res?.success || !res?.data?.deleted) {
         setDismissedIds((prev) => prev.filter((x) => x !== id));
@@ -425,10 +418,10 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
         </div>
 
         <div className={styles.notifBody}>
-          {notifications.length === 0 ? (
+          {notifications?.length === 0 ? (
             <p className={styles.notifEmpty}>No notifications</p>
           ) : (
-            notifications.map((item) => (
+            notifications?.map((item) => (
               <div className={styles.sideNotificationItem} key={item.id}>
                 <button
                   type="button"

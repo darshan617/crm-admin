@@ -84,7 +84,13 @@ export default function Page() {
     },
     { skip: !canCreateQuotation || formData?.lead === "" },
   );
-  console.log(getLeadDeatils, "getLeadDeatils");
+
+  const maxDiscount = (() => {
+    const raw = ddData?.data?.max_discount;
+    if (raw === null || raw === undefined || raw === "") return null;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : null;
+  })();
 
   // Debounce the typed email so we don't hit the API on every keystroke
   useEffect(() => {
@@ -269,12 +275,16 @@ export default function Page() {
       newError.email = "Please enter a valid email.";
     }
 
+    const discountCap = maxDiscount ?? 100;
     if (
       formData.discount === "" ||
       Number(formData.discount) < 0 ||
-      Number(formData.discount) > 100
+      Number(formData.discount) > discountCap
     ) {
-      newError.discount = "Please enter a discount between 0 and 100.";
+      newError.discount =
+        maxDiscount != null
+          ? `Please enter a discount between 0 and ${maxDiscount}.`
+          : "Please enter a discount between 0 and 100.";
     }
 
     if (!formData.plans || formData.plans.length === 0) {
@@ -316,6 +326,24 @@ export default function Page() {
       setField("domain_type", "new");
     }
   }, [domainAvailable?.data, formData.domain_name]);
+
+  useEffect(() => {
+    const leadIdFromQuery = router.query?.lead_id;
+    const leads = ddData?.data?.leads;
+    if (!leadIdFromQuery || !Array.isArray(leads) || formData.lead?.value) {
+      return;
+    }
+
+    const matchedLead = leads.find(
+      (lead) => String(lead.id) === String(leadIdFromQuery),
+    );
+    if (!matchedLead) return;
+
+    setField("lead", {
+      value: matchedLead.id,
+      label: `${matchedLead.company_name} (${matchedLead?.name})`,
+    });
+  }, [router.query?.lead_id, ddData?.data?.leads, formData.lead?.value]);
 
   useEffect(() => {
     if (!getLeadDeatils?.data?.lead) return;
@@ -607,12 +635,35 @@ export default function Page() {
                 type="number"
                 name="discount"
                 min="0"
-                max="100"
+                max={maxDiscount ?? 100}
                 step="0.01"
                 value={form.discount}
-                onChange={(e) => setField("discount", e.target.value)}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  if (nextValue === "") {
+                    setField("discount", "");
+                    return;
+                  }
+
+                  const numericValue = Number(nextValue);
+                  if (!Number.isFinite(numericValue) || numericValue < 0) {
+                    return;
+                  }
+
+                  if (maxDiscount != null && numericValue > maxDiscount) {
+                    setField("discount", String(maxDiscount));
+                    return;
+                  }
+
+                  setField("discount", nextValue);
+                }}
                 required
               />
+              {maxDiscount != null && (
+                <p className={styles.maxDiscountHint}>
+                  Max discount: {maxDiscount}%
+                </p>
+              )}
               {error?.discount && (
                 <p className={styles.errorMessage}>{error.discount}</p>
               )}

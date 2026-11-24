@@ -25,6 +25,13 @@ const DiscountRequestPopup = ({ isOpen, onClose, quotation }) => {
   const employees = employeeData?.data?.employees || [];
   const selectedEmployee =
     employeeName || employees[0]?.name || employees[0] || "";
+  const maxDiscount = (() => {
+    const raw = employeeData?.data?.max_discount;
+    if (raw === null || raw === undefined || raw === "") return null;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : null;
+  })();
+  const discountCap = maxDiscount ?? 100;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -55,9 +62,13 @@ const DiscountRequestPopup = ({ isOpen, onClose, quotation }) => {
       value === "" ||
       !Number.isFinite(amount) ||
       amount < 0 ||
-      amount > 100
+      amount > discountCap
     ) {
-      setError("Please enter a discount between 0 and 100.");
+      setError(
+        maxDiscount != null
+          ? `Please enter a discount between 0 and ${maxDiscount}.`
+          : "Please enter a discount between 0 and 100.",
+      );
       return;
     }
 
@@ -138,15 +149,38 @@ const DiscountRequestPopup = ({ isOpen, onClose, quotation }) => {
               type="number"
               name="discount"
               min="0"
-              max="100"
+              max={discountCap}
               step="0.01"
               value={discount}
               autoFocus
               onChange={(event) => {
-                setDiscount(event.target.value);
+                const nextValue = event.target.value;
+                if (nextValue === "") {
+                  setDiscount("");
+                  if (error) setError("");
+                  return;
+                }
+
+                const numericValue = Number(nextValue);
+                if (!Number.isFinite(numericValue) || numericValue < 0) {
+                  return;
+                }
+
+                if (maxDiscount != null && numericValue > maxDiscount) {
+                  setDiscount(String(maxDiscount));
+                  if (error) setError("");
+                  return;
+                }
+
+                setDiscount(nextValue);
                 if (error) setError("");
               }}
             />
+            {maxDiscount != null && (
+              <p className={styles.maxDiscountHint}>
+                Max discount: {maxDiscount}%
+              </p>
+            )}
             {error && <p className={styles.error}>{error}</p>}
           </div>
         </div>
