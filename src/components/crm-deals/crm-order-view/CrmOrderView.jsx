@@ -50,7 +50,6 @@ const CrmOrderView = () => {
     { id: slug },
     { skip: !router.isReady || !slug || !canSeeDeals },
   );
-
   const [DealsPoSource, { isLoading: isPoSubmitting }] =
     useDealsPoSourceMutation();
 

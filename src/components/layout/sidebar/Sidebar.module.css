@@ -184,9 +184,82 @@
   white-space: nowrap;
 }
 
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.monthlyTarget {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  grid-template-rows: repeat(3, auto) auto;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 4px;
+  width: 100%;
+  min-height: 90px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  border-radius: 9px;
+  background: #0759ad;
+  box-shadow: 0 2px 6px rgba(7, 89, 173, 0.2);
+  color: #fff;
+}
+
+.monthlyTargetTitle {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.monthlyTargetPeriod {
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.8;
+}
+
+.monthlyTargetAmount {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.monthlyTargetStatus {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+.monthlyTargetRing {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: conic-gradient(#fff var(--progress), rgba(255, 255, 255, 0.3) 0);
+}
+
+.monthlyTargetRing::after {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: #0759ad;
+  content: "";
+}
+
 .chat {
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 0;
   margin-bottom: 6px;
   border: 1px solid #e1e6ec;
 }
