@@ -142,6 +142,7 @@ const Quotation = () => {
   const canEditQuotation = canEdit("quotations");
   const canSeeDiscount = canView("discount_approval");
   const isAdminUser = loginAs === "Admin" || loginAs === "super_admin";
+
   const canRequestDiscount = canAdd("discount_approval") && !isAdminUser;
   const visibleTabs = TABS.filter(
     (tab) => tab.key !== "discount" || canSeeDiscount,
@@ -323,8 +324,11 @@ const Quotation = () => {
       from: view.from,
       to: view.to,
       page,
+      page_no: page,
+      items_per_page: itemsPerPage,
+      item_per_page: itemsPerPage,
     },
-    { skip: !canSeeQuotations },
+    { skip: !canSeeQuotations || !router.isReady },
   );
 
   const discountCountArgs = {
@@ -385,12 +389,17 @@ const Quotation = () => {
       ? quotationResponse.data
       : [];
   const pagination = quotationResponse?.data?.pagination || {};
-  const perPage = Number(pagination.per_page) || 10;
+  const perPage =
+    Number(
+      pagination.item_per_page ||
+        pagination.items_per_page ||
+        pagination.per_page,
+    ) || itemsPerPage;
   const total = Number(pagination.total ?? quotations.length) || 0;
-  const currentPage = Number(pagination.current_page ?? page) || 1;
+  const currentPage =
+    Number(pagination.page_no || pagination.current_page) || page;
   const lastPage =
-    Number(pagination.last_page ?? Math.max(1, Math.ceil(total / perPage))) ||
-    1;
+    Number(pagination.last_page) || Math.max(1, Math.ceil(total / perPage));
   const rangeFrom = total
     ? Number(pagination.from ?? (currentPage - 1) * perPage + 1)
     : 0;
@@ -539,7 +548,7 @@ const Quotation = () => {
       const rowStatus = getStatus(quotation);
       const isMenuOpen = view.activeQuotationId === quotation?.id;
       const approved = isApproved(quotation);
-
+      console.log(activeTab, approved, canRequestDiscount, "ss");
       return (
         <tr
           key={quotation.id}
@@ -772,7 +781,7 @@ const Quotation = () => {
                         <button
                           type="button"
                           className={styles.discountBtn}
-                          disabled={Boolean(quotation.discount_sent)}
+                          disabled={Boolean(quotation?.discount_sent)}
                           title={
                             quotation.discount_sent
                               ? "Discount request already sent"
@@ -1052,6 +1061,7 @@ const Quotation = () => {
               lastPage={lastPage}
               onChange={handlePageChange}
               disabled={isLoading || isFetching}
+              hideOnSinglePage={false}
             />
           </div>
         </div>

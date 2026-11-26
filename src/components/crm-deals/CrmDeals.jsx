@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import styles from "@/components/crm-deals/CrmDeals.module.css";
+import { FiSend } from "react-icons/fi";
 import { IoEyeOutline, IoSearch } from "react-icons/io5";
 import { useCrmDealsQuery } from "@/redux/apis/crmDeals";
 import { SIDEBAR_SERVICES_CONSTANTS } from "@/constants/serviceConstant";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import Pagination from "@/common-components/pagination/Pagination";
+import SendQuotationPopup from "@/components/quotation/send-quotation-popupo/SendQuotationPopup";
 
 const FILTER_DEFAULTS = {
   status: "",
@@ -112,13 +115,23 @@ function FilterSelect({ label, value, options, onChange }) {
 
 export default function CrmDeals() {
   const router = useRouter();
-  const { canView } = usePermissions();
+  const { canView, loginAs, ready } = usePermissions();
   const canSeeDeals = canView("crm_deals");
+  const canSendInvoices =
+    ready &&
+    String(loginAs || "")
+      .trim()
+      .toLowerCase() === "account manager";
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState(FILTER_DEFAULTS);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [invoiceDeal, setInvoiceDeal] = useState(null);
+  const [invoiceType, setInvoiceType] = useState("proforma");
   const searchTimer = useRef(null);
+  const actionMenuRef = useRef(null);
+  const actionTriggerRef = useRef(null);
   const page = Math.max(1, Number(router.query.page_no) || 1);
 
   const setPage = (nextPage) => {
@@ -159,6 +172,37 @@ export default function CrmDeals() {
   }, [router, router.isReady, router.query.page_no]);
 
   useEffect(() => () => clearTimeout(searchTimer.current), []);
+
+  useEffect(() => {
+    if (!openActionMenu) return undefined;
+
+    const closeOnOutsideClick = (event) => {
+      if (
+        actionMenuRef.current?.contains(event.target) ||
+        actionTriggerRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+
+      setOpenActionMenu(null);
+    };
+    const closeMenu = () => setOpenActionMenu(null);
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") closeMenu();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("scroll", closeMenu, true);
+    window.addEventListener("resize", closeMenu);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("scroll", closeMenu, true);
+      window.removeEventListener("resize", closeMenu);
+    };
+  }, [openActionMenu]);
 
   const { data, isLoading, isError } = useCrmDealsQuery(
     {
@@ -254,6 +298,38 @@ export default function CrmDeals() {
   const clearFilters = () => {
     setFilters(FILTER_DEFAULTS);
     setPage(1);
+  };
+
+  const toggleActionMenu = (deal, event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const menuWidth = 210;
+    const left = Math.max(
+      8,
+      Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8),
+    );
+    const openUp = window.innerHeight - rect.bottom < 112 && rect.top > 112;
+
+    actionTriggerRef.current = event.currentTarget;
+    setOpenActionMenu((current) =>
+      String(current?.dealId) === String(deal.id)
+        ? null
+        : {
+            dealId: deal.id,
+            left,
+            top: openUp ? rect.top - 104 : rect.bottom + 6,
+          },
+    );
+  };
+
+  const openInvoicePopup = (type) => {
+    const deal = deals.find(
+      (item) => String(item?.id) === String(openActionMenu?.dealId),
+    );
+    if (deal) {
+      setInvoiceDeal(deal);
+      setInvoiceType(type);
+    }
+    setOpenActionMenu(null);
   };
 
   const applySearch = (value) => {
@@ -469,7 +545,7 @@ export default function CrmDeals() {
                       <div>
                         <h5>{deal?.company_name}</h5>
                         <p>
-                          {deal?.name} · Deal #{deal?.id}
+                          {deal?.contact_name} · Deal #{deal?.id}
                         </p>
                       </div>
                     </td>
@@ -523,7 +599,23 @@ export default function CrmDeals() {
                           <small>Added {deal?.created_at}</small>
                         </div>
 
-                        <div className="actions">
+                        <div className={styles.rowActions}>
+                          {canSendInvoices && (
+                            <button
+                              type="button"
+                              className="action-btn"
+                              title="Invoice actions"
+                              aria-label="Invoice actions"
+                              aria-haspopup="menu"
+                              aria-expanded={
+                                String(openActionMenu?.dealId) ===
+                                String(deal?.id)
+                              }
+                              onClick={(event) => toggleActionMenu(deal, event)}
+                            >
+                              <FiSend />
+                            </button>
+                          )}
                           <Link
                             href={`/crm-deals/${deal?.id}`}
                             className="action-btn"
@@ -549,6 +641,52 @@ export default function CrmDeals() {
           />
         </div>
       </section>
+
+      {canSendInvoices &&
+        openActionMenu &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            ref={actionMenuRef}
+            className={styles.sendMenu}
+            role="menu"
+            style={{
+              left: openActionMenu.left,
+              top: openActionMenu.top,
+            }}
+          >
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.sendMenuButton}
+              onClick={() => openInvoicePopup("proforma")}
+            >
+              Send Proforma Invoice
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              className={styles.sendMenuButton}
+              onClick={() => openInvoicePopup("tax")}
+            >
+              Text Invoice
+            </button>
+          </div>,
+          document.body,
+        )}
+
+      <SendQuotationPopup
+        isOpen={canSendInvoices && Boolean(invoiceDeal)}
+        onClose={() => setInvoiceDeal(null)}
+        quotation={invoiceDeal}
+        mode="invoice"
+        title={
+          invoiceType === "proforma"
+            ? "Send Proforma Invoice"
+            : "Send Tax Invoice"
+        }
+        dealInvoiceType={invoiceType}
+      />
     </section>
   );
 }

@@ -7,6 +7,7 @@ import {
   useSendMailMutation,
   useSendInvoiceMutation,
 } from "@/redux/apis/quotationApi";
+import { useSendDealInvoiceMutation } from "@/redux/apis/crmDeals";
 import CustomPopup from "@/common-components/custom-popup/CustomPopup";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
@@ -19,6 +20,8 @@ const SendQuotationPopup = ({
   onClose,
   quotation,
   mode = "quotation",
+  title: customTitle,
+  dealInvoiceType,
 }) => {
   const primaryEmail = quotation?.email || "";
 
@@ -30,13 +33,19 @@ const SendQuotationPopup = ({
   const { showToast } = useToast();
 
   const isInvoice = mode === "invoice";
-  const title = isInvoice ? "Send Invoice" : "Send Quotation";
+  const title =
+    customTitle || (isInvoice ? "Send Invoice" : "Send Quotation");
   const documentType = isInvoice ? "Invoice" : "Quotation";
 
   const [sendMail, { isLoading: isSendingQuotation }] = useSendMailMutation();
   const [sendInvoice, { isLoading: isSendingInvoice }] =
     useSendInvoiceMutation();
-  const isSending = isSendingQuotation || isSendingInvoice;
+  const [sendDealInvoice, { isLoading: isSendingDealInvoice }] =
+    useSendDealInvoiceMutation();
+  const isSending =
+    isSendingQuotation ||
+    isSendingInvoice ||
+    (Boolean(dealInvoiceType) && isSendingDealInvoice);
 
   const { data: suggestMail } = useGetSuggestMailQuery();
 
@@ -57,7 +66,7 @@ const SendQuotationPopup = ({
     setCcEmails([]);
     setToInput("");
     setCcInput("");
-  }, [isOpen, quotation?.id, mode]);
+  }, [isOpen, quotation?.id, mode, dealInvoiceType]);
 
   const getSuggestions = (value) => {
     const q = value.trim().toLowerCase();
@@ -127,7 +136,10 @@ const SendQuotationPopup = ({
     event.preventDefault();
 
     if (!quotation?.id) {
-      showToast("Quotation ID is missing", "error");
+      showToast(
+        dealInvoiceType ? "Deal ID is missing" : "Quotation ID is missing",
+        "error",
+      );
       return;
     }
 
@@ -162,16 +174,26 @@ const SendQuotationPopup = ({
     }
 
     try {
-      // Invoice -> /quotations/send-invoice-mail, Quotation -> existing mail API
-      const sendRequest = isInvoice ? sendInvoice : sendMail;
-
-      const response = await sendRequest({
-        body: {
-          quotation_id: Number(quotation.id),
-          emails: finalToEmails.join(", "),
-          cc: finalCcEmails.join(", "),
-        },
-      }).unwrap();
+      let response;
+      if (dealInvoiceType) {
+        response = await sendDealInvoice({
+          body: {
+            deal_id: Number(quotation.id),
+            emails: finalToEmails.join(", "),
+            cc: finalCcEmails.join(", "),
+            type: dealInvoiceType,
+          },
+        }).unwrap();
+      } else {
+        const sendRequest = isInvoice ? sendInvoice : sendMail;
+        response = await sendRequest({
+          body: {
+            quotation_id: Number(quotation.id),
+            emails: finalToEmails.join(", "),
+            cc: finalCcEmails.join(", "),
+          },
+        }).unwrap();
+      }
 
       if (response?.status === false) {
         showToast(
@@ -263,9 +285,7 @@ const SendQuotationPopup = ({
                         {initialOf(primaryEmail)}
                       </span>
 
-                      <span className={styles.gmailChipText}>
-                        {quotation?.contact_name || primaryEmail}
-                      </span>
+                      <span className={styles.gmailChipText}>{primaryEmail}</span>
                     </span>
                   )}
 
