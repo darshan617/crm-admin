@@ -38,9 +38,14 @@ const CrmOrderView = () => {
   const router = useRouter();
   const { slug } = router.query;
   const { showToast } = useToast();
-  const { canView, canEdit } = usePermissions();
+  const { canView, canEdit, loginAs, ready } = usePermissions();
   const canSeeDeals = canView("crm_deals");
   const canEditDeal = canEdit("crm_deals");
+  const canUpdatePaymentStatus =
+    ready &&
+    String(loginAs || "")
+      .trim()
+      .toLowerCase() === "account manager";
 
   const [poMode, setPoMode] = useState("generated");
   const [updatePaymentStatus, { isLoading: isPaymentStatusUpdating }] =
@@ -158,7 +163,7 @@ const CrmOrderView = () => {
 
   const handlePaymentStatusSubmit = async (e) => {
     e.preventDefault();
-    if (!canEditDeal) return;
+    if (!canUpdatePaymentStatus) return;
 
     const formData = new FormData(e.currentTarget);
     const nextStatus = String(
@@ -334,9 +339,9 @@ const CrmOrderView = () => {
                 </Link>
               )}
 
-              {details?.links?.view_proforma_invoice && (
+              {details?.links?.proforma_invoice_pdf_url && (
                 <Link
-                  href={details.links.view_proforma_invoice}
+                  href={details.links.proforma_invoice_pdf_url || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`${styles.viewInvoice} btn d-flex gap-1 align-items-center`}
@@ -346,9 +351,9 @@ const CrmOrderView = () => {
                 </Link>
               )}
 
-              {details?.links?.view_tax_invoice && (
+              {details?.links?.tax_invoice_pdf_url && (
                 <Link
-                  href={details.links.view_tax_invoice}
+                  href={details.links.tax_invoice_pdf_url || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`${styles.viewInvoice} btn d-flex gap-1 align-items-center`}
@@ -360,7 +365,7 @@ const CrmOrderView = () => {
             </div>
           </form>
 
-          {canEditDeal && (
+          {canUpdatePaymentStatus && (
             <form
               onSubmit={handlePaymentStatusSubmit}
               className={`${styles.actions} ${styles.paymentActions}`}

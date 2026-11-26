@@ -11,8 +11,12 @@ import { useMonthlyTargetQuery } from "@/redux/apis/crmDeals";
 const Sidebar = ({ collapsed, onExpandSidebar }) => {
   const [manageOpen, setManageOpen] = useState(false);
   const { canView, loginAs, ready } = usePermissions();
-  const canSeeMonthlyTarget =
-    ready && String(loginAs || "").trim().toLowerCase() === "account manager";
+  const isRestrictedTargetRole = ["admin", "super_admin"].includes(
+    String(loginAs || "")
+      .trim()
+      .toLowerCase(),
+  );
+  const canSeeMonthlyTarget = ready && !isRestrictedTargetRole;
   const {
     data: monthlyTargetResponse,
     isLoading: isMonthlyTargetLoading,
@@ -177,6 +181,18 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
       </nav>
 
       <div className={styles.footer}>
+        <Link
+          className={styles.chat}
+          href={SIDEBAR_CHAT.url}
+          aria-label={SIDEBAR_CHAT.name}
+          title={collapsed ? SIDEBAR_CHAT.name : undefined}
+        >
+          <span className={styles.navIcon}>
+            <FiMessageSquare aria-hidden="true" />
+          </span>
+
+          <span className={styles.navLabel}>{SIDEBAR_CHAT.name}</span>
+        </Link>
         {!collapsed && canSeeMonthlyTarget && (
           <div className={styles.monthlyTarget} aria-label="Monthly target">
             <div className={styles.monthlyTargetTitle}>
@@ -197,19 +213,6 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
             />
           </div>
         )}
-
-        <Link
-          className={styles.chat}
-          href={SIDEBAR_CHAT.url}
-          aria-label={SIDEBAR_CHAT.name}
-          title={collapsed ? SIDEBAR_CHAT.name : undefined}
-        >
-          <span className={styles.navIcon}>
-            <FiMessageSquare aria-hidden="true" />
-          </span>
-
-          <span className={styles.navLabel}>{SIDEBAR_CHAT.name}</span>
-        </Link>
       </div>
     </aside>
   );
