@@ -1333,9 +1333,15 @@ export default function LeadDetail() {
 
                 {canCreateQuotation && (
                   <div className={styles.submitWrap}>
-                    <button type="button" className={styles.submitBtn}>
+                    <Link
+                      href={{
+                        pathname: "/quotations/add-quotation",
+                        query: leadId ? { lead_id: leadId } : undefined,
+                      }}
+                      className={styles.submitBtn}
+                    >
                       Create Quotation
-                    </button>
+                    </Link>
                   </div>
                 )}
               </div>

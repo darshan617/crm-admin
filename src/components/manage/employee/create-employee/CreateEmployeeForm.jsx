@@ -93,6 +93,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
     role: "",
     manager: "",
     max_quot_discount: "",
+    revenue_target: "",
     status: "active",
     jd_lead_assign: "no",
   });
@@ -164,6 +165,10 @@ const CreateEmployeeForm = ({ employeeId }) => {
         source?.max_quot_discount == null
           ? ""
           : String(source.max_quot_discount),
+      revenue_target:
+        source?.revenue_target == null
+          ? ""
+          : String(source.revenue_target),
       status:
         matchOptionValue(source?.status || "active", optionLists.status) ||
         "active",
@@ -310,6 +315,7 @@ const CreateEmployeeForm = ({ employeeId }) => {
         role: formState?.role,
         manager: formState?.manager,
         max_quot_discount: formState?.max_quot_discount,
+        revenue_target: formState?.revenue_target,
         status: formState?.status || "active",
         jd_lead_assign: formState?.jd_lead_assign,
       };
@@ -572,6 +578,23 @@ const CreateEmployeeForm = ({ employeeId }) => {
             />
             {error?.max_quot_discount && (
               <p className={styles.errorMessage}>{error.max_quot_discount}</p>
+            )}
+          </label>
+
+          <label className={styles.field}>
+            <span className={styles.label}>Revenue Target</span>
+            <input
+              className={`${styles.input} ${styles.numberInput}`}
+              type="number"
+              name="revenue_target"
+              min="0"
+              step="any"
+              placeholder="e.g. 500000"
+              value={formState?.revenue_target}
+              onChange={handleChange}
+            />
+            {error?.revenue_target && (
+              <p className={styles.errorMessage}>{error.revenue_target}</p>
             )}
           </label>
 

@@ -11,7 +11,12 @@ const quotationApi = apiSlice.injectEndpoints({
         from = "",
         to = "",
         page = 1,
-      }) => {
+        page_no,
+        items_per_page,
+        item_per_page,
+      } = {}) => {
+        const pageNo = page_no ?? page ?? 1;
+        const perPage = items_per_page ?? item_per_page ?? 10;
         const params = new URLSearchParams({
           search,
           tab,
@@ -19,7 +24,11 @@ const quotationApi = apiSlice.injectEndpoints({
           date_type,
           from,
           to,
-          page: String(page),
+          page: String(pageNo),
+          page_no: String(pageNo),
+          items_per_page: String(perPage),
+          item_per_page: String(perPage),
+          per_page: String(perPage),
         });
 
         return {

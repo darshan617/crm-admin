@@ -9,6 +9,7 @@ import {
   useCrmDealsDetailsQuery,
   useDealsActivateMutation,
   useDealsPoSourceMutation,
+  useUpdateDealPaymentStatusMutation,
 } from "@/redux/apis/crmDeals";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
@@ -37,17 +38,23 @@ const CrmOrderView = () => {
   const router = useRouter();
   const { slug } = router.query;
   const { showToast } = useToast();
-  const { canView, canEdit } = usePermissions();
+  const { canView, canEdit, loginAs, ready } = usePermissions();
   const canSeeDeals = canView("crm_deals");
   const canEditDeal = canEdit("crm_deals");
+  const canUpdatePaymentStatus =
+    ready &&
+    String(loginAs || "")
+      .trim()
+      .toLowerCase() === "account manager";
 
   const [poMode, setPoMode] = useState("generated");
+  const [updatePaymentStatus, { isLoading: isPaymentStatusUpdating }] =
+    useUpdateDealPaymentStatusMutation();
 
   const { data, isLoading, isError, refetch } = useCrmDealsDetailsQuery(
     { id: slug },
     { skip: !router.isReady || !slug || !canSeeDeals },
   );
-
   const [DealsPoSource, { isLoading: isPoSubmitting }] =
     useDealsPoSourceMutation();
 
@@ -61,6 +68,11 @@ const CrmOrderView = () => {
   const po = details?.po ?? {};
   const poJourney = details?.po_journey ?? [];
   const totals = details?.totals ?? {};
+  const paymentStatus = String(
+    order?.payment_status ?? deal?.payment_status ?? "pending",
+  ).toLowerCase();
+  const paymentStatusLabel =
+    paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1);
 
   // Amounts for the Order Items summary (rename fields to match your API)
   const discount = Number(order.discount_amount ?? 0);
@@ -93,11 +105,13 @@ const CrmOrderView = () => {
 
     try {
       const response = await DealsActivate({ id: slug, body }).unwrap();
-
-      showToast(response?.message);
-      refetch();
+      if (response?.success) {
+        showToast(response?.message);
+        refetch();
+      }
+      console.log(response);
     } catch (error) {
-      showToast(error?.data?.message);
+      showToast(error?.data?.message, "error");
     }
   };
 
@@ -144,6 +158,48 @@ const CrmOrderView = () => {
       refetch();
     } catch (error) {
       showToast(error?.data?.message);
+    }
+  };
+
+  const handlePaymentStatusSubmit = async (e) => {
+    e.preventDefault();
+    if (!canUpdatePaymentStatus) return;
+
+    const formData = new FormData(e.currentTarget);
+    const nextStatus = String(
+      formData.get("payment_status") || "",
+    ).toLowerCase();
+
+    if (!["pending", "paid"].includes(nextStatus)) {
+      showToast("Please select a valid payment status.", "error");
+      return;
+    }
+
+    try {
+      const response = await updatePaymentStatus({
+        body: {
+          deal_id: Number(deal?.id || slug),
+          payment_status: nextStatus,
+        },
+      }).unwrap();
+
+      if (response?.success === false || response?.status === false) {
+        showToast(
+          response?.message || "Failed to update payment status.",
+          "error",
+        );
+        return;
+      }
+
+      showToast(response?.message || "Payment status updated successfully.");
+      refetch();
+    } catch (error) {
+      showToast(
+        error?.data?.message ||
+          error?.message ||
+          "Failed to update payment status.",
+        "error",
+      );
     }
   };
 
@@ -223,73 +279,124 @@ const CrmOrderView = () => {
           </div>
         </div>
 
-        <form onSubmit={handleActivate} className={styles.actions}>
-          {canActivate && canEditDeal && (
-            <>
-              <label className={styles.fieldLabel} htmlFor="start_date">
-                Start Date
-              </label>
+        <div className={styles.summaryActions}>
+          <form
+            onSubmit={handleActivate}
+            className={`${styles.actions} ${styles.orderActions}`}
+          >
+            {canActivate && canEditDeal && (
+              <>
+                <label className={styles.fieldLabel} htmlFor="start_date">
+                  Start Date
+                </label>
 
-              <input
-                type="date"
-                name="start_date"
-                id="start_date"
-                className={`${styles.control} ${styles.dateInput}`}
-                defaultValue={defaultStart}
-              />
+                <input
+                  type="date"
+                  name="start_date"
+                  id="start_date"
+                  className={`${styles.control} ${styles.dateInput}`}
+                  defaultValue={defaultStart}
+                />
 
-              <label className={styles.fieldLabel} htmlFor="billing_cycle">
-                Billing Cycle
+                <label className={styles.fieldLabel} htmlFor="billing_cycle">
+                  Billing Cycle
+                </label>
+
+                <select
+                  name="billing_cycle"
+                  id="billing_cycle"
+                  className={`${styles.control} ${styles.select}`}
+                  defaultValue={defaultCycle}
+                >
+                  {billingCycles.map((cycle) => (
+                    <option key={cycle} value={cycle}>
+                      {cycle}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="submit"
+                  disabled={isActivating}
+                  className={`${styles.btn} ${styles.btnGreen}`}
+                >
+                  <FiCheck />
+                  {isActivating ? "Activating..." : actionLabel}
+                </button>
+              </>
+            )}
+
+            <div className={styles.documentActions}>
+              {details?.links?.view_quotation && (
+                <Link
+                  href={details.links.view_quotation}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.viewPoDocument} btn d-flex gap-1 align-items-center`}
+                >
+                  <FiFileText />
+                  View Quotation
+                </Link>
+              )}
+
+              {details?.links?.proforma_invoice_pdf_url && (
+                <Link
+                  href={details.links.proforma_invoice_pdf_url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.viewInvoice} btn d-flex gap-1 align-items-center`}
+                >
+                  <FiFile />
+                  View Proforma Invoice
+                </Link>
+              )}
+
+              {details?.links?.tax_invoice_pdf_url && (
+                <Link
+                  href={details.links.tax_invoice_pdf_url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${styles.viewInvoice} btn d-flex gap-1 align-items-center`}
+                >
+                  <FiFile />
+                  View Tax Invoice
+                </Link>
+              )}
+            </div>
+          </form>
+
+          {canUpdatePaymentStatus && (
+            <form
+              onSubmit={handlePaymentStatusSubmit}
+              className={`${styles.actions} ${styles.paymentActions}`}
+            >
+              <label className={styles.fieldLabel} htmlFor="payment_status">
+                Payment Status
               </label>
 
               <select
-                name="billing_cycle"
-                id="billing_cycle"
+                key={paymentStatus}
+                name="payment_status"
+                id="payment_status"
                 className={`${styles.control} ${styles.select}`}
-                defaultValue={defaultCycle}
+                defaultValue={paymentStatus}
               >
-                {billingCycles.map((cycle) => (
-                  <option key={cycle} value={cycle}>
-                    {cycle}
-                  </option>
-                ))}
+                <option value="pending">Pending</option>
+                <option value="paid">Paid</option>
               </select>
 
               <button
                 type="submit"
-                disabled={isActivating}
-                className={`${styles.btn} ${styles.btnGreen}`}
+                disabled={isPaymentStatusUpdating}
+                className={`${styles.btn} ${styles.btnPrimary}`}
               >
-                <FiCheck />
-                {isActivating ? "Activating..." : actionLabel}
+                {isPaymentStatusUpdating
+                  ? "Updating..."
+                  : "Update Payment Status"}
               </button>
-            </>
+            </form>
           )}
-
-          {details?.links?.view_quotation && (
-            <Link
-              href={details.links.view_quotation}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${styles.viewPoDocument} btn d-flex gap-1 align-items-center`}
-            >
-              <FiFileText />
-              View Quotation
-            </Link>
-          )}
-
-          {details?.links?.view_invoice && (
-            <Link
-              href={details.links.view_invoice}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${styles.viewInvoice} btn d-flex gap-1 align-items-center`}
-            >
-              <FiFile />
-              View Invoice
-            </Link>
-          )}
-        </form>
+        </div>
       </section>
 
       {/* Order Details */}
@@ -302,8 +409,9 @@ const CrmOrderView = () => {
             ["Order", `#${order.order_no || "Preview"}`],
             ["Type", deal.deal_type || "-"],
             ["Billing Cycle", order.period || deal.quotation_period || "-"],
+            ["Payment Status", paymentStatusLabel],
             ["Start Date", converted ? defaultStart : "—"],
-            ["Next Renewal", deal.next_renewal || "—"],
+            ["Next Renewal", deal.renewal_date || "—"],
             [
               "Amount",
               `₹${Number(order.total_amount ?? deal.total_amount ?? 0).toLocaleString("en-IN")}`,

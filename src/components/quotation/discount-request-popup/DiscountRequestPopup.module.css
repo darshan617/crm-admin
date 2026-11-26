@@ -111,6 +111,12 @@
   box-shadow: 0 0 0 3px rgba(8, 104, 189, 0.12);
 }
 
+.maxDiscountHint {
+  margin: 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
 .error {
   margin: 0;
   color: #dc2626;

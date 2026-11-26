@@ -1,14 +1,12 @@
 .assignedUser {
-    display: flex;
-    grid-template-columns: 28px 1fr 32px;
-    align-items: center;
-    column-gap: 8px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    border-left: 1px solid #e7e9eb;
-    padding-left: 15px;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  border-left: 1px solid #e7e9eb;
+  padding: 0 8px 0 15px;
+  justify-content: space-between;
 }
 
 .searchButton {
@@ -28,4 +26,46 @@
     align-items: center;
     flex-direction: row;
     width: 100%;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+.sendMenu {
+  position: fixed;
+  z-index: 1100;
+  width: 210px;
+  padding: 6px;
+  border: 1px solid #e7e9eb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(20, 33, 50, 0.16);
+}
+
+.sendMenuButton {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: #263445;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sendMenuButton:hover,
+.sendMenuButton:focus-visible {
+  background: #f0f6fc;
+  color: var(--primary);
+  outline: none;
 }

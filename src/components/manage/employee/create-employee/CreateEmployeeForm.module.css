@@ -112,6 +112,17 @@
   color: #cbd5e1;
 }
 
+.numberInput {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.numberInput::-webkit-outer-spin-button,
+.numberInput::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
 .input:focus,
 .select:focus,
 .phoneField:focus-within {
