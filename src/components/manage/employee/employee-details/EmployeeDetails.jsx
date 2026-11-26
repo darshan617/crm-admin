@@ -11,7 +11,12 @@ import {
   FiUser,
   FiUsers,
 } from "react-icons/fi";
-import { useGetEmployeeQuery } from "@/redux/apis/employeeApi";
+import {
+  useGetEmployeeQuery,
+  useUpdateEmployeeStatusMutation,
+} from "@/redux/apis/employeeApi";
+import CustomPopup from "@/common-components/custom-popup/CustomPopup";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
 import styles from "./EmployeeDetails.module.css";
 
@@ -206,6 +211,7 @@ function EmployeeAvatar({ name, src }) {
 }
 
 const EmployeeDetails = ({ employeeId }) => {
+  const { showToast } = useToast();
   const { canView, canEdit, ready } = usePermissions();
   const canSeeEmployees = ready && canView("employees");
   const canEditEmployee = ready && canEdit("employees");
@@ -219,6 +225,9 @@ const EmployeeDetails = ({ employeeId }) => {
       { id: employeeId },
       { skip: !employeeId || !canSeeEmployees },
     );
+  const [updateEmployeeStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateEmployeeStatusMutation();
+  const [isStatusConfirmOpen, setIsStatusConfirmOpen] = useState(false);
 
   const payload =
     data?.data && !Array.isArray(data.data) ? data.data : data || {};
@@ -291,6 +300,46 @@ const EmployeeDetails = ({ employeeId }) => {
     { label: "Password", value: "hidden" },
     { label: "Employee ID", value: formatEmployeeId(employee) },
   ];
+
+  const closeStatusConfirm = () => {
+    if (isUpdatingStatus) return;
+    setIsStatusConfirmOpen(false);
+  };
+
+  const handleStatusChange = async () => {
+    if (!canEditEmployee || isUpdatingStatus) return;
+
+    const nextStatus = isActive ? "inactive" : "active";
+
+    try {
+      const response = await updateEmployeeStatus({
+        id: employee?.id || employeeId,
+        body: { status: nextStatus },
+      }).unwrap();
+
+      if (response?.success === false) {
+        showToast(
+          response?.message || "Unable to update employee status.",
+          "error",
+        );
+        return;
+      }
+
+      setIsStatusConfirmOpen(false);
+      showToast(
+        response?.message ||
+          (nextStatus === "active"
+            ? "Employee activated successfully."
+            : "Employee deactivated successfully."),
+        "success",
+      );
+    } catch (statusError) {
+      showToast(
+        statusError?.data?.message || "Unable to update employee status.",
+        "error",
+      );
+    }
+  };
 
   const quickActions = [
     canViewLead && {
@@ -389,6 +438,24 @@ const EmployeeDetails = ({ employeeId }) => {
                 Edit Employee
               </Link>
             )}
+            {canEditEmployee && (
+              <button
+                type="button"
+                className={
+                  isActive ? styles.deactivateButton : styles.activateButton
+                }
+                onClick={() => setIsStatusConfirmOpen(true)}
+                disabled={isUpdatingStatus}
+              >
+                {isUpdatingStatus
+                  ? isActive
+                    ? "Deactivating..."
+                    : "Activating..."
+                  : isActive
+                    ? "Deactivate"
+                    : "Activate"}
+              </button>
+            )}
             <Link href="/manage/employee" className={styles.listButton}>
               <FiArrowLeft size={15} />
               Back to List
@@ -416,6 +483,49 @@ const EmployeeDetails = ({ employeeId }) => {
           </div>
         </section>
       </div>
+
+      <CustomPopup
+        isOpen={isStatusConfirmOpen}
+        onClose={closeStatusConfirm}
+        maxWidth="500px"
+      >
+        <div className={styles.confirmPopup}>
+          <div className={styles.confirmContent}>
+            <h3>{isActive ? "Deactivate Employee" : "Activate Employee"}</h3>
+            <p>
+              Are you sure you want to{" "}
+              {isActive ? "deactivate" : "activate"} this employee?
+            </p>
+          </div>
+
+          <div className={styles.confirmActions}>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={closeStatusConfirm}
+              disabled={isUpdatingStatus}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={
+                isActive ? styles.confirmDeactivateBtn : styles.confirmActivateBtn
+              }
+              onClick={handleStatusChange}
+              disabled={isUpdatingStatus}
+            >
+              {isUpdatingStatus
+                ? isActive
+                  ? "Deactivating..."
+                  : "Activating..."
+                : isActive
+                  ? "Deactivate"
+                  : "Activate"}
+            </button>
+          </div>
+        </div>
+      </CustomPopup>
     </div>
   );
 };

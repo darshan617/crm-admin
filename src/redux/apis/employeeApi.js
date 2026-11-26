@@ -60,6 +60,17 @@ const employeeApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["employees"],
     }),
+    updateEmployeeStatus: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/employees/${id}/status`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        "employees",
+        { type: "employees", id },
+      ],
+    }),
     getEmployeePermissions: builder.query({
       query: ({ type = "role", role = "", employeeId = "" }) => {
         const params = new URLSearchParams();
@@ -119,6 +130,7 @@ export const {
   useGetEmployeeCreateFormQuery,
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
+  useUpdateEmployeeStatusMutation,
   useGetEmployeePermissionsQuery,
   useSaveEmployeePermissionsMutation,
   useGetEmployeeAttendanceQuery,

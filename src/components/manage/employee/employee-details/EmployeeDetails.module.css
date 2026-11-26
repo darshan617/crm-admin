@@ -225,13 +225,17 @@
 
 .editButton,
 .listButton,
+.activateButton,
+.deactivateButton,
 .actionLink {
   font-family: inherit;
   text-decoration: none;
 }
 
 .editButton,
-.listButton {
+.listButton,
+.activateButton,
+.deactivateButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -262,6 +266,112 @@
 
 .listButton:hover {
   background: #f8fafc;
+}
+
+.activateButton {
+  border: 0;
+  background: #16b364;
+  color: #fff;
+}
+
+.activateButton:hover {
+  background: #129a56;
+}
+
+.deactivateButton {
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #dc2626;
+}
+
+.deactivateButton:hover {
+  background: #fef2f2;
+}
+
+.activateButton:disabled,
+.deactivateButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.confirmPopup {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+  text-align: left;
+}
+
+.confirmContent h3 {
+  margin: 0 0 16px;
+  color: #212529;
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.confirmContent p {
+  margin: 0;
+  color: #495057;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.confirmActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.cancelBtn,
+.confirmActivateBtn,
+.confirmDeactivateBtn {
+  min-width: 100px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  border-color: #ced4da;
+  background: #fff;
+  color: #343a40;
+}
+
+.cancelBtn:hover {
+  background: #f5f5f5;
+}
+
+.confirmActivateBtn {
+  border-color: #16b364;
+  background: #16b364;
+  color: #fff;
+}
+
+.confirmActivateBtn:hover {
+  background: #129a56;
+}
+
+.confirmDeactivateBtn {
+  border-color: #dc3545;
+  background: #dc3545;
+  color: #fff;
+}
+
+.confirmDeactivateBtn:hover {
+  background: #bb2d3b;
+}
+
+.cancelBtn:disabled,
+.confirmActivateBtn:disabled,
+.confirmDeactivateBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .sideCard {

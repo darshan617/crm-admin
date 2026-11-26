@@ -93,11 +93,13 @@ const CrmOrderView = () => {
 
     try {
       const response = await DealsActivate({ id: slug, body }).unwrap();
-
-      showToast(response?.message);
-      refetch();
+      if (response?.success) {
+        showToast(response?.message);
+        refetch();
+      }
+      console.log(response);
     } catch (error) {
-      showToast(error?.data?.message);
+      showToast(error?.data?.message, "error");
     }
   };
 
