@@ -69,6 +69,22 @@ const crmDeals = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["crmDeals"],
     }),
+    sendDealInvoice: builder.mutation({
+      query: ({ body }) => ({
+        url: `/deals/send-invoice`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["crmDeals"],
+    }),
+    updateDealPaymentStatus: builder.mutation({
+      query: ({ body }) => ({
+        url: `/deals/payment-status`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["crmDeals"],
+    }),
   }),
 });
 
@@ -77,4 +93,6 @@ export const {
   useCrmDealsDetailsQuery,
   useDealsPoSourceMutation,
   useDealsActivateMutation,
+  useSendDealInvoiceMutation,
+  useUpdateDealPaymentStatusMutation,
 } = crmDeals;
