@@ -6,10 +6,24 @@ import { FiChevronDown, FiMessageSquare } from "react-icons/fi";
 import { SIDEBAR_CHAT, SIDEBAR_SECTIONS } from "@/constants/sidebar";
 import styles from "./Sidebar.module.css";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
+import { useMonthlyTargetQuery } from "@/redux/apis/crmDeals";
 
 const Sidebar = ({ collapsed, onExpandSidebar }) => {
   const [manageOpen, setManageOpen] = useState(false);
-  const { canView, ready } = usePermissions();
+  const { canView, loginAs, ready } = usePermissions();
+  const isRestrictedTargetRole = ["admin", "super_admin"].includes(
+    String(loginAs || "")
+      .trim()
+      .toLowerCase(),
+  );
+  const canSeeMonthlyTarget = ready && !isRestrictedTargetRole;
+  const {
+    data: monthlyTargetResponse,
+    isLoading: isMonthlyTargetLoading,
+    isError: isMonthlyTargetError,
+  } = useMonthlyTargetQuery(undefined, {
+    skip: collapsed || !canSeeMonthlyTarget,
+  });
 
   const router = useRouter();
   const currentPath = router.asPath.split(/[?#]/)[0];
@@ -30,6 +44,26 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
       setManageOpen(false);
     }
   };
+
+  const target = monthlyTargetResponse?.data;
+  const rawProgress = Number(target?.progress ?? target?.percent ?? 0);
+  const progress = Number.isFinite(rawProgress)
+    ? Math.min(100, Math.max(0, rawProgress))
+    : 0;
+  const currencySymbol = target?.currency_symbol || "₹";
+  const amountLabel =
+    target?.amount_label ||
+    (target?.amount != null
+      ? `${currencySymbol}${Number(target.amount).toLocaleString("en-IN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`
+      : "—");
+  const statusText = isMonthlyTargetError
+    ? "Unable to load target"
+    : isMonthlyTargetLoading
+      ? "Loading target..."
+      : target?.status_text || "Target data unavailable";
 
   return (
     <aside
@@ -146,18 +180,40 @@ const Sidebar = ({ collapsed, onExpandSidebar }) => {
         ))}
       </nav>
 
-      <Link
-        className={styles.chat}
-        href={SIDEBAR_CHAT.url}
-        aria-label={SIDEBAR_CHAT.name}
-        title={collapsed ? SIDEBAR_CHAT.name : undefined}
-      >
-        <span className={styles.navIcon}>
-          <FiMessageSquare aria-hidden="true" />
-        </span>
+      <div className={styles.footer}>
+        <Link
+          className={styles.chat}
+          href={SIDEBAR_CHAT.url}
+          aria-label={SIDEBAR_CHAT.name}
+          title={collapsed ? SIDEBAR_CHAT.name : undefined}
+        >
+          <span className={styles.navIcon}>
+            <FiMessageSquare aria-hidden="true" />
+          </span>
 
-        <span className={styles.navLabel}>{SIDEBAR_CHAT.name}</span>
-      </Link>
+          <span className={styles.navLabel}>{SIDEBAR_CHAT.name}</span>
+        </Link>
+        {!collapsed && canSeeMonthlyTarget && (
+          <div className={styles.monthlyTarget} aria-label="Monthly target">
+            <div className={styles.monthlyTargetTitle}>
+              {target?.title || "Monthly Target"}
+            </div>
+            <div className={styles.monthlyTargetPeriod}>
+              {target?.period_label || target?.period || ""}
+            </div>
+            <div className={styles.monthlyTargetAmount}>{amountLabel}</div>
+            <div className={styles.monthlyTargetStatus} title={statusText}>
+              {statusText}
+            </div>
+            <div
+              className={styles.monthlyTargetRing}
+              style={{ "--progress": `${progress}%` }}
+              role="img"
+              aria-label={`${progress}% of monthly target`}
+            />
+          </div>
+        )}
+      </div>
     </aside>
   );
 };

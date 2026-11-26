@@ -85,6 +85,12 @@ const crmDeals = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["crmDeals"],
     }),
+    monthlyTarget: builder.query({
+      query: () => ({
+        url: `/monthly-target`,
+        method: "GET",
+      }),
+    }),
   }),
 });
 
@@ -95,4 +101,5 @@ export const {
   useDealsActivateMutation,
   useSendDealInvoiceMutation,
   useUpdateDealPaymentStatusMutation,
+  useMonthlyTargetQuery,
 } = crmDeals;
