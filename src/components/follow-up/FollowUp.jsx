@@ -12,7 +12,15 @@ import { useRouter } from "next/router";
 import styles from "@/components/follow-up/FollowUp.module.css";
 import Pagination from "@/common-components/pagination/Pagination";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
-import { useGetFollowUpsQuery } from "@/redux/apis/followUpApi";
+import CustomPopup from "@/common-components/custom-popup/CustomPopup";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import {
+  useAssignFollowUpsMutation,
+  useDeleteFollowUpsMutation,
+  useGetFollowUpAssignOptionsQuery,
+  useDownloadFollowUpsMutation,
+  useGetFollowUpsQuery,
+} from "@/redux/apis/followUpApi";
 
 const TABS = [
   { label: "All Follow-Ups", value: "all" },
@@ -168,11 +176,29 @@ const Followup = () => {
   const [searchInput, setSearchInput] = useState("");
   const [querySearch, setQuerySearch] = useState("");
   const [selected, setSelected] = useState([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [employeeFilter, setEmployeeFilter] = useState("");
+  const { showToast } = useToast();
+  const {
+    data: assignOptionsResponse,
+    isLoading: isLoadingAssignOptions,
+    isError: isAssignOptionsError,
+    refetch: refetchAssignOptions,
+  } = useGetFollowUpAssignOptionsQuery(undefined, {
+    skip: !assignOpen,
+  });
+  const [assignFollowUps, { isLoading: isAssigningFollowUps }] =
+    useAssignFollowUpsMutation();
+  const [deleteFollowUps, { isLoading: isDeletingFollowUps }] =
+    useDeleteFollowUpsMutation();
+  const [downloadFollowUps, { isLoading: isDownloadingFollowUps }] =
+    useDownloadFollowUpsMutation();
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -440,6 +466,115 @@ const Followup = () => {
   // Follow-up details
   const handleDetails = (id) => {
     router.push(`/follow-up/follow-up-details?id=${encodeURIComponent(id)}`);
+  };
+
+  const assignEmployees = Array.isArray(
+    assignOptionsResponse?.data?.employees,
+  )
+    ? assignOptionsResponse.data.employees
+    : [];
+
+  const closeAssignPopup = () => {
+    setAssignOpen(false);
+    setSelectedEmployee(null);
+  };
+
+  const openAssignPopup = () => {
+    setSelectedEmployee(null);
+    setAssignOpen(true);
+  };
+
+  const handleAssignFollowUps = async () => {
+    if (!selectedEmployee || !selected.length) return;
+
+    try {
+      const response = await assignFollowUps({
+        body: {
+          assigned_to: selectedEmployee.name,
+          lead_ids: selected,
+        },
+      }).unwrap();
+
+      if (response?.success === false) {
+        showToast(
+          response?.message || "Unable to assign follow-ups.",
+          "error",
+        );
+        return;
+      }
+
+      showToast(
+        response?.message || "Follow-ups assigned successfully.",
+        "success",
+      );
+      closeAssignPopup();
+      setSelected([]);
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Unable to assign follow-ups.",
+        "error",
+      );
+    }
+  };
+
+  const handleDeleteFollowUps = async () => {
+    if (!selected.length) return;
+
+    try {
+      const response = await deleteFollowUps({
+        body: { lead_ids: selected },
+      }).unwrap();
+
+      if (response?.success === false) {
+        showToast(
+          response?.message || "Unable to delete selected follow-ups.",
+          "error",
+        );
+        return;
+      }
+
+      showToast(
+        response?.message || "Selected follow-ups deleted successfully.",
+        "success",
+      );
+      setSelected([]);
+      setDeleteOpen(false);
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Unable to delete selected follow-ups.",
+        "error",
+      );
+    }
+  };
+
+  const downloadSelected = async () => {
+    try {
+      const response = await downloadFollowUps({
+        body: { lead_ids: selected },
+      }).unwrap();
+
+      if (response?.success === false || !(response?.blob instanceof Blob)) {
+        showToast(
+          response?.message || "Unable to download selected follow-ups.",
+          "error",
+        );
+        return;
+      }
+
+      const url = URL.createObjectURL(response.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = response.filename || "selected-follow-ups";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Unable to download selected follow-ups.",
+        "error",
+      );
+    }
   };
 
   const errorMessage =
@@ -816,6 +951,178 @@ const Followup = () => {
               onChange={handlePageChange}
               disabled={isLoading || isFetching}
             />
+
+            {selected.length > 0 && (
+              <div className={styles.selectionActionBar} role="toolbar">
+                <button
+                  type="button"
+                  className={styles.selectionAction}
+                  onClick={openAssignPopup}
+                >
+                  Assign Employee
+                </button>
+                <button
+                  type="button"
+                  className={styles.selectionAction}
+                  onClick={downloadSelected}
+                  disabled={isDownloadingFollowUps}
+                >
+                  {isDownloadingFollowUps ? "Downloading..." : "Download List"}
+                </button>
+                <button
+                  type="button"
+                  className={styles.selectionAction}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  Delete Follow-Ups
+                </button>
+              </div>
+            )}
+
+            <CustomPopup
+              isOpen={assignOpen}
+              onClose={closeAssignPopup}
+              closeIcon={false}
+              maxWidth="760px"
+              className={styles.assignPopup}
+            >
+              <div className={styles.assignModal}>
+                <h2>Assign Employee to Selected Follow-Ups</h2>
+                <button
+                  type="button"
+                  className={styles.assignModalClose}
+                  onClick={closeAssignPopup}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+
+                <div className={styles.employeeGrid} role="radiogroup">
+                  {isLoadingAssignOptions ? (
+                    <div className={styles.employeeLoading}>
+                      Loading employees...
+                    </div>
+                  ) : isAssignOptionsError ? (
+                    <div className={styles.employeeLoading}>
+                      <div>
+                        <p>Unable to load employees.</p>
+                        <button
+                          type="button"
+                          className={styles.retryAssignOptions}
+                          onClick={refetchAssignOptions}
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    </div>
+                  ) : assignEmployees.length === 0 ? (
+                    <div className={styles.employeeLoading}>
+                      No employees available.
+                    </div>
+                  ) : (
+                    assignEmployees.map((employee, index) => {
+                      const active =
+                        selectedEmployee?.id === employee.id ||
+                        selectedEmployee?.name === employee.name;
+                      const colors = [
+                        "#6b55a5",
+                        "#377c91",
+                        "#b28d25",
+                        "#2876a8",
+                        "#a3326b",
+                      ];
+
+                      return (
+                        <button
+                          key={employee.id}
+                          type="button"
+                          role="radio"
+                          aria-checked={active}
+                          className={`${styles.employeeCard} ${
+                            active ? styles.employeeCardActive : ""
+                          }`}
+                          onClick={() => setSelectedEmployee(employee)}
+                        >
+                          <span
+                            className={styles.employeeAvatar}
+                            style={{ background: colors[index % colors.length] }}
+                          >
+                            {String(employee.name || "-")
+                              .trim()
+                              .charAt(0)
+                              .toUpperCase()}
+                          </span>
+                          <span className={styles.employeeName}>
+                            {employee.name || "-"}
+                          </span>
+                          <span className={styles.employeeCount}>
+                            {Number(employee.followup_count) || 0}
+                          </span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+
+                <div className={styles.assignModalFooter}>
+                  <button
+                    type="button"
+                    className={styles.confirmAssign}
+                    onClick={handleAssignFollowUps}
+                    disabled={
+                      !selectedEmployee ||
+                      isAssigningFollowUps ||
+                      isLoadingAssignOptions
+                    }
+                  >
+                    {isAssigningFollowUps ? "Assigning..." : "Confirm"}
+                  </button>
+                </div>
+              </div>
+            </CustomPopup>
+
+            <CustomPopup
+              isOpen={deleteOpen}
+              onClose={() => setDeleteOpen(false)}
+              closeIcon={false}
+              maxWidth="440px"
+              className={styles.assignPopup}
+            >
+              <div className={styles.deleteModal}>
+                <button
+                  type="button"
+                  className={styles.assignModalClose}
+                  onClick={() => setDeleteOpen(false)}
+                  aria-label="Close"
+                  disabled={isDeletingFollowUps}
+                >
+                  ×
+                </button>
+                <h2>Delete selected follow-ups?</h2>
+                <p>
+                  This will permanently delete {selected.length} selected{" "}
+                  {selected.length === 1 ? "follow-up" : "follow-ups"}.
+                </p>
+                <div className={styles.deleteModalActions}>
+                  <button
+                    type="button"
+                    className={styles.cancelDelete}
+                    onClick={() => setDeleteOpen(false)}
+                    disabled={isDeletingFollowUps}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.confirmDelete}
+                    onClick={handleDeleteFollowUps}
+                    disabled={isDeletingFollowUps}
+                  >
+                    {isDeletingFollowUps ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </CustomPopup>
           </div>
         </section>
       </div>
