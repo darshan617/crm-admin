@@ -478,7 +478,7 @@ export default function LeadDetail() {
     : canView("leads") || canView("jd_leads") || canView("exhibition_leads");
   const canEditLead = canEdit("leads") || canEdit(leadModuleKey);
   const canDeleteLead = canDelete("leads") || canDelete(leadModuleKey);
-  const canCreateQuotation = canAdd("create_quotations");
+  const canCreateQuotation = canAdd("quotations");
   const contacts = Array.isArray(leadData.contacts) ? leadData.contacts : [];
   const services = Array.isArray(leadData.services) ? leadData.services : [];
   const responseData = getLeadDeatils?.data || {};
@@ -1334,7 +1334,7 @@ export default function LeadDetail() {
                       </div>
 
                       <div className={styles.serviceItem}>
-                        <label>Renewal Date</label>
+                        <label>SKU</label>
                         <p>{service.sku}</p>
                       </div>
 
