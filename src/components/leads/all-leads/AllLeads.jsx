@@ -7,6 +7,14 @@ import styles from "@/components/leads/all-leads/AllLeads.module.css";
 import { useRouter } from "next/router";
 import Pagination from "@/common-components/pagination/Pagination";
 import usePermissions from "@/custom-hooks/permissions/usePermissions";
+import CustomPopup from "@/common-components/custom-popup/CustomPopup";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import {
+  useAssignLeadsMutation,
+  useDeleteLeadsMutation,
+  useDownloadLeadsMutation,
+  useGetLeadAssignEmployeesQuery,
+} from "@/redux/apis/leadsApi";
 
 const TABS = [
   { label: "All Leads", query: "all", moduleKey: "leads" },
@@ -311,8 +319,24 @@ export default function AllLeads({
   const { canView } = usePermissions();
   const [selectedIds, setSelectedIds] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [searchInput, setSearchInput] = useState(search);
   const searchTimer = useRef(null);
+  const { showToast } = useToast();
+  const {
+    data: assignEmployeesResponse,
+    isLoading: isLoadingAssignEmployees,
+  } = useGetLeadAssignEmployeesQuery(undefined, {
+    skip: !assignOpen,
+  });
+  const [assignLeads, { isLoading: isAssigningLeads }] =
+    useAssignLeadsMutation();
+  const [deleteLeads, { isLoading: isDeletingLeads }] =
+    useDeleteLeadsMutation();
+  const [downloadLeads, { isLoading: isDownloadingLeads }] =
+    useDownloadLeadsMutation();
   const visibleTabs = TABS.filter((tab) => canView(tab.moduleKey));
   const visibleTabKey = visibleTabs.map((tab) => tab.query).join(",");
   const paginationData = allLeadsListData?.data?.pagination || {};
@@ -412,6 +436,99 @@ export default function AllLeads({
   }, [search]);
 
   useEffect(() => () => clearTimeout(searchTimer.current), []);
+
+  const downloadSelected = async () => {
+    try {
+      const response = await downloadLeads({
+        body: { lead_ids: selectedIds },
+      }).unwrap();
+
+      if (!(response?.blob instanceof Blob)) {
+        showToast(
+          response?.message || "Unable to download selected leads.",
+          "error",
+        );
+        return;
+      }
+
+      const url = URL.createObjectURL(response.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = response.filename || "selected-leads";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Unable to download selected leads.",
+        "error",
+      );
+    }
+  };
+
+  const employees = Array.isArray(assignEmployeesResponse?.data?.employees)
+    ? assignEmployeesResponse.data.employees
+    : [];
+
+  const closeAssignPopup = () => {
+    setAssignOpen(false);
+    setSelectedEmployee(null);
+  };
+
+  const openAssignPopup = () => {
+    setSelectedEmployee(null);
+    setAssignOpen(true);
+  };
+
+  const handleAssignLeads = async () => {
+    if (!selectedEmployee) return;
+
+    try {
+      const response = await assignLeads({
+        body: {
+          assigned_to: selectedEmployee.name,
+          lead_ids: selectedIds,
+        },
+      }).unwrap();
+
+      showToast(
+        response?.message || "Leads assigned successfully.",
+        "success",
+      );
+      closeAssignPopup();
+      setSelectedIds([]);
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Unable to assign leads. Please try again.",
+        "error",
+      );
+    }
+  };
+
+  const handleDeleteLeads = async () => {
+    if (!selectedIds.length) return;
+
+    try {
+      const response = await deleteLeads({
+        body: { lead_ids: selectedIds },
+      }).unwrap();
+
+      if (response?.success === false) {
+        showToast(response?.message || "Unable to delete selected leads.", "error");
+        return;
+      }
+
+      showToast(response?.message || "Selected leads deleted successfully.");
+      setSelectedIds([]);
+      setDeleteOpen(false);
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Unable to delete selected leads.",
+        "error",
+      );
+    }
+  };
 
   return (
     <section className={styles.commonTableSection}>
@@ -711,6 +828,163 @@ export default function AllLeads({
           lastPage={paginationData.last_page}
           onChange={onPageChange}
         />
+
+        {selectedIds.length > 0 && (
+          <div className={styles.selectionActionBar} role="toolbar">
+            <button
+              type="button"
+              className={styles.selectionAction}
+              onClick={openAssignPopup}
+            >
+              Assign Employee
+            </button>
+            <button
+              type="button"
+              className={styles.selectionAction}
+              onClick={downloadSelected}
+              disabled={isDownloadingLeads}
+            >
+              {isDownloadingLeads ? "Downloading..." : "Download List"}
+            </button>
+            <button
+              type="button"
+              className={styles.selectionAction}
+              onClick={() => setDeleteOpen(true)}
+            >
+              Delete Leads
+            </button>
+          </div>
+        )}
+
+        <CustomPopup
+          isOpen={assignOpen}
+          onClose={closeAssignPopup}
+          closeIcon={false}
+          maxWidth="760px"
+          className={styles.assignPopup}
+        >
+          <div className={styles.assignModal}>
+            <h2>Assign Employee to Selected Leads</h2>
+
+            <button
+              type="button"
+              className={styles.assignModalClose}
+              onClick={closeAssignPopup}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            <div className={styles.employeeGrid} role="radiogroup">
+              {isLoadingAssignEmployees ? (
+                <div className={styles.employeeLoading}>Loading employees...</div>
+              ) : employees.length === 0 ? (
+                <div className={styles.employeeLoading}>
+                  No employees available.
+                </div>
+              ) : (
+                employees.map((employee, index) => {
+                  const active =
+                    selectedEmployee?.id === employee.id ||
+                    selectedEmployee?.name === employee.name;
+
+                  return (
+                    <button
+                      key={employee.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      className={`${styles.employeeCard} ${
+                        active ? styles.employeeCardActive : ""
+                      }`}
+                      onClick={() => setSelectedEmployee(employee)}
+                    >
+                      <span
+                        className={styles.employeeAvatar}
+                        style={{
+                          background:
+                            [
+                              "#7c78a8",
+                              "#6a9aab",
+                              "#b8a05f",
+                              "#4d91ad",
+                              "#b13b77",
+                            ][index % 5],
+                        }}
+                      >
+                        {String(employee.name || "-").trim().charAt(0).toUpperCase()}
+                      </span>
+                      <span className={styles.employeeName}>
+                        {employee.name || "-"}
+                      </span>
+                      <span className={styles.employeeCount}>
+                        {Number(employee.lead_count) || 0}
+                      </span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+
+            <div className={styles.assignModalFooter}>
+              <button
+                type="button"
+                className={styles.confirmAssign}
+                onClick={handleAssignLeads}
+                disabled={
+                  !selectedEmployee ||
+                  isAssigningLeads ||
+                  isLoadingAssignEmployees
+                }
+              >
+                {isAssigningLeads ? "Assigning..." : "Confirm"}
+              </button>
+            </div>
+          </div>
+        </CustomPopup>
+
+        <CustomPopup
+          isOpen={deleteOpen}
+          onClose={() => setDeleteOpen(false)}
+          closeIcon={false}
+          maxWidth="440px"
+          className={styles.assignPopup}
+        >
+          <div className={styles.deleteModal}>
+            <button
+              type="button"
+              className={styles.assignModalClose}
+              onClick={() => setDeleteOpen(false)}
+              aria-label="Close"
+              disabled={isDeletingLeads}
+            >
+              ×
+            </button>
+            <h2>Delete selected leads?</h2>
+            <p>
+              This will permanently delete {selectedIds.length} selected{" "}
+              {selectedIds.length === 1 ? "lead" : "leads"}.
+            </p>
+            <div className={styles.deleteModalActions}>
+              <button
+                type="button"
+                className={styles.cancelDelete}
+                onClick={() => setDeleteOpen(false)}
+                disabled={isDeletingLeads}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmDelete}
+                onClick={handleDeleteLeads}
+                disabled={isDeletingLeads}
+              >
+                {isDeletingLeads ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </CustomPopup>
       </div>
     </section>
   );

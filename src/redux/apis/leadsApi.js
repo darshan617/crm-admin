@@ -34,6 +34,51 @@ const leadsApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["leads"],
     }),
+    getLeadAssignEmployees: builder.query({
+      query: () => ({
+        url: "/leads/assign-options",
+        method: "GET",
+      }),
+      providesTags: ["leads", "employees"],
+    }),
+    assignLeads: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/assign",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["leads", "employees"],
+    }),
+    deleteLeads: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/delete",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["leads"],
+    }),
+    downloadLeads: builder.mutation({
+      query: ({ body }) => ({
+        url: "/leads/download",
+        method: "POST",
+        body,
+        responseHandler: async (response) => {
+          const contentType = response.headers.get("content-type") || "";
+
+          if (contentType.includes("application/json")) {
+            return response.json();
+          }
+
+          const disposition = response.headers.get("content-disposition") || "";
+          const filename = disposition.match(/filename="?([^";]+)"?/i)?.[1];
+
+          return {
+            blob: await response.blob(),
+            filename: filename || "selected-leads",
+          };
+        },
+      }),
+    }),
     createLead: builder.mutation({
       query: ({ body }) => ({
         url: "/lead-create",
@@ -146,11 +191,16 @@ export const normalizedLocation = (payload) => {
   const labeled =
     data.label && typeof data.label === "object" ? data.label : null;
   const source =
-    (data.normalized && typeof data.normalized === "object" && data.normalized) ||
+    (data.normalized &&
+      typeof data.normalized === "object" &&
+      data.normalized) ||
     labeled ||
     data;
   const name = (value) =>
-    (typeof value === "string" ? value : value?.name || value?.label || "").trim();
+    (typeof value === "string"
+      ? value
+      : value?.name || value?.label || ""
+    ).trim();
 
   return {
     valid: payload?.success !== false && data.valid !== false,
@@ -168,6 +218,10 @@ export const normalizedLocation = (payload) => {
 export const {
   useGetAllLeadsQuery,
   useGetDdDataQuery,
+  useGetLeadAssignEmployeesQuery,
+  useAssignLeadsMutation,
+  useDeleteLeadsMutation,
+  useDownloadLeadsMutation,
   useCreateLeadMutation,
   useGetSingleLeadDeatilsQuery,
   useUpdateLeadMutation,

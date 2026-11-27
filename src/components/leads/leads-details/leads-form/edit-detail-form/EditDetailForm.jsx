@@ -1,5 +1,43 @@
 import React from "react";
 import styles from "@/components/leads/leads-details/leads-form/edit-detail-form/EditDetailForm.module.css";
+
+const getSelectOptions = (items, selectedValue) => {
+  const options = (Array.isArray(items) ? items : [])
+    .map((item) => {
+      const value =
+        typeof item === "object" && item !== null
+          ? item.name ?? item.label ?? item.value ?? item.id
+          : item;
+
+      if (value === null || value === undefined || value === "") return null;
+
+      const label =
+        typeof item === "object" && item !== null
+          ? item.label ?? item.name ?? item.value ?? item.id
+          : item;
+
+      return { value: String(value), label: String(label) };
+    })
+    .filter(Boolean);
+
+  const selected = String(selectedValue ?? "").trim();
+  if (!selected) return options;
+
+  const matchingOption = options.find(
+    (option) =>
+      option.value.toLowerCase() === selected.toLowerCase() ||
+      option.label.toLowerCase() === selected.toLowerCase(),
+  );
+
+  if (!matchingOption) {
+    return [{ value: selected, label: selected }, ...options];
+  }
+
+  return options.map((option) =>
+    option === matchingOption ? { ...option, value: selected } : option,
+  );
+};
+
 const EditDetailForm = ({
   leadData = {},
   formData,
@@ -7,6 +45,23 @@ const EditDetailForm = ({
   apiDropdownData,
   handleUpdate,
 }) => {
+  const leadBifurcation =
+    formData?.lead_specification?.lead_bifurcation || "";
+  const leadSource = formData?.lead_specification?.lead_source || "";
+  const domainType = formData?.domain?.domain_type || "no-domain";
+  const domainPeriodOptions = getSelectOptions(
+    apiDropdownData?.data?.options?.domain_period,
+    formData?.domain?.domain_period,
+  );
+  const bifurcationOptions = getSelectOptions(
+    apiDropdownData?.data?.options?.lead_bifurcation,
+    leadBifurcation,
+  );
+  const leadSourceOptions = getSelectOptions(
+    apiDropdownData?.data?.options?.lead_source,
+    leadSource,
+  );
+
   return (
     <div className={styles.creditModalBox}>
       <h2>Add / Edit Lead Details</h2>
@@ -425,12 +480,15 @@ const EditDetailForm = ({
 
             <select
               name="lead_bifurcation"
-              value={formData?.lead_specification?.lead_bifurcation || ""}
+              value={leadBifurcation}
               onChange={(e) => handleFormChange(e, "lead_specification")}
             >
               <option value="">Select Bifurcation</option>
-              <option value="B2B">B2B</option>
-              <option value="B2C">B2C</option>
+              {bifurcationOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -439,19 +497,15 @@ const EditDetailForm = ({
 
             <select
               name="lead_source"
-              value={formData?.lead_specification?.lead_source || ""}
+              value={leadSource}
               onChange={(e) => handleFormChange(e, "lead_specification")}
             >
               <option value="">Select Source</option>
-              <option value="Email">Email</option>
-              <option value="Exhibition">Exhibition</option>
-              <option value="Google Ads">Google Ads</option>
-              <option value="Instagram">Instagram</option>
-              <option value="JD">JD</option>
-              <option value="LinkedIn">LinkedIn</option>
-              <option value="Referral">Referral</option>
-              <option value="Tele Caller">Tele Caller</option>
-              <option value="Website">Website</option>
+              {leadSourceOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -515,148 +569,128 @@ const EditDetailForm = ({
             />
           </div>
 
-          <div className="form-group">
-            <label>Domain option</label>
+          <section className={styles.domainSection}>
+            <h3 className={styles.domainTitle}>Domain</h3>
+            <div className={styles.domainSelectionGrid}>
+              <div className={styles.domainField}>
+                <label htmlFor="editDomainType">Domain option</label>
+                <div className={styles.domainSelectWrap}>
+                  <select
+                    name="domain_type"
+                    id="editDomainType"
+                    value={domainType}
+                    onChange={(e) => handleFormChange(e, "domain")}
+                  >
+                    <option value="no-domain">No domain</option>
+                    <option value="existing">Already have domain</option>
+                    <option value="new">Need new domain</option>
+                  </select>
+                </div>
+              </div>
 
-            <select
-              name="domain_type"
-              id="editDomainType"
-              value={formData?.domain?.domain_type || ""}
-              onChange={(e) => handleFormChange(e, "domain")}
-            >
-              <option value="">No domain</option>
-              <option value="existing">Already have domain</option>
-              <option value="new">Need new domain</option>
-            </select>
-          </div>
+              {domainType === "existing" && (
+                <>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainName">Domain Name</label>
+                    <input
+                      type="text"
+                      name="domain"
+                      id="editDomainName"
+                      value={formData?.domain?.domain || ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                      placeholder="example.com"
+                    />
+                  </div>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainRenewal">Renewal Date</label>
+                    <input
+                      type="date"
+                      name="domain_renewal_date"
+                      id="editDomainRenewal"
+                      value={formData?.domain?.domain_renewal_date || ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                    />
+                  </div>
+                </>
+              )}
 
-          <div
-            className="form-group edit-domain-name domain-check-group"
-            style={{}}
-          >
-            <label>Domain Name</label>
-
-            <div className="domain-check-row">
-              <input
-                type="text"
-                name="domain"
-                id="editDomainName"
-                value={formData?.domain?.domain || ""}
-                onChange={(e) => handleFormChange(e, "domain")}
-                placeholder="example.com"
-              />
-
-              <button
-                type="button"
-                className="add-plan-btn domain-check-btn edit-domain-check"
-                id="editCheckDomainBtn"
-                style={{ display: "none" }}
-              >
-                Check Availability
-              </button>
+              {domainType === "new" && (
+                <>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editNewDomainName">Domain Name</label>
+                    <input
+                      type="text"
+                      name="domain"
+                      id="editNewDomainName"
+                      value={formData?.domain?.domain || ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                      placeholder="example.com"
+                    />
+                  </div>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainPeriod">Period</label>
+                    <div className={styles.periodSelectWrap}>
+                      <select
+                        name="domain_period"
+                        id="editDomainPeriod"
+                        value={formData?.domain?.domain_period || ""}
+                        onChange={(e) => handleFormChange(e, "domain")}
+                      >
+                        <option value="">Select Period</option>
+                        {domainPeriodOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainRate">Rate</label>
+                    <input
+                      type="number"
+                      name="domain_rate"
+                      id="editDomainRate"
+                      min="0"
+                      step="0.01"
+                      value={formData?.domain?.domain_rate ?? ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                    />
+                  </div>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainSac">SAC</label>
+                    <input
+                      type="text"
+                      name="sac"
+                      id="editDomainSac"
+                      value={formData?.domain?.sac || ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                    />
+                  </div>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainStart">Domain Start</label>
+                    <input
+                      type="date"
+                      name="domain_start"
+                      id="editDomainStart"
+                      value={formData?.domain?.domain_start || ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                    />
+                  </div>
+                  <div className={styles.domainField}>
+                    <label htmlFor="editDomainEnd">Domain End</label>
+                    <input
+                      type="date"
+                      name="domain_end"
+                      id="editDomainEnd"
+                      value={formData?.domain?.domain_end || ""}
+                      onChange={(e) => handleFormChange(e, "domain")}
+                    />
+                  </div>
+                </>
+              )}
             </div>
-
-            <div
-              id="editDomainCheckStatus"
-              className="form-hint domain-check-status"
-            ></div>
-
-            <div id="editDomainHaveHint" className="form-hint"></div>
-          </div>
-
-          <div
-            className="form-group edit-domain-have"
-            style={{ display: "flex" }}
-          >
-            <label>Renewal Date</label>
-
-            <div className="date-input">
-              <input
-                type="date"
-                name="domain_renewal_date"
-                id="editDomainRenewal"
-                value={formData?.domain?.domain_renewal_date || ""}
-                onChange={(e) => handleFormChange(e, "domain")}
-              />
-            </div>
-          </div>
-
-          <div
-            className="form-group edit-domain-new"
-            style={{ display: "none" }}
-          >
-            <label>Period</label>
-
-            <select
-              name="domain_period"
-              value={formData?.domain?.domain_period || ""}
-              onChange={(e) => handleFormChange(e, "domain")}
-            >
-              <option value="">Select Period</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Quarterly">Quarterly</option>
-              <option value="Half Yearly">Half Yearly</option>
-              <option value="Yearly">Yearly</option>
-            </select>
-          </div>
-
-          <div
-            className="form-group edit-domain-new"
-            style={{ display: "none" }}
-          >
-            <label>Rate</label>
-
-            <input
-              type="number"
-              name="domain_rate"
-              min="0"
-              step="0.01"
-              value={formData?.domain?.domain_rate ?? ""}
-              onChange={(e) => handleFormChange(e, "domain")}
-            />
-          </div>
-
-          <div
-            className="form-group edit-domain-new"
-            style={{ display: "none" }}
-          >
-            <label>SAC</label>
-
-            <input
-              type="text"
-              name="sac"
-              value={formData?.domain?.sac || ""}
-              onChange={(e) => handleFormChange(e, "domain")}
-            />
-          </div>
-
-          <div
-            className="form-group edit-domain-new"
-            style={{ display: "none" }}
-          >
-            <label>Domain Start</label>
-
-            <input
-              type="date"
-              name="domain_start"
-              value={formData?.domain?.domain_start || ""}
-              onChange={(e) => handleFormChange(e, "domain")}
-            />
-          </div>
-
-          <div
-            className="form-group edit-domain-new"
-            style={{ display: "none" }}
-          >
-            <label>Domain End</label>
-
-            <input
-              type="date"
-              name="domain_end"
-              value={formData?.domain?.domain_end || ""}
-              onChange={(e) => handleFormChange(e, "domain")}
-            />
-          </div>
+          </section>
         </div>
 
         <div className={styles.submitWrap}>

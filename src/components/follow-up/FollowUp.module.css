@@ -217,6 +217,477 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.followupPage {
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+.followupPage :global(.page-header) {
+  margin-bottom: 22px;
+}
+
+.followupPage :global(.page-header h2) {
+  margin: 6px 0 0;
+  color: #303846;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.followupSection {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.crmLeadTabs {
+  height: 50px;
+  align-items: flex-end;
+  gap: 14px;
+  padding-left: 12px;
+  margin: 0;
+}
+
+.crmLeadTabs button {
+  min-width: 152px;
+  height: 50px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: #f7f9fc;
+  color: #606b7a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.crmLeadTabs button.active {
+  border-top: 3px solid #0865b5;
+  background: #fff;
+  color: #303846;
+  box-shadow: 0 -2px 8px rgb(23 43 77 / 3%);
+}
+
+.followupCard {
+  padding: 20px;
+  border: 1px solid #e8edf3;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 5px 18px rgb(72 101 134 / 10%);
+}
+
+.followupHeader {
+  min-height: 44px;
+  margin-bottom: 14px;
+}
+
+.followupHeader .crmLeadTitle,
+.crmLeadTitle {
+  min-height: 40px;
+}
+
+.followupHeader :global(.table-search),
+.followupSearch {
+  height: 44px;
+  border-color: #e5e9ef;
+  background: #fff;
+  box-shadow: none;
+}
+
+.followupSearch input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #303846;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.followupSearch input::placeholder {
+  color: #a3aab5;
+}
+
+.followupSearch button {
+  display: grid;
+  flex: 0 0 28px;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: #25364d;
+}
+
+.filterBar {
+  min-height: 30px;
+  margin: 0 0 12px;
+  align-items: center;
+}
+
+.filterBar :global(.border-line) {
+  top: 50%;
+}
+
+.filterBar :global(.filter-btn) {
+  min-width: 118px;
+  height: 38px;
+  margin-top: 0;
+  padding: 0 18px;
+  border-radius: 999px;
+  box-shadow: 0 4px 10px rgb(8 101 181 / 12%);
+  transform: translateY(0);
+}
+
+.tableResponsive :global(.crm-lead-table) {
+  overflow: visible;
+}
+
+.tableResponsive :global(.table-head) {
+  min-height: 42px;
+  margin: 0 0 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #edf4fb;
+  color: #4c5563;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.tableResponsive :global(.table-row) {
+  min-height: 90px;
+  margin-bottom: 10px;
+  padding: 14px 18px;
+  border: 1px solid #edf0f4;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.tableResponsive :global(.table-row:hover) {
+  border-color: #dce7f3;
+  box-shadow: 0 5px 14px rgb(8 101 181 / 8%);
+}
+
+.tableResponsive :global(.customer h5) {
+  max-width: 260px;
+  margin: 0 0 4px;
+  color: #0865b5;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.tableResponsive :global(.customer p) {
+  margin: 0;
+  color: #606b7a;
+  font-size: 13px;
+}
+
+.contactInfo h5 {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.contactInfo p {
+  margin: 0;
+  color: #606b7a;
+  font-size: 13px;
+}
+
+.assignedUser {
+  min-height: 62px;
+  justify-content: flex-start;
+  border-left: 1px solid #edf0f4;
+}
+
+.assignedUser :global(.actions) {
+  margin-left: auto;
+}
+
+.avatarFlex h5 {
+  margin: 0;
+  color: #303846;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.userInfo small {
+  margin-top: 7px;
+  color: #9a9fa7;
+  font-size: 12px;
+}
+
+.statusCol :global(.badge) {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.selectionActionBar {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  height: 92px;
+  padding: 14px 24px;
+  border-top: 1px solid rgb(220 228 237 / 80%);
+  background: #3a3a3a5e;
+  box-shadow: 0 -8px 24px rgb(15 23 42 / 8%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  white-space: nowrap;
+  backdrop-filter: blur(2px);
+}
+
+.selectionAction {
+  min-width: 170px;
+  height: 52px;
+  padding: 0 28px;
+  border: 1px solid #eef1f4;
+  border-radius: 999px;
+  background: #fff;
+  color: #303846;
+  box-shadow: 0 4px 12px rgb(15 23 42 / 8%);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.selectionAction:hover {
+  border-color: #cfd9e6;
+  color: #0865b5;
+  box-shadow: 0 6px 14px rgb(15 23 42 / 10%);
+}
+
+.assignPopup {
+  border: 2px solid #0865b5;
+  border-radius: 10px;
+  overflow: visible;
+}
+
+.assignPopup :global(.content) {
+  overflow: visible;
+}
+
+.assignModal {
+  position: relative;
+  width: 100%;
+  min-height: 440px;
+  padding: 12px 8px 8px;
+  box-sizing: border-box;
+}
+
+.assignModal h2 {
+  margin: 0 64px 34px;
+  color: #303846;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.assignModalClose {
+  position: absolute;
+  top: -20px;
+  right: -12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #111;
+  font-family: inherit;
+  font-size: 30px;
+  line-height: 40px;
+  cursor: pointer;
+}
+
+.employeeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 28px;
+  min-height: 230px;
+  align-content: start;
+}
+
+.employeeCard {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 20px 10px 12px;
+  border: 1px solid #dfe5ec;
+  border-radius: 7px;
+  background: #fff;
+  color: #303846;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.employeeCard:hover,
+.employeeCardActive {
+  border-color: #0865b5;
+  background: #f7fbff;
+  box-shadow: 0 4px 12px rgb(8 101 181 / 8%);
+}
+
+.employeeAvatar {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.employeeName {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.employeeCount {
+  color: #303846;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.employeeLoading {
+  grid-column: 1 / -1;
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  color: #7b8493;
+  font-size: 14px;
+  text-align: center;
+}
+
+.employeeLoading p {
+  margin: 0 0 10px;
+}
+
+.retryAssignOptions {
+  padding: 7px 16px;
+  border: 1px solid #0865b5;
+  border-radius: 999px;
+  background: #fff;
+  color: #0865b5;
+  font: inherit;
+  cursor: pointer;
+}
+
+.assignModalFooter {
+  display: flex;
+  justify-content: center;
+  padding-top: 48px;
+}
+
+.confirmAssign {
+  min-width: 190px;
+  height: 52px;
+  border: 0;
+  border-radius: 999px;
+  background: #0865b5;
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirmAssign:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.deleteModal {
+  position: relative;
+  padding: 8px 8px 4px;
+  text-align: center;
+}
+
+.deleteModal h2 {
+  margin: 0 32px 12px;
+  color: #303846;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.deleteModal p {
+  margin: 0;
+  color: #687386;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.deleteModalActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.cancelDelete,
+.confirmDelete {
+  min-width: 120px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid #dfe5ec;
+  border-radius: 999px;
+  background: #fff;
+  color: #344054;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.confirmDelete {
+  border-color: #d92d20;
+  background: #d92d20;
+  color: #fff;
+}
+
+.cancelDelete:disabled,
+.confirmDelete:disabled,
+.assignModalClose:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 @media (min-width: 768px) and (max-width: 1199px) {
   .tableResponsive > table {
     min-width: 900px;
@@ -238,14 +709,26 @@
     display: none;
   }
 
-  .crmLeadTabs a {
+  .crmLeadTabs button {
     flex: 0 0 auto;
-    min-width: 120px;
+    min-width: 132px;
     padding: 0 16px;
   }
 }
 
 @media (max-width: 767px) {
+  .followupCard {
+    padding: 14px;
+  }
+
+  .followupHeader {
+    align-items: stretch;
+  }
+
+  .followupSearch {
+    width: 100%;
+  }
+
   .crmLeadTitle {
     flex-wrap: wrap;
     gap: 8px;
@@ -279,10 +762,98 @@
   .userInfo small {
     white-space: normal;
   }
+
+  .tableResponsive :global(.crm-lead-table) {
+    overflow: visible;
+  }
+
+  .tableResponsive :global(.crm-lead-row) {
+    grid-template-columns: 24px minmax(0, 1fr);
+    grid-template-areas:
+      "select customer"
+      "select contact"
+      "select status"
+      "select action";
+    gap: 10px 12px;
+    min-height: 0;
+  }
+
+  .tableResponsive :global(.customer) {
+    grid-area: customer;
+  }
+
+  .tableResponsive :global(.select-col) {
+    grid-area: select;
+  }
+
+  .contactInfo {
+    grid-area: contact;
+  }
+
+  .statusCol {
+    grid-area: status;
+  }
+
+  .tableResponsive :global(.plan-action) {
+    grid-area: action;
+  }
+
+  .selectionActionBar {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    gap: 8px;
+    height: 72px;
+    padding: 12px;
+  }
+
+  .selectionAction {
+    min-width: 0;
+    flex: 1 1 0;
+    height: 46px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .assignModal {
+    min-height: 380px;
+  }
+
+  .assignModal h2 {
+    margin: 0 42px 24px;
+    font-size: 15px;
+  }
+
+  .assignModalClose {
+    top: -14px;
+    right: -4px;
+  }
+
+  .employeeGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .employeeLoading {
+    min-height: 180px;
+  }
+
+  .assignModalFooter {
+    padding-top: 28px;
+  }
+
+  .confirmAssign {
+    min-width: 160px;
+  }
 }
 
 @media (max-width: 479px) {
-  .crmLeadTabs a {
+  .crmLeadTabs {
+    height: 46px;
+  }
+
+  .crmLeadTabs button {
     min-width: 100px;
     height: 44px;
     font-size: 13px;
