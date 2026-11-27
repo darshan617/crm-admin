@@ -211,6 +211,32 @@ const formatDateTimeInput = (value) => {
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
+const getDomainType = (domain) => {
+  const type = String(domain.domain_type || "")
+    .trim()
+    .toLowerCase();
+
+  if (type === "existing" || type === "already have domain") {
+    return "existing";
+  }
+  if (type === "new" || type === "need new domain") {
+    return "new";
+  }
+  if (
+    type === "no-domain" ||
+    type === "no_domain" ||
+    type === "no domain" ||
+    type === "none"
+  ) {
+    return "no-domain";
+  }
+
+  if (!domain.domain) return "no-domain";
+  return domain.domain_period || domain.domain_start || domain.domain_end
+    ? "new"
+    : "existing";
+};
+
 const createLeadFormData = (leadData) => {
   const leadDomain = leadData.domain || {};
   const services = Array.isArray(leadData.services) ? leadData.services : [];
@@ -237,7 +263,7 @@ const createLeadFormData = (leadData) => {
       pincode: leadData.pincode || "",
     },
     domain: {
-      domain_type: leadDomain.domain_type || "",
+      domain_type: getDomainType(leadDomain),
       domain: leadDomain.domain || "",
       domain_period: leadDomain.domain_period || "",
       domain_rate: leadDomain.domain_rate ?? "",

@@ -30,6 +30,7 @@ import {
   useNotificationReadMutation,
   useNotificationDeleteMutation,
 } from "@/redux/apis/notificationApi";
+import Link from "next/link";
 
 const subscribeToUserCookie = (onStoreChange) => {
   window.addEventListener("crm-user-updated", onStoreChange);
@@ -253,7 +254,7 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
   return (
     <>
       <header className={styles.navbar}>
-        <div className={styles.brand}>
+        <Link href={"/"} className={styles.brand}>
           <Image
             className={styles.brandLogo}
             src="/logo.png"
@@ -263,7 +264,7 @@ const Navbar = ({ sidebarCollapsed, onToggleSidebar }) => {
             priority
             unoptimized
           />
-        </div>
+        </Link>
 
         <button
           className={styles.sidebarButton}

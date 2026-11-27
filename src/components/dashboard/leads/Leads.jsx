@@ -785,6 +785,7 @@ const Leads = () => {
 
               {/* Designation */}
               <div className="form-group">
+                <label>Designation</label>
                 {/* <label>Designation</label>
                 <input
                   type="text"
@@ -1586,7 +1587,10 @@ const Leads = () => {
                             maxLength={10}
                             value={item.mobile}
                             onChange={(e) => {
-                              e.target.value = e.target.value.replace(/\D/g, "");
+                              e.target.value = e.target.value.replace(
+                                /\D/g,
+                                "",
+                              );
                               handleFormChange(e, "additional_contact", idx);
                             }}
                           />

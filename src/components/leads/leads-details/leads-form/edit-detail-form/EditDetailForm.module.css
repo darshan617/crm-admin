@@ -33,6 +33,82 @@
     font-weight: 500;
     color: #4C4C5C;
   }
+
+  .domainSection {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .domainTitle {
+    margin: 0 0 12px;
+    color: #1f2a36;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .domainSelectionGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 18px 24px;
+  }
+
+  .domainField {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .domainField label {
+    color: #404b58;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .domainField input,
+  .domainField select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid #dfe3e8;
+    border-radius: 6px;
+    background: #fff;
+    color: #1b2430;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .domainField input:focus,
+  .domainField select:focus {
+    border-color: #0d74d6;
+  }
+
+  .domainSelectWrap,
+  .periodSelectWrap {
+    position: relative;
+    width: 100%;
+  }
+
+  .domainSelectWrap select {
+    appearance: none;
+    padding-right: 38px;
+    border-radius: 8px;
+  }
+
+  .domainSelectWrap::after {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    color: #0d74d6;
+    font-size: 14px;
+    content: "▾";
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
   
   .submitBtn {
     background: var(--primary);
@@ -55,4 +131,11 @@
     justify-content: center;
     margin-top: 8px;
     width: 100%;
+  }
+
+  @media (max-width: 560px) {
+    .domainSelectionGrid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
   }
