@@ -189,7 +189,7 @@
   margin-top: 12px;
 }
 .submitBtn {
-  background: #1d4ed8;
+  background: var(--primary);
   font-family: "Baloo Bhai 2";
   color: #fff;
   border: none;

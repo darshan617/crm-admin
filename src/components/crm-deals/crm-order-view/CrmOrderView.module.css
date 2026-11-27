@@ -191,13 +191,13 @@
 
 .btnOutline {
   background: #fff;
-  color: #2563eb;
+  color: var(--primary);
   border-color: #93b4f5;
 }
 
 .btnOutline:hover {
   background: #eff6ff;
-  color: #1d4ed8;
+  color: var(--primary);
 }
 
 .btnPrimary {

@@ -449,7 +449,7 @@ const Followup = () => {
 
   return (
     <main className="content">
-      <div className="crm-page">
+      <div className={`crm-page ${styles.followupPage}`}>
         {/* Page Header */}
         <div className="page-header">
           <div className="">
@@ -464,7 +464,7 @@ const Followup = () => {
           </div>
         </div>
 
-        <section className="common-table-section">
+        <section className={`common-table-section ${styles.followupSection}`}>
           {/* Tabs */}
           <div className={styles.crmLeadTabs}>
             {TABS.map((tab) => (
@@ -479,9 +479,9 @@ const Followup = () => {
             ))}
           </div>
 
-          <div className="common-table-card">
+          <div className={`common-table-card ${styles.followupCard}`}>
             {/* Table Header */}
-            <div className="common-table-header crm-lead-header">
+            <div className={`common-table-header crm-lead-header ${styles.followupHeader}`}>
               <div className={styles.crmLeadTitle}>
                 <p>
                   Showing{" "}
@@ -513,7 +513,7 @@ const Followup = () => {
               <form
                 method="GET"
                 action="#"
-                className="table-search"
+                className={`table-search ${styles.followupSearch}`}
                 onSubmit={handleSearch}
               >
                 <input
