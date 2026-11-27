@@ -500,7 +500,10 @@ table {
 
 .crm-lead-table .table-head,
 .crm-lead-table .crm-lead-row {
-  grid-template-columns: 35px minmax(180px, 1.5fr) minmax(200px, 1.5fr) minmax(120px, 0.7fr) minmax(220px, 1.2fr);
+  grid-template-columns: 35px minmax(180px, 1.5fr) minmax(200px, 1.5fr) minmax(
+      120px,
+      0.7fr
+    ) minmax(230px, 1.2fr);
   width: 100%;
   min-width: 920px;
   box-sizing: border-box;
@@ -676,8 +679,10 @@ table {
 
 .crm-quo-table .table-head,
 .crm-quo-table .crm-quo-row {
-  grid-template-columns:
-    minmax(120px, 0.8fr) minmax(200px, 1.3fr) minmax(240px, 1.7fr) minmax(100px, 0.6fr) minmax(200px, 1.2fr);
+  grid-template-columns: minmax(120px, 0.8fr) minmax(200px, 1.3fr) minmax(
+      240px,
+      1.7fr
+    ) minmax(100px, 0.6fr) minmax(200px, 1.2fr);
   align-items: center;
 }
 
@@ -866,8 +871,10 @@ table {
 
 .es-quo-table .table-head,
 .es-quo-table .es-quo-row {
-  grid-template-columns:
-    minmax(120px, 0.8fr) minmax(190px, 1.2fr) minmax(240px, 1.6fr) 96px 96px minmax(190px, 1.1fr);
+  grid-template-columns: minmax(120px, 0.8fr) minmax(190px, 1.2fr) minmax(
+      240px,
+      1.6fr
+    ) 96px 96px minmax(190px, 1.1fr);
   align-items: center;
 }
 
@@ -1021,7 +1028,7 @@ table {
   min-width: 0;
 }
 
-.common-form.quotation-detail>div {
+.common-form.quotation-detail > div {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -1041,7 +1048,6 @@ table {
 }
 
 @media (max-width: 1199px) {
-
   .crm-page .crm-lead-table .table-head,
   .crm-page .crm-lead-table .crm-lead-row {
     gap: 10px;
@@ -1205,8 +1211,8 @@ table {
       "assigned assigned assigned";
   }
 
-  .crm-quo-list .crm-quo-row>td,
-  .crm-quo-list .es-quo-row>td {
+  .crm-quo-list .crm-quo-row > td,
+  .crm-quo-list .es-quo-row > td {
     min-width: 0;
     width: auto;
     padding: 0;
@@ -1315,7 +1321,6 @@ table {
     width: 100%;
     min-width: 0;
   }
-
 }
 
 @media (max-width: 768px) {
@@ -1366,7 +1371,7 @@ table {
     align-items: start;
   }
 
-  .crm-page .crm-lead-table .crm-lead-row>td {
+  .crm-page .crm-lead-table .crm-lead-row > td {
     min-width: 0;
     width: auto;
   }
