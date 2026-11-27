@@ -44,7 +44,7 @@ const FALLBACK_MODULES = [
     items: [
       { key: "quotations", label: "Quotations" },
       { key: "discount_approval", label: "Discount Approval" },
-      { key: "create_quotations", label: "Create Quotations" },
+      { key: "quotations", label: "Create Quotations" },
       {
         key: "update_status_of_invoice_and_quotation",
         label: "Update Status of Invoice and Quotation",
